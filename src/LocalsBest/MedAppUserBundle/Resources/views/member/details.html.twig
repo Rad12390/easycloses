@@ -1,0 +1,432 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Members{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/pages/css/profile.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+    <link href="{{ asset('system/global/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('system/global/plugins/dropzone/basic.min.css') }}" rel="stylesheet" type="text/css"/>
+
+    <style>
+        .table-responsive {
+            overflow-x: inherit !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/dropzone/dropzone.min.js') }}"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.doc-checkbox').on('change', function () {
+                var total = $('input.doc-checkbox:checked').length;
+
+                if (total > 0) {
+                    $("#send-docs-by-email").removeAttr('disabled');
+                } else {
+                    $("#send-docs-by-email").attr('disabled', true);
+                }
+            });
+
+            $('#send-docs-by-email').on('click', function(){
+
+                var total = $('input.doc-checkbox:checked').length;
+
+                if (total == 0) {
+                    return false;
+                }
+
+                documents = [];
+
+                $.each( $('.doc-checkbox'), function( i, val ) {
+                    if ($(val).prop("checked") && $(val).val() != '') {
+                        documents.push($(val).val());
+                    }
+                });
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('user_docs_send_email') }}",
+                    dataType: "html",
+                    data: {
+                        documents: documents
+                    },
+                    success:function(data){
+                        $("#email .modal-content").html(data);
+                        $("#email").modal();
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-6">
+                <div class="portlet-body no-more-tables">
+
+                    <div id="transaction_parties_wrapper" class="dataTables_wrapper no-footer">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12">
+                                <div class="portlet box blue" id="eventBox">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-user"></i> User Info
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <table class="table table-striped table-bordered table-condensed table-hover table-full-width cf" id="transaction_parties" style="font-size:15px;">
+                                            <tbody>
+                                                <tr>
+                                                    <td rowspan="4" style="border-top:none; width: 30%;">
+                                                        {{ vich_uploader_custom.getImage(user, 'file', false)|raw }}
+                                                    </td>
+                                                    <td style="border-top:none; vertical-align: inherit;">
+                                                        <div style="display:inline;">
+                                                            {{user.firstname}}&nbsp;{{user.lastname}}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="vertical-align: inherit;">
+                                                        <div style="display:inline;">
+                                                            {% if user.primaryPhone is not null %}
+                                                                {{ user.primaryPhone.number }}
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="vertical-align: inherit;">
+                                                        <div style="display:inline;">
+                                                            {% if user.primaryEmail is not null %}
+                                                                {{ user.primaryEmail.email }}
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="vertical-align: inherit;">
+                                                        <div style="display:inline;">
+                                                            {% if user.businesses[0].id == 173 %}
+                                                                {% if user.role.level == 8 and user.clientBusiness is not null %}
+                                                                    {{ user.clientBusiness.name }}
+                                                                {% else %}
+                                                                    -
+                                                                {% endif %}
+                                                            {% else %}
+                                                                {% if user.businesses[0].name is not null %}
+                                                                    {{ user.businesses[0].name }}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-sm-12">
+                                <div class="portlet box blue" id="eventBox">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-calendar"></i> Events
+                                        </div>
+                                        <div class="actions">
+                                            <a class="btn  red" href="{{ path('event_add_object', {'objectId': user.id, 'objectType': objectType}) }}" style="color: white;">Add</a>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body customEventBody">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th><input type="checkbox" class="group-checkable"></th>
+                                                    <th></th>
+                                                    <th>Type</th>
+                                                    <th>Title</th>
+                                                    <th>Due Date</th>
+                                                    <th>Alert</th>
+                                                    <th></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for event in events %}
+                                                    {% if event.time is not null %}
+                                                        <tr>
+                                                            <td><input type="checkbox" class="group-checkable"></td>
+                                                            <td><div class="circle-small attach_status_color" id="approved" style="{% if event.status.status is not null%} background-color:{{ event.status.color }}{% endif%}" rel="tooltip" title="" data-placement="top">
+                                                                </div></td>
+                                                            <td>{{ event.type }}</td>
+                                                            <td><a href="{{ path('event_edit_object', {'objectId': user.id, 'objectType': objectType, 'slug': event.slug}) }}" ><strong>{{ event.title }}</strong></a></td>
+                                                            <td>{{ event.time|date('m/d/Y') }} {#({{ time_diff(event.time)}} )#}</td>
+                                                            <td>{% if event.alert == 1 %}<i class="icon-bell"></i>{% endif %}</td>
+                                                            <td>
+                                                                <div class="btn-group" role="group">
+                                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                                        <i class="fa fa-gear"></i>
+                                                                        <span class="caret"></span>
+                                                                    </button>
+
+                                                                    {% if app.user.role.level <= 5 %}
+                                                                        <ul class="dropdown-menu pull-right" role="menu">
+                                                                            <li>
+                                                                                <a href="" class="event-remove" data-id="{{ event.id }}">
+                                                                                    <i class="fa fa-times"></i>remove
+                                                                                </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    {% elseif app.user.role.level == 7 and event.createdBy == app.user and event.isRequired == false %}
+                                                                        <ul class="dropdown-menu pull-right" role="menu">
+                                                                            <li>
+                                                                                <a href="" class="event-remove" data-id="{{event.id}}">
+                                                                                    <i class="fa fa-times"></i>remove
+                                                                                </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    {% endif%}
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif%}
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-sm-12">
+                                <div class="portlet box blue" id="eventBox">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-map-marker"></i> Address
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body ">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Address</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>Business</td>
+                                                    <td>{{ user.businesses[0].address.full }}</td>
+                                                </tr>
+                                                    {% for property in user.properties %}
+                                                        {% if (property.isPublic == true) %}
+                                                            <tr>
+                                                                <td>{{ property.format|capitalize }}</td>
+                                                                <td>{{ property.address.full }}</td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="portlet box blue" id="noteBox">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-comments"></i> Notes
+                        </div>
+                        <div class="actions">
+                            <a class="btn  red" href="{{ path('note_add', {'id': user.id ,'type': objectType}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">Add</a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <ul class="chats">
+                            {% if notes|length >= 1 %}
+                                {% for note in notes %}
+                                    {{ include ('@LocalsBestCommon/note/single.html.twig',{note: note}) }}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="portlet box blue" id="closingDocument">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="icon-docs"></i> User Docs
+                        </div>
+                        <div class="actions">
+                            <a class="btn  red" href="{{ path('user_document_add', {'id': user.id })}}" style="color: white;" data-target="#ajax" data-toggle="modal">Add</a>
+                        </div>
+                    </div>
+                    <div class="portlet-body no-more-tables customClosingDocumentBody">
+                        <a href="#" class="btn btn-primary" style="margin-bottom: 10px;" id="send-docs-by-email" disabled>
+                            <i class="fa fa-envelope"></i> Email Selected Files
+                        </a>
+                        <br>
+                        <span class="label label-info"> TIP: </span>
+                        <span>Click on file name to view document</span>
+                        <div style="margin-top: 10px;" class="table-responsive">
+                            <table class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf doc_vault doc_vault_listing" id="document_vault">
+                                <thead class="cf">
+                                <tr>
+                                    <th></th>
+                                    <th style="width:250px;">File Name</th>
+                                    <th>Date</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for document in documents %}
+                                    <tr class="odd gradeX doc closing required " id="1253955_1392118" style="height:20px;">
+                                        <td>
+                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                <input class="doc-checkbox" type="checkbox" value="{{ document.id }}" name="documents[]">
+                                                <span></span>
+                                            </label>
+                                        </td>
+                                        <td><a href="{{ path('document_view', {'slug': document.slug}) }}" >{{ document.fileName }}</a></td>
+                                        <td>{{ document.created|date('m-d-Y H:i') }}</td>
+                                        <td>
+                                            {% if app.user == document.createdBy %}
+                                                {% set t='777' %}
+                                                {% set shareID = 0 %}
+                                                {% for share in document.shares %}
+                                                    {% if( share.user.id == user.id and document.id == share.objectId and share.objectType == 'LocalsBestUserBundle:DocumentUser' ) %}
+                                                        {% set t='22' %}
+                                                        {% set shareID = share.id %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if(t == '777') %}
+                                                    <form style="float: left;" action="/documents/share/{{ document.slug }}" method="POST" enctype="multipart/form-data" name="shareValue">
+                                                        <input id="selectedusers" type="hidden" class="hidden" name="shares" value="{{ user.username }}">
+                                                        <input id="sharedUserReadReciepts" type="hidden" class="hidden" name="readReciepts" value=",">
+                                                        <input id="sharedUserFurtherActions" type="hidden" class="hidden" name="furtherActions" value=",">
+                                                        <input type="hidden" class="hidden" name="shareFor" value="1">
+                                                        <button type="submit" class="btn btn-xs" id="share_btn">Share</button>
+                                                    </form>
+                                                {% else %}
+                                                    <button title="Remove Share Link" class="btn btn-xs yellow share_btn_remove" data-removeid="{{ shareID }}" data-username="{{ user.username }}" data-saved="1"><i class="fa fa-ban"></i></button>
+                                                {% endif %}
+                                                <a title="Remove Document" onclick="return confirm('Are you sure you want to delete file?')" href="{{ path('user_document_delete', {'slug': document.slug}) }}" class="btn btn-xs red"><i class="fa fa-trash-o"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {% if app.user.id == 2326 %}
+                    <div class="portlet box blue" id="inventory">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                <i class="fa fa-globe"></i> Inventory
+                            </div>
+                        </div>
+                        <div class="portlet-body">
+                            {{ render(controller('LocalsBestUserBundle:User:AsSignInventory', {'userId': user.id})) }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if app.user.id == 2338 %}
+                    <div class="portlet box blue" id="inventory">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                <i class="fa fa-globe"></i> Size of the bin
+                            </div>
+                        </div>
+                        <div class="portlet-body">
+                            {{ render(controller('LocalsBestUserBundle:User:ChampionSizeOfTheBin', {'userId': user.id})) }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="email" role="basic" aria-hidden="true" style="display: none; padding-right: 15px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $('#review-click').on('click', function (event) {
+                var id = $(this).data('reviewid');
+                if ($(this).data('saved') == "0") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('review_important_ajax', {'objectId': user.id ,'objectType': objectType})}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            $("#noteBox").load("{{ path('user_view', {'username': user.username}) }} #noteBox");
+                        }
+                        return false;
+                    });
+                } else {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('review_not_important_ajax', {'objectId': user.id ,'objectType': objectType})}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            $("#noteBox").load("{{ path('user_view', {'username': user.username}) }} #noteBox");
+                        }
+                        return false;
+                    });
+                }
+            });
+
+            $('.share_btn_remove').on('click', function (event) {
+                if (!confirm('Are you sure?')) {
+                    return false;
+                }
+
+                var username = $(this).data('username');
+                var id = $(this).data('removeid');
+
+                if ($(this).data('saved') == "1") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('share_remove_ajax')}}/" + id
+                    }).done(function (data) {
+                        window.location.replace("/members/"+{{ user.id }});
+                        return false;
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

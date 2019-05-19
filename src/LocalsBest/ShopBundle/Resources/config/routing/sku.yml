@@ -1,0 +1,39 @@
+sku_show:
+    path:     /{id}/show
+    defaults: { _controller: "LocalsBestShopBundle:Sku:show" }
+
+sku_for_approve_list:
+    path:     /for-approve
+    defaults: { _controller: "LocalsBestShopBundle:Sku:forApproveList" }
+
+sku_business_able:
+    path:     /business-able
+    defaults: { _controller: LocalsBestShopBundle:Sku:businessAble }
+
+sku_toggle_business_able:
+    path: /toggle-business-able-product
+    defaults: { _controller: LocalsBestShopBundle:Sku:toggleDisableSku}
+
+sku_change_shop_status:
+    path: /change-shop-sku-status
+    defaults: { _controller: LocalsBestShopBundle:Sku:changeShopSkuStatus}
+
+sku_status_change:
+    path:     /status-change
+    defaults: { _controller: "LocalsBestShopBundle:Sku:statusChange" }
+
+sku_contact_us:
+    path: /contact-us
+    defaults: { _controller: "LocalsBestShopBundle:Sku:contactUs" }
+
+sku_business_able_ajax:
+    path:     /ajax/business-able
+    defaults: { _controller: LocalsBestShopBundle:Sku:businessAjax }
+    
+sku_change_shop_status1:
+    path: /change-quote-status
+    defaults: { _controller: LocalsBestShopBundle:Sku:changeQuoteStatus}
+    
+vendor_contact_request:
+    path: /contactus-request
+    defaults: { _controller: LocalsBestShopBundle:Sku:showContactRequest}

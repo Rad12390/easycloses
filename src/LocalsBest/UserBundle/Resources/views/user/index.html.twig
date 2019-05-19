@@ -1,0 +1,162 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Company Directory{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Company Directory
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}" rel="stylesheet" type="text/css" />
+
+    <style>
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+        .dt-buttons {
+            margin-left: 117px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            $("a.btn-ajax").click(function(){
+                var anchor = $(this);
+                var successAddClass     = anchor.data('success-add-class');
+                var successRemoveClass  = anchor.data('success-remove-class');
+
+                $.post($(this).attr('href'), function(data){
+                    alert(data.message);
+                    anchor.closest('li').hide('slow', function(){$(this).remove();});
+                    anchor.closest('tr').addClass(successAddClass);
+                    anchor.closest('tr').removeClass(successRemoveClass);
+                    $('body').click();
+                });
+                return false;
+            });
+
+            $('#user_filter option[value=All]').attr('selected', 'selected');
+
+            $('#user_filter').change(function () {
+                var status = $(this).val();
+                $('.customTbody').addClass('hidden');
+                $("#userLoadAjax").load('{{ path('users_load_ajax') }}/' + status);
+            });
+
+            var table = $('#example');
+            var oTable = table.dataTable({
+                columns: [
+                    {
+                        orderable: false,
+                        className: "text-center"
+                    },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    {orderable: false}
+                ],
+                processing: true,
+                stateSave: true,
+                responsive: true,
+                serverSide: true,
+                ajax: {
+                    url: "/datatable/users?status={{ paramsArray.status }}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        windowForLogout(data)
+                    }
+                },
+                dom: 'lfrtip',
+                searchDelay: 800
+            } );
+
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-group"></i> Company Directory
+            </div>
+
+            {% if app.user.role.level <= 7 %}
+                <div class="actions">
+                    <div class="btn-group">
+                        <button class="btn  btn-danger btn dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Add or Invite <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-right" role="menu">
+                            <li>
+                                {% if app.user.role.level <= 5 %}
+                                    <a href="{{ path('users_add') }}">
+                                        <i class="icon-plus"></i>
+                                        <span class=""> Add User </span>
+                                    </a>
+                                {% endif %}
+                            </li>
+                            <li>
+                                <a href="{{ path('users_invite') }}">
+                                    <i class="icon-plus"></i>
+                                    <span class=""> Invite User </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="portlet-body" id="userLoadAjax" style="padding-bottom: 45px;">
+            {% if app.user.role.level <= 5 %}
+                <label class="mt-checkbox mt-checkbox-outline">
+                    Show Archived
+                    <input type="checkbox" id="toggleArchived" value="1" {% if status != 'archived' %}checked{% endif %} onclick="window.location='{{ path('users_index', { 'status': status}) }}';">
+                    <span></span>
+                </label>
+            {% endif %}
+
+            <table style="width: 100%;" id="example" class="customTbody table table-bordered table-striped">
+                <thead>
+                    <tr role="row">
+                        <th > </th>
+                        <th > Name </th>
+                        <th > Phone </th>
+                        <th > Email </th>
+                        <th > Role </th>
+                        <th > Last Updated </th>
+                        <th > Actions </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+{% endblock %}

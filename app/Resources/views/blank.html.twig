@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+    <head>
+        <meta charset="utf-8"/>
+        <title>{% block title %}Login{% endblock %} - EasyCloses</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <meta content="{% block meta_description %}{% endblock %}" name="description"/>
+        <meta content="" name="author"/>
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/simple-line-icons/simple-line-icons.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="{{ asset('system/global/css/components.min.css') }}" rel="stylesheet" id="style_components" type="text/css" />
+        <link href="{{ asset('system/global/css/plugins.min.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="{{ asset('system/pages/css/login-3.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+
+        <!-- END THEME STYLES -->
+        <link rel="shortcut icon" href="{{ asset('favicon.ico')}}"/>
+    </head>
+    <!-- BEGIN BODY -->
+    <!-- DOC: Apply "page-header-fixed-mobile" and "page-footer-fixed-mobile" class to body element to force fixed header or footer in mobile devices -->
+    <!-- DOC: Apply "page-sidebar-closed" class to the body and "page-sidebar-menu-closed" class to the sidebar menu element to hide the sidebar by default -->
+    <!-- DOC: Apply "page-sidebar-hide" class to the body to make the sidebar completely hidden on toggle -->
+    <!-- DOC: Apply "page-sidebar-closed-hide-logo" class to the body element to make the logo hidden on sidebar toggle -->
+    <!-- DOC: Apply "page-sidebar-hide" class to body element to completely hide the sidebar on sidebar toggle -->
+    <!-- DOC: Apply "page-sidebar-fixed" class to have fixed sidebar -->
+    <!-- DOC: Apply "page-footer-fixed" class to the body element to have fixed footer -->
+    <!-- DOC: Apply "page-sidebar-reversed" class to put the sidebar on the right side -->
+    <!-- DOC: Apply "page-full-width" class to the body element to have full width page without the sidebar menu -->
+
+    <body class="login" {% if business is defined and business is not null and business.themeColor is not null %}style="background-color: {% if business.themeColor == 'default' %}#3d3d3d{% elseif business.themeColor == 'light' %}white{% elseif business.themeColor == 'blue' %}#4276a4{% elseif business.themeColor == 'darkblue' %}#364150{% elseif business.themeColor == 'purple' %}#620ea0{% elseif business.themeColor == 'light2' %}#f6f6f6{% else %}{{ business.themeColor }}{% endif %} !important;" {% endif %}>
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+            <a>
+                {% if business is defined and business is not null %}
+                    {%  if business.filename is not null %}
+                        <img src="{{ vich_uploader_asset(business, 'file') }}" class="logo-default" style="width:150px;" alt="{{ business.filename }}"/>
+                    {% endif %}
+                {% else %}
+                    <img src="{{ asset('images/lb_logo_2.png') }}" alt="" style="width:150px;">
+                {% endif %}
+            </a>
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+        <div class="menu-toggler sidebar-toggler">
+        </div>
+        <!-- END SIDEBAR TOGGLER BUTTON -->
+        <!-- BEGIN LOGIN -->
+        <div class="content" {% if business is defined and business is not null and business.themeColor == 'light' %}style="border: 3px solid #000;"{% endif %}>
+            {% for label, flashes in app.session.flashbag.all %}
+                {% for flash in flashes %}
+                    <div class="alert alert-{{ label }} alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                        <p>{{ flash }}</p>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- BEGIN LOGIN FORM -->
+            {% block content %}
+            {% endblock %}
+            <!-- END LOGIN FORM -->
+
+        </div>
+        <!-- END LOGIN -->
+        <!-- BEGIN COPYRIGHT -->
+        <div class="copyright">
+            {% if business is defined and business is not null %}
+                <img src="{{ asset('images/lb_logo_2.png') }}" alt="" style="width:100px;">
+            {% else %}
+                2015 EasyCloses
+            {% endif %}
+        </div>
+        <!-- END COPYRIGHT -->
+        <!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+        <!-- BEGIN CORE PLUGINS -->
+        <!--[if lt IE 9]>
+        <script src="{{ asset('system/global/plugins/respond.min.js') }}"></script>
+        <script src="{{ asset('system/global/plugins/excanvas.min.js') }}"></script>
+        <script src="{{ asset('system/global/plugins/ie8.fix.min.js') }}"></script>
+        <![endif]-->
+
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="{{ asset('system/global/plugins/jquery.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/js.cookie.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/jquery.blockui.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}" type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="{{ asset('system/global/plugins/jquery-validation/js/jquery.validate.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/select2/js/select2.full.min.js') }}" type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="{{ asset('system/global/scripts/app.min.js') }}" type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="{{ asset('system/pages/scripts/login.min.js') }}" type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+
+        <script>
+            jQuery(document).ready(function() {
+                $(".add_email").change(function() {
+                    $(".add").val($(this).val());
+                });
+            });
+        </script>
+
+        {% block javascripts %}
+        {% endblock %}
+        <!-- END JAVASCRIPTS -->
+    </body>
+    <!-- END BODY -->
+</html>

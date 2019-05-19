@@ -1,0 +1,41 @@
+<div class="portlet blue box">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class="fa fa-certificate"></i> Information about Associations
+        </div>
+        <div class="actions">
+            <a href="{{ path('association_row_create', { 'type': type, 'username': userProfile_username }) }}" class="btn  btn-sm btn-danger" data-target="#ajax" data-toggle="modal">
+                <i class="fa fa-plus"></i> Add
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <table class="table table-hover table-light">
+            <thead>
+                <tr>
+                    <th> Association Name </th>
+                    <th> Association ID </th>
+                    <th> Actions </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in associationRows %}
+                    <tr>
+                        <td>{{ item.association.title }}</td>
+                        <td>{{ item.associationMlsId }}</td>
+                        <td>
+                            <a href="{{ path('association_row_edit', { 'id': item.id, 'username': userProfile_username }) }}" class="btn  btn-sm btn-primary" data-target="#ajax" data-toggle="modal"><i class="fa fa-edit"></i> Edit</a>
+                            <a href="{{ path('association_row_delete', { 'id': item.id, 'username': userProfile_username }) }}" class="btn  btn-sm btn-danger"><i class="fa fa-trash-o"></i> Delete</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center;">
+                            There is no information about Associations
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

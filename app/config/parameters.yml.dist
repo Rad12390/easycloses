@@ -1,0 +1,66 @@
+parameters:
+    database_driver:   pdo_mysql
+    database_host:     127.0.0.1
+    database_port:     ~
+    database_name:     localsbest
+    database_user:     localsbest_app
+    database_password: localsbest_app
+
+    database_feeds_name: property_feeds
+
+    database2_driver: pdo_mysql
+    database2_host: mysql.locatehomes.info
+    database2_port: ~
+    database2_name: rets
+    database2_user: ivan
+    database2_password: ivan
+
+    mailer_transport:  smtp
+    mailer_host:       127.0.0.1
+    mailer_user:       ~
+    mailer_password:   ~
+    mailer_from_address: shop@localsbest.com
+    mailer_from_name: EasyCloses.com
+
+    locale:            en
+    secret:            ThisTokenIsNotSoSecretChangeIt
+    facebook_client_id: 414183585420093
+    facebook_client_secret: e65281f2ca5785b6a2277db0787fe969
+    twitter_consumer_key:
+    twitter_consumer_secret:
+    linkedin_client_id:
+    linkedin_client_secret:
+    googleplus_client_id:
+    googleplus_client_secret:
+    token_expiry : 604800
+    aws_key: AKIAISX2EXDM2VSBAIWA
+    aws_secret_key: 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
+    aws_region: us-east-1
+
+    nexmo_api_key: 503520a6
+    nexmo_api_secret: 5ad1a083
+    nexmo_from_name: Localsbest
+
+    users_bucket: dev-ec-users
+    jobs_bucket: dev-ec-jobs
+    transactions_bucket: dev-ec-transactions
+
+    auth_login_id: 82TVr6uUY
+    auth_transaction_key: 7EmuwhR5CB3975aW
+
+    cookie_recent_viewed: ec_recent_viewed
+    cookie_cart:  ec_cart
+
+    wp_token: k2hlSmArNvfq9I7WNxRXAXjBAImh1drJ
+
+    sign_form_auth_login_id: 82TVr6uUY
+    sign_form_auth_transaction_key: 7EmuwhR5CB3975aW
+
+    google_map_api_key: ~
+
+    security.authentication.switchuser_listener.class: LocalsBest\UserBundle\Listener\SwitchUserListener
+
+    stripe_secret_key: sk_test_ID6MaWPJg24kVKM90qvNGzOG
+    stripe_public_key: pk_test_EXVt6C3oeaQL2Abg9riT5m0p
+    stripe_client_id: ca_CBAxysxC03F6Q8vFqyUSYQwQzLDyXi2p
+    temp_download_aws_folder: https://s3.amazonaws.com/ec-users/

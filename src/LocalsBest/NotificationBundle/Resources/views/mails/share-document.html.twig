@@ -1,0 +1,10 @@
+Hello {{ share.user.firstname }},
+<br>
+This document shared by {{ share.createdBy.firstname}}&nbsp;{{ share.createdBy.lastname}}<br />
+<br>
+<a href="{{ url('document_share_response', {'token':  share.token}) }}">Share Document Link</a>
+<br>
+-We appreciate you allowing us to serve you!<br>
+<br>
+Sincerely,-<br>
+EasyCloses.com 888-740-0550

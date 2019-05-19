@@ -1,0 +1,29 @@
+{% if feedbacks|length > 0 %}
+    <div class="sidebar-box">
+        <h5>Recent Reviews</h5>
+        <ul class="thumb-list">
+            {% for entity in feedbacks %}
+                <li>
+                    <a href="{{ path('sku_show', { 'id': entity.sku.id }) }}">
+                        {% if entity.sku.package is not empty %}
+                            <img src="{{ vich_uploader_asset(entity.sku.package   , 'file') }}" alt="{{ entity.sku.title }}">
+                        {% else %}
+                            <img src="/shop/img/70x70.png" alt="{{ entity.sku.title }}" title="{{ entity.sku.title }}"/>
+                        {% endif %}
+                    </a>
+                    <div class="thumb-list-item-caption">
+                        <ul class="icon-group icon-list-rating" title="{{ entity.rating }}/5 rating">
+                            {{ entity.rating|rating|raw }}
+                        </ul>
+                        <h5 class="thumb-list-item-title">
+                            <a href="{{ path('sku_show', { 'id': entity.sku.id }) }}">
+                                {{ entity.sku.title }}
+                            </a>
+                        </h5>
+                        <p class="thumb-list-item-author">by {{ entity.createdBy.fullName }}</p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

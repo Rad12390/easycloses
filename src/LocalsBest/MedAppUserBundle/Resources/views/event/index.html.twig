@@ -1,0 +1,162 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Events & Alerts{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Events & Alerts
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}"/>
+
+    <style>
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+        table.dataTable>tbody>tr td {
+            line-height: 2.1;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+
+    <script>
+        $(function () {
+            markAsComplete();
+        });
+
+        function markAsComplete()
+        {
+            $("a[data-action='ajax']").click(function () {
+                var confirmMessage = $(this).data('confirm');
+
+                if (confirm(confirmMessage)) {
+                    var url = $(this).attr('href');
+
+                    $.get(url).done(function (resp) {
+                        if ($.parseJSON(resp).message) {
+                            alert($.parseJSON(resp).message);
+
+                            $("#datatable_ajax").load("https://localsbest.dev/app_dev.php/events#datatable_ajax", function () {
+                                markAsComplete();
+                            });
+                        }
+                    });
+                }
+
+                return false;
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            var table = $('#example');
+            var oTable = table.dataTable({
+                order: [[ 7, "desc" ]],
+                dom: 'lfrtip',
+                columns: [
+                    {
+                        orderable: false,
+                        className: "text-center"
+                    },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    {orderable: false},
+                    null,
+                    {orderable: false}
+                ],
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ path('datatable_event_limit') }}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        windowForLogout(data)
+                    }
+                },
+                searchDelay: 800
+            } );
+
+        });
+    </script>
+{% endblock %}
+
+
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-calendar"></i> Events
+            </div>
+            <div class="actions">
+                <a class="btn  btn-danger" href="{{ path('event_add') }}">
+                    <i class="icon-plus"></i> Add Event
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <table style="width: 100%;" id="example" class="table table-bordered table-striped">
+                <thead class="flip-content">
+                    <tr>
+                        <th></th>
+                        <th> Status </th>
+                        <th> Address </th>
+                        <th> Time Due </th>
+                        <th> Title </th>
+                        <th> Type </th>
+                        <th> Shared With </th>
+                        <th> Time Created </th>
+                        <th> Actions </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <!-- End: life time stats -->
+
+    <div class="modal fade" id="basic" tabindex="-1" role="basic" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">Modal Title</h4>
+                </div>
+                <div class="modal-body">
+                    Modal body goes here
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn blue">Save changes</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+{% endblock %}	

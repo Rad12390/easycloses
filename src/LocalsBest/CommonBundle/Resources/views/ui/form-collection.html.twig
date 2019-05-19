@@ -1,0 +1,14 @@
+{% macro widget_prototype(widget, remove_text) %}
+    {% if widget.vars.prototype is defined %}
+        {% set form = widget.vars.prototype %}
+        {% set name = widget.vars.prototype.vars.name %}
+    {% else %}
+        {% set form = widget %}
+        {% set name = widget.vars.full_name %}
+    {% endif %}
+
+    <div data-content="{{ name }}">                                                                
+        {{ form_widget(form) }}<br/>
+        <a data-related="{{ name }}" class="btn default btn-sm btn-remove"><i class="fa fa-times"></i> {{ remove_text }} </a>
+    </div>
+{% endmacro %}

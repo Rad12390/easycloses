@@ -1,0 +1,467 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Member Search{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Member Search
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.js') }}"></script>
+    <script src="https://unpkg.com/vue/dist/vue.js" xmlns:v-bind="http://www.w3.org/1999/xhtml"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vuejs-paginator/2.0.0/vuejs-paginator.js"></script>
+
+    <script>
+        var v_business = new Vue({
+            el: '#company_app',
+            data: {
+                businesses: [],
+                loading: false,
+                error: false,
+                currentPage: 1,
+                itemsPerPage: 10,
+                resultCount: 0,
+                filters: {
+                    query: '',
+                    state: '',
+                    city: '',
+                    type: '',
+                    business: ''
+                }
+            },
+            methods: {
+                search: function() {
+                    // Clear the error message.
+                    this.error = '';
+                    // Empty the products array so we can fill it with the new products.
+                    this.businesses = [];
+                    // Set the loading property to true, this will display the "Searching..." button.
+                    this.loading = true;
+                    // Making a get request to our API and passing the query to it.
+                    this.$http.get('/businesses-search', {params: this.filters}).then(function(response){
+                        // If there was an error set the error message, if not fill the products array.
+                        response.body.error ? this.error = response.body.error : this.businesses = response.body;
+                        // The request is finished, change the loading to false again.
+                        this.loading = false;
+                        this.currentPage = 1;
+                        this.resultCount = this.businesses.length;
+                    });
+                },
+                totalPages: function() {
+                    return Math.ceil(this.resultCount / this.itemsPerPage)
+                },
+                nextPage: function () {
+                    if (this.currentPage < this.totalPages()) {
+                        this.currentPage++;
+                    }
+                },
+                changeState: function() {
+                    this.filters.city = '';
+                    $(".js-cities-ajax").select2("val", "");
+                },
+                prevPage: function () {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                    }
+                },
+                filteredItems: function () {
+                    return this.businesses.slice(((this.currentPage-1)*this.itemsPerPage), this.currentPage*this.itemsPerPage)
+                },
+                buttonStatus: function() {
+                    return !(this.filters.state != '' || this.filters.city != '' || this.filters.business.length >= 3 || this.filters.type != '')
+                },
+                jobRequestUrl: function(id) {
+                    return '/job/request?user_id=' + id;
+                }
+            }
+        });
+    </script>
+
+    <script>
+        var v_member = new Vue({
+            el: '#people_app',
+            data: {
+                members: [],
+                loading: false,
+                error: false,
+                currentPage: 1,
+                itemsPerPage: 10,
+                resultCount: 0,
+                industryTypes: [],
+                filters: {
+                    query: '',
+                    state: '',
+                    city: '',
+                    business: ''
+                }
+            },
+            methods: {
+                search: function() {
+                    // Clear the error message.
+                    this.error = '';
+                    // Empty the products array so we can fill it with the new products.
+                    this.members = [];
+                    // Set the loading property to true, this will display the "Searching..." button.
+                    this.loading = true;
+                    // Making a get request to our API and passing the query to it.
+                    this.$http.get('/members-search', {params: this.filters}).then(function(response){
+                        // If there was an error set the error message, if not fill the products array.
+                        response.body.error ? this.error = response.body.error : this.members = response.body;
+                        // The request is finished, change the loading to false again.
+                        this.loading = false;
+                        this.currentPage = 1;
+                        this.resultCount = this.members.length;
+                    });
+                },
+                totalPages: function() {
+                    return Math.ceil(this.resultCount / this.itemsPerPage)
+                },
+                nextPage: function () {
+                    if (this.currentPage < this.totalPages()) {
+                        this.currentPage++;
+                    }
+                },
+                changeState: function() {
+                    this.filters.city = '';
+                    $(".js-members-cities-ajax").select2("val", "");
+                },
+                prevPage: function () {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                    }
+                },
+                filteredItems: function () {
+                    return this.members.slice(((this.currentPage-1)*this.itemsPerPage), this.currentPage*this.itemsPerPage)
+                },
+                buttonStatus: function() {
+                    return !(this.filters.state != '' || this.filters.city != '' || this.filters.business.length >= 3)
+                },
+                jobRequestUrl: function(id) {
+                    return '/job/request?user_id=' + id;
+                }
+            }
+        });
+    </script>
+
+    <script>
+
+        function formatRepo (repo) {
+            if (repo.loading) return repo.text;
+
+            var markup = '<div class="clearfix">' +
+                repo.name +
+                '</div>';
+
+            if (repo.description) {
+                markup += '<div>' + repo.description + '</div>';
+            }
+
+            markup += '</div></div>';
+
+            return markup;
+        }
+
+        function formatRepoSelection (repo) {
+            return repo.name || repo.text;
+        }
+
+        $(".js-cities-ajax").select2({
+            theme: "bootstrap",
+            width: '100%',
+            placeholder: "- City -",
+            allowClear: true,
+            multiple: false,
+            minimumInputLength: 2,
+            ajax: {
+                url: "/working-cities-by-state",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        state: v_business.filters.state,
+                        q: params.term
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+
+                    return {
+                        results: data,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true
+            },
+            escapeMarkup: function (markup) { return markup; },
+            templateResult: formatRepo, // omitted for brevity, see the source of this page
+            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+        })
+            .on("select2:select", function(e) {
+                var item = e.params.data;
+                v_business.filters.city = item.id;
+            })
+            .on("change", function(e) {
+                v_business.filters.city = '';
+            });
+
+
+        $(".js-members-cities-ajax").select2({
+            theme: "bootstrap",
+            width: '100%',
+            placeholder: "- City -",
+            allowClear: true,
+            multiple: false,
+            minimumInputLength: 2,
+            ajax: {
+                url: "/working-cities-by-state",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        state: v_business.filters.state,
+                        q: params.term
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+
+                    return {
+                        results: data,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true
+            },
+            escapeMarkup: function (markup) { return markup; },
+            templateResult: formatRepo, // omitted for brevity, see the source of this page
+            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+        })
+            .on("elect2:select", function(e) {
+                v_member.filters.city = e.val;
+            })
+            .on("change", function(e) {
+                v_member.filters.city = '';
+            })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-search"></i> Member Search
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="tabbable tabbable-custom tabbable-full-width">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#company" data-toggle="tab"> Find Company </a>
+                    </li>
+                    <li>
+                        <a href="#people" data-toggle="tab"> Find People </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="company">
+                        <div class="row" id="company_app">
+                            <div class="col-md-12">
+                                <div class="form-horizontal" v-cloak>
+                                    <div class="alert alert-danger" role="alert" v-if="error">
+                                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                        {% verbatim %}
+                                            {{ error }}
+                                        {% endverbatim %}
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-3" style="margin-bottom: 5px;">
+                                            <button class="btn btn-info" v-bind:disabled="buttonStatus()" type="button" @click="search()" v-if="!loading">
+                                                <i class="fa fa-search"></i>
+                                                Search Member
+                                            </button>
+                                            <button class="btn  btn-danger" type="button" disabled="disabled" v-if="loading">
+                                                <i class="fa fa-spin fa-gear"></i>
+                                                Searching
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3" style="margin-bottom: 5px;">
+                                            <select v-model="filters.type" class="form-control">
+                                                <option value="">- Type -</option>
+                                                {% for type in types %}
+                                                    <option value="{{ type.id }}">{{ type.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" style="margin-bottom: 5px;">
+                                            <select v-on:change="changeState()" v-model="filters.state" class="form-control">
+                                                <option value="">- State -</option>
+                                                {% for state in states %}
+                                                    <option value="{{ state.short_name }}">{{ state.short_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2" style="margin-bottom: 5px;">
+                                            <select v-model="filters.city" class="form-control js-cities-ajax"></select>
+                                        </div>
+
+                                        <div class="col-md-2" style="margin-bottom: 5px;">
+                                            <input v-model="filters.business" class="form-control" placeholder="Company Name">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-cloak class="col-md-12" v-if="resultCount > itemsPerPage" style="margin-bottom: 10px;">
+                                <button class="btn btn-default" @click="prevPage()" v-bind:disabled="currentPage == 1">
+                                    Prev
+                                </button>
+                                {% verbatim %}{{ currentPage }} of {{ totalPages() }}{% endverbatim %}
+                                <button class="btn btn-default" @click="nextPage()" v-bind:disabled="currentPage == totalPages()">
+                                    Next
+                                </button>
+                            </div>
+
+                            <div v-cloak class="item col-md-12" v-for="business in filteredItems()">
+                                <div class="thumbnail">
+                                    <div class="caption">
+                                        <div class="row">
+                                            <div class="col-xs-2">
+                                                <div style="width: 130px; height: 105px; margin: 0 auto;">
+                                                    <img style="max-width: 100%; max-height: 90px;" class="" v-bind:src="business.logo">
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-10">
+                                                <p>
+                                                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_CUSTOMER_SERVICE') %}
+                                                        {% verbatim %} <a onclick="return confirm('Are you sure?')" class="btn btn-danger pull-right" v-bind:href="/business\delete/ + business.id">Delete User</a> {% endverbatim %}
+                                                    {% endif %}
+
+                                                    {% verbatim %}
+                                                        <a v-bind:href="/businesses/ + business.slug">{{ business.name }}</a>
+                                                        <i>{{ business.contactName }}</i>
+                                                        <a class="btn btn-primary pull-right" v-bind:href="jobRequestUrl(business.ownerId)">Job Request</a>
+                                                    {% endverbatim %}
+                                                </p>
+                                                <p>
+                                                    <span v-for="phone in business.contact.phones"><i class="fa fa-phone"></i> {% verbatim %}{{ phone.number }} {% endverbatim %} </span>
+                                                    <span v-for="email in business.contact.emails"><i class="fa fa-envelope"></i> {% verbatim %}{{ email.email }} {% endverbatim %} </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end tab-pane-->
+
+                    <div class="tab-pane" id="people">
+                        <div class="row profile-account" id="people_app">
+                            <div class="col-md-12">
+                                <div class="form-horizontal">
+                                    <div class="alert alert-danger" role="alert" v-if="error">
+                                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                        {% verbatim %}
+                                            {{ error }}
+                                        {% endverbatim %}
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="controls">
+                                            <div class="col-md-3" style="margin-bottom: 5px;">
+                                                <button class="btn btn-info" v-bind:disabled="buttonStatus()" type="button" @click="search()" v-if="!loading">
+                                                    <i class="fa fa-search"></i>
+                                                    Search Member
+                                                </button>
+                                                <button class="btn  btn-danger" type="button" disabled="disabled" v-if="loading">
+                                                    <i class="fa fa-spin fa-gear"></i>
+                                                    Searching
+                                                </button>
+                                            </div>
+                                            <div class="col-md-2" style="margin-bottom: 5px;">
+                                                <select v-on:change="changeState()" v-model="filters.state" class="form-control">
+                                                    <option value="">- State -</option>
+                                                    {% for state in states %}
+                                                        <option value="{{ state.short_name }}">{{ state.short_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3" style="margin-bottom: 5px;">
+                                                <input v-model="filters.query" v-bind:disabled="buttonStatus()" type="text" class="form-control" id="inputEmail3" placeholder="Member name, email, phone">
+                                            </div>
+                                            <div class="col-md-2" style="margin-bottom: 5px;">
+                                                <select v-model="filters.city" class="form-control js-members-cities-ajax"></select>
+                                            </div>
+                                            <div class="col-md-2" style="margin-bottom: 5px;">
+                                                <input v-model="filters.business" class="form-control" placeholder="Company Name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12" v-if="resultCount > itemsPerPage" style="margin-bottom: 10px;">
+                                <button class="btn btn-default" @click="prevPage()" v-bind:disabled="currentPage == 1">
+                                    Prev
+                                </button>
+                                {% verbatim %}{{ currentPage }} of {{ totalPages() }}{% endverbatim %}
+                                <button class="btn btn-default" @click="nextPage()" v-bind:disabled="currentPage == totalPages()">
+                                    Next
+                                </button>
+                            </div>
+
+                            <div class="item col-xs-12 col-lg-12" v-for="member in filteredItems()">
+                                <div class="thumbnail">
+                                    <div class="caption">
+                                        <div class="row">
+                                            <div class="col-xs-2">
+                                                <div style="width: 130px; height: 105px; margin: 0 auto;">
+                                                    <img style="max-width: 100%; max-height: 90px;" class="" v-bind:src="member.logo" />
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-10">
+                                                <p>
+                                                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_CUSTOMER_SERVICE') %}
+                                                        {% verbatim %} <a onclick="return confirm('Are you sure?')" class="btn btn-danger pull-right" v-bind:href="/user\remove/ + member.id">Delete Member</a> {% endverbatim %}
+                                                    {% endif %}
+
+                                                    {% verbatim %}
+                                                        <a v-bind:href="/members/ + member.id">{{ member.firstName }} {{ member.lastName }}</a>
+                                                        <b v-for="business in member.businesses">{{ business.name }}</b>
+                                                        <i>{{ member.role.name }}</i>
+                                                        <a class="btn btn-primary pull-right" v-bind:href="jobRequestUrl(member.id)">Job Request</a>
+                                                    {% endverbatim %}
+                                                </p>
+                                                <p>
+                                                    <span v-for="phone in member.contact.phones"><i class="fa fa-phone"></i> {% verbatim %}{{ phone.number }} {% endverbatim %} </span>
+                                                    <span v-for="email in member.contact.emails"><i class="fa fa-envelope"></i> {% verbatim %}{{ email.email }} {% endverbatim %} </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

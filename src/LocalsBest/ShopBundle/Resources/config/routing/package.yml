@@ -1,0 +1,30 @@
+packages:
+    path:     /
+    defaults: { _controller: "LocalsBestShopBundle:Package:index" }
+
+packages_show:
+    path:     /{id}/show
+    defaults: { _controller: "LocalsBestShopBundle:Package:show" }
+
+packages_new:
+    path:     /new
+    defaults: { _controller: "LocalsBestShopBundle:Package:new" }
+
+packages_create:
+    path:     /create
+    defaults: { _controller: "LocalsBestShopBundle:Package:create" }
+    methods: [POST]
+
+packages_edit:
+    path:     /{id}/edit
+    defaults: { _controller: "LocalsBestShopBundle:Package:edit" }
+
+packages_update:
+    path:     /{id}/update
+    defaults: { _controller: "LocalsBestShopBundle:Package:update" }
+    methods: [POST|PUT]
+
+packages_delete:
+    path:     /{id}/delete
+    defaults: { _controller: "LocalsBestShopBundle:Package:delete" }
+    methods: [POST|DELETE]

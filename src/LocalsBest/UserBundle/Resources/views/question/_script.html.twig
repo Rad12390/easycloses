@@ -1,0 +1,41 @@
+<script>
+    $(function () {
+        $('#creating').on('change', function(){
+            if($(this).val() == 'Listing'){
+                $("#represent option[value='Buyer']").hide();
+                $("#represent option[value='Tenant']").hide();
+                $("#represent option[value='Buyer&Seller']").hide();
+                $("#represent option[value='Landlord&Tenant']").hide();
+
+                {% if app.user.businesses[0].id == 56 %}
+                    $("#represent option[value='Landlord']").hide();
+                {% else %}
+                    $("#represent option[value='Landlord']").show();
+                {% endif %}
+            } else {
+                $("#represent option[value='Buyer']").show();
+                $("#represent option[value='Buyer&Seller']").show();
+
+                {% if app.user.businesses[0].id == 56 %}
+                    $("#represent option[value='Tenant']").hide();
+                    $("#represent option[value='Landlord&Tenant']").hide();
+                {% else %}
+                    $("#represent option[value='Tenant']").show();
+                    $("#represent option[value='Landlord&Tenant']").show();
+                {% endif %}
+            }
+        }).trigger('change');
+
+        {% if app.user.businesses[0].id == 2 %}
+            $("#propertyType").append($("<option></option>").attr("value", 'Farm & Ranch').text('Farm & Ranch'));
+        {% endif %}
+
+        {% if app.user.businesses[0].id == 50 %}
+            $("#propertyType").append($("<option></option>").attr("value", 'Apartment').text('Apartment'));
+        {% endif %}
+
+        {% if app.user.businesses[0].id == 56 %}
+            $("#transactionType option[value='Lease']").hide();
+        {% endif %}
+    });
+</script>

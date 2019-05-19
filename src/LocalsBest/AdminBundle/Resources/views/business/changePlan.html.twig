@@ -1,0 +1,23 @@
+{% extends "::base.html.twig" %}
+
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block title %}LocalsBestAdminBundle:Business:setPlan{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="text-center">
+                <h3>
+                    {{ entity.name }}
+                </h3>
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                        <img src="{{ vich_uploader_asset(entity, 'file') }}" class="logo-default" style="max-height: 100%;max-width: 100%;" alt="{{ entity.filename }}"/>
+                    </div>
+                </div>
+            </div>
+            {{ form(form) }}
+        </div>
+    </div>
+{% endblock %}

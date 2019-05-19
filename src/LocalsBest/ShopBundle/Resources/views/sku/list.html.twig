@@ -1,0 +1,115 @@
+{% extends '::ec-shop-layout.html.twig' %}
+
+{% block title %}
+    Products
+{% endblock %}
+
+
+{% block styles %}
+    {{ parent() }}
+    <link rel='stylesheet' href="{{ asset('shop/bootstrap-star-rating/css/star-rating.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('shop/bootstrap-star-rating/js/star-rating.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.js') }}"></script>
+    <script src="{{ asset('shop/js/page-ec-product-detail.js', null, false, 3) }}"></script>
+{% endblock %}
+
+{% block content -%}
+
+    {% set url_params = app.request.attributes.get('_route_params') %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <aside class="sidebar-left">
+                    <ul class="nav nav-tabs nav-stacked nav-coupon-category">
+                        <li {% if selectedCategory is null %}class="active"{% endif %}>
+                            <a href="{{ path('ec_shop_main_page', app.request.query.all|merge({'category': null})) }}">
+                                <i class="fa fa-ticket"></i> All
+                            </a>
+                        </li>
+                       
+                        {{ render(controller('LocalsBestShopBundle:Category:list', {'url': app.request.query.all, 'selected': selectedCategory} )) }}
+                    </ul>
+
+                    {{ render(controller('LocalsBestShopBundle:Category:indTypesList', {'url': app.request.query.all, 'selected': selectedCategory} )) }}
+
+                    {{ render(controller('LocalsBestShopBundle:Sku:recentViewed', { 'productLimit': 3, 'businessSlug': business.slug })) }}
+                    {{ render(controller('LocalsBestShopBundle:Sku:popular', { 'productLimit': 3, 'businessSlug': business.slug })) }}
+                </aside>
+            </div>
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="product-sort">
+                            <span class="product-sort-selected">
+                                sort by <b>{{ orderBy|capitalize }}</b>
+                            </span>
+                            <a href="{{ path('ec_shop_main_page', app.request.query.all|merge({'order_direction': orderDirection == 'asc' ? 'desc' : 'asc'})) }}" class="product-sort-order fa {{ orderDirection == 'asc' ? 'fa-angle-up' : 'fa-angle-down' }}"></a>
+                            <ul>
+                                {% for option in orderByArray if option != orderBy %}
+                                <li>
+                                    <a href="{{ path('ec_shop_main_page', app.request.query.all|merge({'order_by': option})) }}">
+                                        sort by {{ option|capitalize }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-md-offset-7">
+                        <div class="product-view pull-right">
+                            <a class="fa fa-list  {% if productsListView != 1 %}active{% endif %}" href="{% if productsListView != 1 %}#{% else %}{{ path('toggle_products_view', {'horizontal': 0}) }}{% endif %}"></a>
+                            <a class="fa fa-th-large {% if productsListView == 1 %}active{% endif %}" href="{% if productsListView == 1 %}#{% else %}{{ path('toggle_products_view', {'horizontal': 1}) }}{% endif %}"></a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row row-wrap">
+
+                    {% for product in entities %}
+                        {% if productsListView != 1 %}
+                            {% include('@LocalsBestShop/sku/blocks/_products-list-view.html.twig') %}
+                        {% else %}
+                            {% include('@LocalsBestShop/sku/blocks/_products-block-view.html.twig') %}
+                        {% endif %}
+                    {% endfor %}
+
+                </div>
+
+
+                {% if maxPages > 1 %}
+                    <ul class="pagination">
+                        {# `«` arrow  #}
+                        <li class="prev {{ thisPage == 1 ? 'disabled' }}">
+                            <a {% if thisPage-1>=1 %}href="{{ path('ec_shop_main_page', app.request.query.all|merge({ page: thisPage-1 })) }}"{% endif %}></a>
+                        </li>
+
+                        {# Render each page number #}
+                        {% for i in 1..maxPages %}
+                            <li class="{{ thisPage == i ? 'active' }}">
+                                <a {% if thisPage != i %}href="{{ path('ec_shop_main_page', app.request.query.all|merge({ page: i })) }}"{% endif %}>{{ i }}</a>
+                            </li>
+                        {% endfor %}
+
+                        {# `»` arrow #}
+                        <li class="next {{ thisPage == maxPages ? 'disabled' }}">
+                            <a {% if thisPage+1 <= maxPages %}href="{{ path('ec_shop_main_page', app.request.query.all|merge({ page: thisPage+1 })) }}"{% endif %}></a>
+                        </li>
+                    </ul>
+                {% endif %}
+
+                <div class="gap"></div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

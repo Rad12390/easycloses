@@ -1,0 +1,50 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+    <h4 class="modal-title">Create New Link</h4>
+</div>
+
+{{ form_start(form, { 'attr': {'class': 'form-horizontal', 'role': 'form'} }) }}
+    <div class="modal-body">
+        <div class="form-body">
+            <div class="form-group">
+                {{ form_label(form.title, null, {'label_attr': {'class' : 'col-md-3 control-label'} }) }}
+                <div class="col-md-9">
+                    {{ form_widget(form.title, { 'attr': { 'class': 'form-control' } }) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.source, null, {'label_attr': {'class' : 'col-md-3 control-label'} }) }}
+                <div class="col-md-9">
+                    {{ form_widget(form.source, { 'attr': { 'class': 'form-control' } }) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.group, null, {'label_attr': {'class' : 'col-md-3 control-label'} }) }}
+                <div class="col-md-9">
+                    {{ form_widget(form.group, { 'attr': { 'class': 'form-control' } }) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Cancel</button>
+        {{ form_widget(form.save, { 'attr': { 'class': 'btn green' } }) }}
+    </div>
+{{ form_end(form) }}
+
+
+<script>
+    $(document).ready(function(){
+        {% if app.user.role.level > 5 %}
+            $("#localsbest_userbundle_link_group option[value=2]").remove();
+        {% endif %}
+
+        {% for type in app.user.businesses[0].types if type.id != 23 %}
+            $("#localsbest_userbundle_link_group option[value=2]").remove();
+            $("#localsbest_userbundle_link_group option[value=3]").remove();
+            $("#localsbest_userbundle_link_group option[value=4]").remove();
+        {% endfor %}
+    });
+</script>

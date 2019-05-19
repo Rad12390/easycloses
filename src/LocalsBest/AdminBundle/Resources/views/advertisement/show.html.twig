@@ -1,0 +1,44 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Advertisement</h1>
+
+    <table class="record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+            <tr>
+                <th>Url</th>
+                <td>{{ entity.url }}</td>
+            </tr>
+            <tr>
+                <th>Image</th>
+                <td>
+                    <div class="col-sm-2">
+                        <img class="img-thumbnail" src="{{ vich_uploader_asset(entity, 'image', 'LocalsBest\\UserBundle\\Entity\\Advertisement') }}" alt="{{ entity.title }}">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ entity.title }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('admin_advertisement') }}">
+            Back to the list
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('admin_advertisement_edit', { 'id': entity.id }) }}">
+            Edit
+        </a>
+    </li>
+    <li>{{ form(delete_form) }}</li>
+</ul>
+{% endblock %}

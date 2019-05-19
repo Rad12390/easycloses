@@ -1,0 +1,59 @@
+{% extends "::empty.html.twig" %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+    <div class="col-md-10 col-md-offset-1">
+        <div class="portlet box blue" id="partyBox">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-magic"></i>Local Vendor Sign Up
+                </div>
+            </div>
+            <div class="portlet-body no-more-tables">
+                <div class="table-responsive">
+                    <div id="transaction_parties_wrapper" class="dataTables_wrapper no-footer">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Network</th>
+                                            <th>Service Team</th>
+                                            <th>Setup Price</th>
+                                            <th>Service Price</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Network</td>
+                                            <td>Service Team</td>
+                                            <td>Setup Price</td>
+                                            <td>Service Price</td>
+                                            <td>Total</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="4" class="text-right">
+                                                Order total:
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("body div.col-md-12").css('margin', 0)
+        });
+    </script>
+{% endblock %}

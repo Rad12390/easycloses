@@ -1,0 +1,15 @@
+parameters:
+#    locals_best_notification.example.class: LocalsBest\NotificationBundle\Example
+
+services:
+#    locals_best_notification.example:
+#        class: %locals_best_notification.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]
+    localsbest.notification:
+            class: LocalsBest\NotificationBundle\Service\Notification
+            calls:
+                - [setContainer, ["@service_container"]]
+    localsbest.mailman:
+            class: LocalsBest\NotificationBundle\Service\MailMan
+            calls:
+                - [setContainer, ["@service_container"]]

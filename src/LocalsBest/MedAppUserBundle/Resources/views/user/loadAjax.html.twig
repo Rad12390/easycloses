@@ -1,0 +1,187 @@
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('plugins/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js') }}"></script>
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery('#example').DataTable({
+                responsive: true
+            });
+        });
+    </script>
+{% endblock %}
+<table {% if members|length >= 1 %}id="example"{% endif %} class="table table-bordered">
+    <thead>
+    <tr role="row">
+        <th ></th>
+        <th > Name </th>
+        <th > Phone </th>
+        <th > Email </th>
+        <th > Tags </th>
+        <th > Role </th>
+        <th > Business Name </th>
+        <th > Industry </th>
+        <th > Last Updated </th>
+        <th > Actions </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if members|length >= 1 %}
+        {% for contact in members %}
+            {% set tags = null %}
+            {% if contact.tags is defined and contact.tags is not null %}
+                {% for tag in contact.tags %}
+                    {% if app.user == tag.createdBy %}
+                        {% set tags = tags ~ (tags is not null ? ', ' : '') ~ tag.tag %}
+                    {% endif %}
+                {% endfor%}
+            {% endif %}
+
+            {% if (contact.deleted is null) or (contact.deleted is defined and contact.deleted is not null and app.user.role.level < contact.role.level) or (app.user.role.level <= 4) %}
+
+                <tr>
+                    <td>
+                        {% if contact.name is defined and contact.name is not null %}
+                        {% else %}
+                            {% if contact.filename is not empty %}
+                                <img style="height: 29px; width: 29px; margin: 0 auto;" src="{{ vich_uploader_asset(contact, 'file') }}" class="img-responsive" alt="{{ contact.filename }}">
+                            {% else %}
+                                <i class="icon-user-follow tooltips" data-container="body" data-placement="top" data-original-title="Contact Interaction Available"></i>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td >
+                        {% if contact.name is defined and contact.name is not null %}
+                            <a href="{{ path('contact_view', {'id': contact.id}) }}" >{{ contact.firstName }}&nbsp;{{ contact.lastName }}</a>
+                        {% else %}
+                            {% if contact.deleted is null %}
+                                <a href="{{ path('user_view', {'username': contact.username}) }}" >{{ contact.firstName }}&nbsp;{{ contact.lastName }}</a>
+                            {% else %}
+                                {{ contact.firstName }}&nbsp;{{ contact.lastName }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td >
+                        {% if contact.name is defined and contact.name is not null %}
+                            {{contact.number}}
+                        {% else %}
+                            {% if contact.primaryPhone is not null %}{{ contact.primaryPhone.number }} {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if contact.name is defined and contact.name is not null %}
+                            {{contact.email}}
+                        {% else %}
+                            {% if contact.primaryEmail is not null %}{{ contact.primaryEmail.email }} {% endif %}
+                        {% endif %}
+
+                    </td>
+                    <td>{% if tags is not null %}{{ tags }}{% endif%}
+                    </td>
+                    <td >
+                        {% if contact.name is defined and contact.name is not null %}
+                            {% if contact.user is not null %}
+                                {#{% set role = contact.user.role.role|split('_') %}#}
+                                {#{{ role[1]|capitalize }}#}
+                                {{ contact.user.role.name }}
+                            {% endif %}
+                        {% else %}
+                            {#{% set role = contact.role.role|split('_') %}#}
+                            {#{{ role[1]|capitalize }}#}
+                            {{ contact.role.name }}
+                        {% endif %}
+                    </td>
+                    <td >
+                        {% if contact.name is defined and contact.name is not null %}
+                            {{ contact.businessName }}
+                        {% else %}
+                            {% if contact.businesses is not null and contact.businesses[0] is defined %}
+                                {{ contact.businesses[0].name }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td >
+                        {% if contact.name is defined and contact.name is not null %}
+                            {% if contact.businessType is not null %}
+                                {{ contact.businessType.name }}
+                            {% endif %}
+                        {% else %}
+                            {% if contact.businesses is not null and contact.businesses[0] is defined and contact.businesses[0].type is not null %}
+                                {{ contact.businesses[0].type.name }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td >
+                        {% if contact.created is not null %}
+                            {{ contact.created|date('m/d/Y H:i A') }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-{% if app.user.role.level == 4 and contact.isDocumentApprover is defined and contact.isDocumentApprover %}success{% elseif contact.deleted is defined and contact.deleted is not null %}danger{% else %} default{% endif %} dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-gear"></i>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu right-aligned" role="menu">
+                                {% if contact.name is defined and contact.name is not null %}
+                                    <li>
+                                        <a href="{{ path('contact_edit', {'id': contact.id}) }}" >
+                                            <i class="fa fa-edit"></i> Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ path('contact_delete', {'id': contact.id}) }}" >
+                                            <i class="fa fa-minus-circle"></i> Delete
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    {% if contact.deleted is null %}
+                                        <li>
+                                            <a href="{{ path('user_detail', {'username': contact.username}) }}">
+                                                <i class="fa fa-eye"></i> View
+                                            </a>
+                                        </li>
+                                        {% if (app.user.role.level < contact.role.level) %}
+                                            <li>
+                                                <a href="{{ path('users_profile_edit', {'username': contact.username}) }}" >
+                                                    <i class="fa fa-edit"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ path('user_delete', {'id': contact.id}) }}">
+                                                    <i class="fa fa-minus-circle"></i> Disable
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li>
+                                            <a href="{{ path('user_delete', {'id': contact.id}) }}">
+                                                <i class="fa fa-minus-circle"></i> Enable
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if app.user.role.level == 4 and contact.isDocumentApprover is defined and contact.role.role != 'ROLE_VENDOR' and contact.role.role != 'ROLE_CLIENT' and contact.deleted is null %}
+                                        <li>
+                                            {% if contact.isDocumentApprover == null %}
+                                                <a data-success-add-class="success" class="btn-ajax" href="{{ path('user_make_document_approver', {'id': contact.id}) }}" >
+                                                    <i class="fa fa-check-square-o"></i> Make Document Approver
+                                                </a>
+                                            {% else %}
+                                                <a data-success-remove-class="success" class="btn-ajax" href="{{ path('user_unmake_document_approver', {'id': contact.id}) }}" >
+                                                    <i class="fa fa-check-square-o"></i> UnMake Document Approver
+                                                </a>
+                                            {% endif %}
+                                        </li>
+                                    {% endif %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    {% else%}
+        <tr><td colspan="10" align="middle"><span class="small">No record found</span></td></tr>
+    {% endif %}
+    </tbody>
+</table>

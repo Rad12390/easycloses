@@ -1,0 +1,199 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+    <h4 class="modal-title">Vendor Bio</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tabbable tabbable-custom tabbable-full-width">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#tab_1_3" data-toggle="tab">Profile Details </a>
+                    </li>
+                    {% if vendor %}
+                        {% for business in vendor.businesses %}
+                            <li>
+                                <a href="#{{ business.slug }}" data-toggle="tab">{{ business.name }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1_3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <ul class="ver-inline-menu tabbable margin-bottom-10">
+                                    <li>
+                                        {% if vendor.filename is not empty %}
+                                            <img src="{{ vich_uploader_asset(vendor, 'file') }}" style="margin: 0 auto;" class="img-responsive img-thumbnail" alt="{{ vendor.firstName }}&nbsp;{{ vendor.lastName }}">
+                                        {% else %}
+                                            <img src="{{ asset('images/empty-avatar.png') }}" class="img-responsive img-thumbnail" alt="{{ vendor.firstName }}&nbsp;{{ vendor.lastName }}">
+                                        {% endif %}
+
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="profile-info">
+                                    {% if vendor %}
+                                        <h3>{{ vendor.firstName }}&nbsp;{{ vendor.lastName }}</h3>
+                                        <p>
+                                            {% if vendor.primaryPhone.type =='M' %}
+                                            <span class="glyphicon glyphicon-phone"></span>
+                                        {% elseif vendor.primaryPhone.type =='H' %}
+                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                        {% elseif vendor.primaryPhone.type =='O' %}
+                                            <span class="glyphicon glyphicon-earphone"></span>
+                                            {% endif %}&nbsp; {{ vendor.primaryPhone.number }}
+                                        </p>
+                                        {% if vendor.primaryPhone|length > 1 %}
+                                            {% for phone in vendor.contact.phones %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        {% if phone.type =='M' %}
+                                                            <span class="glyphicon glyphicon-phone"></span>
+                                                        {% elseif phone.type =='H' %}
+                                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                                        {% elseif phone.type =='O' %}
+                                                            <span class="glyphicon glyphicon-earphone"></span>
+                                                        {% endif %}
+                                                        &nbsp; {{ phone.number }}&nbsp;(optional)
+                                                    </li>
+                                                </ul>
+                                            {% endfor %}
+                                        {% endif %}
+
+                                        <p>
+                                            <span class="glyphicon glyphicon-envelope"></span>&nbsp;<a href="#">{{ vendor.primaryEmail.email }} </a>
+                                        </p>
+                                        {% if vendor.primaryEmail|length > 1 %}
+                                            {% for email in vendor.contact.emails %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                                    </li>
+                                                </ul>
+                                            {% endfor %}
+                                        {% endif %}
+
+                                        <div class="pull-left">
+                                            <a class="btn btn-sm btn-success" href="{{ path('job_add', { 'jobType': 'Order', 'vendor_id': vendor.id, 'industryType': vendor.businesses.first.types.first.id }) }}">Order Job</a>
+                                            <a class="btn btn-sm btn-primary" href="{{ path('job_add', { 'jobType': 'Quote', 'vendor_id': vendor.id, 'industryType': vendor.businesses.first.types.first.id }) }}">Get Quote</a>
+                                            <a class="btn btn-sm btn-info" href="{{ path('job_add', { 'jobType': 'Info', 'vendor_id': vendor.id, 'industryType': vendor.businesses.first.types.first.id }) }}">Request Info</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                {% if vendor.aboutMe|length > 1 %}
+                                    <hr>
+                                    {{ vendor.aboutMe|raw }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if vendor %}
+                        {% for business in vendor.businesses %}
+                            <div class="tab-pane" id="{{ business.slug }}">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <ul class="ver-inline-menu tabbable margin-bottom-10">
+                                            <li>
+                                                {% if business.filename is not null and business.filename is not empty %}
+                                                    <img src="{{ vich_uploader_asset(business, 'file') }}" style="margin: 0 auto;" class="img-responsive img-thumbnail" alt="{{ business.name }}">
+                                                {% else %}
+                                                    <img src="{{ asset('images/empty-vendor.jpg') }}" style="margin: 0 auto;" class="img-responsive img-thumbnail" alt="{{ business.name }}">
+                                                {% endif %}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="profile-info">
+                                            <h4>{{ business.name}}</h4>
+                                            <p>{{ business.address.city }}<br/></p>
+
+                                            {% if business.contact is not null %}
+                                                {% for phone in business.contact.phones %}
+                                                    {% if phone|length > 1 %}
+                                                        <ul class="list-inline">
+                                                            <li>
+                                                                {% if phone.type =='M' %}
+                                                                <span class="glyphicon glyphicon-phone"></span>
+                                                            {% elseif phone.type =='H' %}
+                                                                <span class="glyphicon glyphicon-phone-alt"></span>
+                                                            {% elseif phone.type =='O' %}
+                                                                <span class="glyphicon glyphicon-earphone"></span>
+                                                                {% endif %}&nbsp;{{ phone.number }}&nbsp;(optional)
+                                                            </li>
+                                                        </ul>
+                                                    {% else %}
+                                                        <p>
+                                                            {% if phone.type =='M' %}
+                                                            <span class="glyphicon glyphicon-phone"></span>
+                                                        {% elseif phone.type =='H' %}
+                                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                                        {% elseif phone.type =='O' %}
+                                                            <span class="glyphicon glyphicon-earphone"></span>
+                                                            {% endif %}&nbsp;{{ phone.number }}
+                                                        </p>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                {% for email in business.contact.emails %}
+                                                    {% if email|length > 1 %}
+                                                        <ul class="list-inline">
+                                                            <li>
+                                                                <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                                            </li>
+                                                        </ul>
+                                                    {% else %}
+                                                        <p>
+                                                            <span class="glyphicon glyphicon-envelope"></span>&nbsp;<a href="#">{{ email.email }} </a>
+                                                        </p>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+
+                                            <p>
+                                                {{ business.contactname }}<br />
+                                                {% if business.types|length > 0 %}
+                                                    {% for t_ype in business.types %}
+                                                        {{ t_ype.name}}<br>
+                                                    {% endfor %}
+                                                {% endif %}<br />
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        {% if business.aboutMe is not null %}
+                                            {% for bio in business.aboutMe %}
+                                                {% if bio.aboutMe|length > 0 %}
+                                                    <hr>
+                                                    <div>
+                                                        {{ bio.aboutMe|raw }}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="pull-left">
+        <a class="btn btn-success" href="{{ path('job_add', { 'jobType': 'Order', 'vendor_id': vendor.id, 'industryType': vendor.businesses.first.types.first.id }) }}">Order Job</a>
+        <a class="btn btn-primary" href="{{ path('job_add', { 'jobType': 'Quote', 'vendor_id': vendor.id, 'industryType': vendor.businesses.first.types.first.id }) }}">Get Quote</a>
+        <a class="btn btn-info" href="{{ path('job_add', { 'jobType': 'Info', 'vendor_id': vendor.id, 'industryType': vendor.businesses.first.types.first.id }) }}">Request Info</a>
+    </div>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>

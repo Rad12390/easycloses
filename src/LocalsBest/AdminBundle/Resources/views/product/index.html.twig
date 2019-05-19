@@ -1,0 +1,106 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Product Entities List</h1>
+
+    <a class="btn btn-success" href="{{ path('admin_products_new') }}">
+        Create a new entry
+    </a>
+
+    <table class="table records_list">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Slug</th>
+                <th>Created By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('admin_products_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{{ entity.title }}</td>
+                <td>
+                    {% if entity.isAbleForShop == true %}
+                        <span class="label label-sm label-success">For Shop</span>
+                    {% else %}
+                        <span class="label label-sm label-danger">Not For Shop</span>
+                    {% endif %}
+                    {% if entity.isAbleForSlider == true %}
+                        <span class="label label-sm label-success">For Slider</span>
+                    {% else %}
+                        <span class="label label-sm label-danger">Not For Slider</span>
+                    {% endif %}
+                </td>
+                <td>{{ entity.slug }}</td>
+                <td>{{ entity.createdBy.fullName }}</td>
+                <td>
+                    {#<a class="btn btn-xs btn-primary" href="{{ path('admin_products_show', { 'id': entity.id }) }}">show</a>#}
+                    <a class="btn btn-xs btn-warning" href="{{ path('admin_products_edit', { 'id': entity.id }) }}">edit</a>
+                    <form name="form" method="post" action="{{ path('admin_products_delete', {'id': entity.id}) }}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" id="form__token" name="form[_token]" value="{{ csrf_token("intention") }}">
+                        <button type="submit" id="form_submit" name="form[submit]" class="btn btn-xs btn-danger">delete</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Product For Shop List</h1>
+
+    <a class="btn btn-success" href="{{ path('admin_product_type_new') }}">
+        Create Product for Shop
+    </a>
+
+    {% for product in forShop %}
+        <h3>#{{ product.id }} - {{ product.title }}</h3>
+        <table class="table records_list">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th>Margin</th>
+                    <th>Cost</th>
+                    <th>Quantity for Sale</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in product.types %}
+                    <tr>
+                        <td>{{ item.type }}</td>
+                        <td>${{ item.price|number_format }}</td>
+                        <td>{{ item.margin }}%</td>
+                        <td>${{ (item.price * (1 + (item.margin / 100)))|number_format }}</td>
+                        <td>
+                            {% if item.type == 'subscription' %}
+                                {{ item.subscriptionPeriod }} month(s) ({{ item.subscriptionCharges }} charges)
+                            {% else %}
+                                {{ item.value }}
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <a class="btn btn-xs btn-info" href="{{ path('admin_product_type_assign_to', { 'id': item.id }) }}">assign to</a>
+                            <a class="btn btn-sm btn-warning" href="{{ path('admin_product_type_edit', {'id': item.id}) }}">
+                                <i class="fa fa-edit"></i>
+                            </a>
+
+                            <form onsubmit="return confirm('Do you really want to delete this?');" name="form" method="post" action="{{ path('admin_product_type_delete', {'id': item.id}) }}">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <input type="hidden" id="form__token" name="form[_token]" value="{{ csrf_token("intention") }}">
+                                <button type="submit" id="form_submit" name="form[submit]" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+{% endblock %}

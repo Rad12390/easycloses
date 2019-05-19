@@ -1,0 +1,30 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block title %}
+    Contact Us
+{% endblock %}
+
+
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="box">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

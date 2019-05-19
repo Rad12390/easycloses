@@ -1,0 +1,27 @@
+<div class="modal-content">
+    <form action="{{ path('user_document_add', {'id': id })}}" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+            <h4 class="modal-title">Upload Document</h4>
+        </div>
+        <div class="modal-body">
+            <div class="fileinput fileinput-new" data-provides="fileinput">
+                <div class="fileinput-preview thumbnail" data-trigger="fileinput" style="width: 200px; height: 150px; line-height: 150px;"></div>
+                <div>
+                    <span class="btn btn-default btn-file">
+                        <span class="fileinput-new"> Select File </span>
+                        <span class="fileinput-exists"> Change </span>
+                        {{ form_widget( documentForm.file) }}
+                    </span>
+                    <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">
+                        Remove
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save Changes</button>
+        </div>
+    {{ form_end(documentForm) }}
+</div>

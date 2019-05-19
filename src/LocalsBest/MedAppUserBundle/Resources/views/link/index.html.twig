@@ -1,0 +1,141 @@
+<div class="portlet-title line">
+    <div class="caption">
+        <i class="fa fa-link"></i> Links
+    </div>
+    <div class="actions">
+        {% if app.user.role.level != 8 %}
+            <a class="btn btn-sm btn-danger" href="{{ path('link_create') }}" style="color: white;" id="linkAdd" data-target="#ajax" data-toggle="modal">
+                Create New
+            </a>
+        {% endif %}
+    </div>
+</div>
+<div class="portlet-body" id="chats">
+    <div class="scroller" style="height: 352px;" data-always-visible="1" data-rail-visible1="1">
+        <div class="tabbable-custom nav-justified">
+            <ul class="nav nav-tabs nav-justified">
+                {% if app.user.businesses[0].types.first.id == 23 %}
+                    {% if app.user.role.level != 8 %}
+                        <li>
+                            <a href="#person" data-toggle="tab"> Personal </a>
+                        </li>
+                        {% if app.user.role.level <= 5 %}
+                            <li class="active">
+                                <a href="#staff" data-toggle="tab"> Staff </a>
+                            </li>
+                        {% endif %}
+                        <li {% if app.user.role.level == 6 or app.user.role.level == 7 %}class="active"{% endif %}>
+                            <a href="#company" data-toggle="tab"> Company </a>
+                        </li>
+                    {% endif %}
+                    <li {% if app.user.role.level == 8 %}class="active"{% endif %}>
+                        <a href="#clients" data-toggle="tab"> Clients </a>
+                    </li>
+                {% else %}
+                    <li class="active">
+                        <a href="#person" data-toggle="tab"> Personal </a>
+                    </li>
+                {% endif %}
+            </ul>
+            <div class="tab-content">
+                {% if app.user.businesses[0].types.first.id == 23 %}
+                    {% if app.user.role.level != 8 %}
+                        <div class="tab-pane scroll-bar" id="person">
+                            <ul class="chats">
+                                {% for link in personLinks %}
+                                    <li class="grid-item person">
+                                        <a class="btn btn-info" target="_blank" href="{{ link.source }}">{{ link.title }}</a>
+                                        {% if app.user == link.createdBy or app.user.role.level < link.createdBy.role.level %}
+                                            <a href="{{ path('link_delete', {'id': link.id}) }}" style="color: red;">
+                                                <i class="fa fa-trash-o"></i>
+                                            </a>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li style="text-align: center;">
+                                        <em>No Links</em>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="tab-pane {% if app.user.role.level == 6 or app.user.role.level == 7 %}active{% endif %} scroll-bar" id="company">
+                            <ul class="chats">
+                                {% for link in companyLinks %}
+                                    <li class="grid-item {% if app.user.role.level == 6 or app.user.role.level == 7 %}active{% endif %} company">
+                                        <a class="btn btn-info" target="_blank" href="{{ link.source }}">{{ link.title }}</a>
+                                        {% if link.createdBy and (app.user == link.createdBy or app.user.role.level < link.createdBy.role.level) or app.user.role.level <= 4 %}
+                                            <a href="{{ path('link_delete', {'id': link.id}) }}" style="color: red;">
+                                                <i class="fa fa-trash-o"></i>
+                                            </a>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li style="text-align: center;">
+                                        <em>No Links</em>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% if app.user.role.level <= 5 %}
+                            <div class="tab-pane active scroll-bar" id="staff">
+                                <ul class="chats">
+                                    {% for link in staffLinks %}
+                                        <li class="grid-item staff">
+                                            <a class="btn btn-info" target="_blank" href="{{ link.source }}">{{ link.title }}</a>
+                                            {% if link.createdBy and (app.user == link.createdBy or app.user.role.level < link.createdBy.role.level) or app.user.role.level <= 4 %}
+                                                <a href="{{ path('link_delete', {'id': link.id}) }}" style="color: red;">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </a>
+                                            {% endif %}
+                                        </li>
+                                    {% else %}
+                                        <li style="text-align: center;">
+                                            <em>No Links</em>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    <div class="tab-pane scroll-bar {% if app.user.role.level == 8 %}active{% endif %}" id="clients">
+                        <ul class="chats">
+                            {% for link in clientsLinks %}
+                                <li class="grid-item clients">
+                                    <a class="btn btn-info" target="_blank" href="{{ link.source }}">{{ link.title }}</a>
+                                    {% if link.createdBy and (app.user == link.createdBy or app.user.role.level < link.createdBy.role.level) or app.user.role.level <= 4 %}
+                                        <a href="{{ path('link_delete', {'id': link.id}) }}" style="color: red;">
+                                            <i class="fa fa-trash-o"></i>
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            {% else %}
+                                <li style="text-align: center;">
+                                    <em>No Links</em>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="tab-pane scroll-bar active" id="person">
+                        <ul class="chats">
+                            {% for link in personLinks %}
+                                <li class="grid-item person">
+                                    <a class="btn btn-info" target="_blank" href="{{ link.source }}">{{ link.title }}</a>
+                                    {% if app.user == link.createdBy or app.user.role.level < link.createdBy.role.level %}
+                                        <a href="{{ path('link_delete', {'id': link.id}) }}" style="color: red;">
+                                            <i class="fa fa-trash-o"></i>
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            {% else %}
+                                <li style="text-align: center;">
+                                    <em>No Links</em>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

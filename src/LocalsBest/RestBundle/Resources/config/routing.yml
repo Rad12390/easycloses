@@ -1,0 +1,6 @@
+# import routes from a controller directory
+project:
+    resource: "@LocalsBestRestBundle/Controller"
+    type:     annotation
+    prefix: "rest"
+    

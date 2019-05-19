@@ -1,0 +1,315 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    {%if vendorId is not null%}
+        Edit Vendor
+    {%else%}
+        Invite Business
+    {%endif%}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('service_index') }}">Service Directory</a>
+    </li>
+    {% if vendorId is not null %}
+        <li>
+            <i class="fa fa-angle-right"></i>
+            <a href="#">Edit Vendor</a>
+        </li>
+    {% else %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Free Business Invite
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+
+    <style type="text/css">
+        .form-group.error .input-icon input, .form-group.error .input-icon select {
+            border-color: red;
+            background: rgb(250, 255, 189) !important;
+        }
+        .form-group.success .input-icon input, .form-group.success .input-icon select {
+            border-color: #468847;
+        }
+        .create_job .control-group.error input, .input-group.error input, .control-group.error select, .control-group.error textarea, .control-group.error radio {
+            border-color: red;
+            background: rgb(250, 255, 189);
+        }
+        .create_job .control-group.success input, .input-group.success input, .control-group.success select, .control-group.success textarea, .control-group.success radio {
+            border-color: #468847;
+        }
+        .radio input[type=radio], .radio-inline input[type=radio], .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox] {
+            margin-left: -10px !important;
+        }
+        tr.contact_error .contact_status{
+            color:rgb(255, 0, 0);
+        }
+        tr.contact_success .contact_status{
+            color:rgb(0, 128, 0);
+        }
+
+        ul.thumbnails {
+            padding: 0px;
+            width: 1000%;
+        }
+
+        .thumbnails .vendor-box {
+            width: 225px;
+            display: inline-block;
+            float: left;
+            margin: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('system/pages/scripts/ui-toastr.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.min.js') }}"></script>
+
+    <script>
+        $(function () {
+            $("input.required").keyup(function(){
+                row = $(this).closest('.form-group');
+                if ($(this).val() === '') {
+                    row.removeClass('success').addClass('error');
+                    row.find('.required_icon').css('color', 'red');
+                } else {
+                    row.removeClass('error').addClass('success');
+                    row.find('.required_icon').css('color', 'green');
+                }
+            });
+
+            $('#vendor_businessType').change(function () {
+                var type = $(this).val();
+                row = $(this).closest('.form-group');
+                if (type === '') {
+                    row.removeClass('success').addClass('error');
+                    row.find('.required_icon').css('color', 'red');
+                } else {
+                    row.removeClass('error').addClass('success');
+                    row.find('.required_icon').css('color', 'green');
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(function () {
+            var helpFunction = function(response, status, xhr, dataType) {
+
+                $("#show-more-vendors").removeAttr('disabled');
+                $("div .bx-loading").hide();
+
+                if ( status === "error" ) {
+                    response = JSON.parse(response);
+                    $("#vendorLoadAjax").html(response.message);
+                    $("#show-more-vendors").attr('disabled', 'disabled');
+                } else {
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-center",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.success('We found a match!<br> click the "+Add" Button to add this business now');
+                }
+            };
+
+            $("#vendor_businessName").on('blur', function () {
+                var element = $(this).val() == '' ? 'empty' : $(this).val();
+                var checkType = 'businessName';
+                var type = 'Vendor';
+                $("#vendorLoadAjax").load('{{ path('vendor_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ encodeURIComponent(element), function(response, status, xhr){
+                    helpFunction(response, status, xhr, 'business name')
+                });
+            });
+
+            $("#vendor_contactName").on('blur', function () {
+                var element = $(this).val() == '' ? 'empty' : $(this).val();
+                var checkType = 'contactName';
+                var type = 'Vendor';
+                $("#vendorLoadAjax").load('{{ path('vendor_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ encodeURIComponent(element), function(response, status, xhr){
+                    helpFunction(response, status, xhr, 'contact name')
+                });
+            });
+
+            $("#vendor_number").on('blur', function () {
+                var element = $(this).val() == '' ? 'empty' : $(this).val();
+                var checkType = 'primaryPhone';
+                var type = 'Vendor';
+                $("#vendorLoadAjax").load('{{ path('vendor_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ element, function(response, status, xhr){
+                    helpFunction(response, status, xhr, 'phone')
+                });
+            });
+
+            $("#vendor_email").on('blur', function () {
+                var element = $(this).val() == '' ? 'empty' : $(this).val();
+                var checkType = 'primaryEmail';
+                var type = 'Vendor';
+                $("#vendorLoadAjax").load('{{ path('vendor_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ element, function(response, status, xhr){
+                    helpFunction(response, status, xhr, 'email')
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row" style="margin:15px;">
+
+        <div class="col-md-12">
+            <div class="row" id="vendorLoadAjax"> </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-info-circle"></i> FREE Business Invite
+                    </div>
+                </div>
+                <div class="portlet-body" style="font-weight: 400; font-size: 16px;">
+                    <p>
+                        Would you like to share a favorite service provider that would benefit from being listed in Easy Closes where anyone needing a service may find them?
+                    </p>
+                    <p>
+                        <b>Invite your favorite business to create a FREE account</b>
+                    </p>
+                    <p>
+                        It’s <b>FREE</b> for any business you invite to be listed in your service directory and that business may also choose for a small upgrade fee to display in everyone’s account. Once they accept your invitation they are automatically added to your service directory.
+                    </p>
+                    <p>
+                        <b>Fill in the form now to help your favorite businesses get more jobs – it’s fast and easy!</b>
+                    </p>
+                </div>
+            </div>   
+        </div>		
+
+        <div class="col-md-7 submit_form">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-database"></i> Submit Business
+                    </div>
+                </div>
+
+                <div class="portlet-body form">
+                    {{ form_start(form, { 'attr': {'class': 'form-horizontal create_form', 'id': 'create_form', 'role': 'form'} }) }}
+                    <div class="form-body">
+
+                        <div class="form-group {% if form.vars.value.businessType != '' %}success{% else %}error{% endif %}">
+                            <label class="col-md-3 control-label">{{ form_label(form.businessType) }}</label>
+                            <div class="col-md-9">
+                                <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.email != '' %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %} margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                <div class="input-icon">
+                                    <i class="icon-user"></i>
+                                    {{ form_widget(form.businessType) }}
+                                    <span class="help-block">
+                                        {{ form_errors(form.businessType) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group {% if form.vars.value.email != '' %}success{% else %}error{% endif %}">
+                            <label class="col-md-3 control-label">{{ form_label(form.email) }}</label>
+                            <div class="col-md-9">
+                                <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.email != '' %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %} margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                <div class="input-icon">
+                                    <i class="fa fa-envelope"></i>
+                                    {{ form_widget(form.email) }}
+                                    <span class="help-block">
+                                        {{ form_errors(form.email) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{{ form_label(form.number) }}</label>
+                            <div class="col-md-9">
+                                <div class="input-icon">
+                                    <i class="icon-call-end"></i>
+                                    {{ form_widget(form.number) }}
+                                    <span class="help-block">
+                                        {{ form_errors(form.number) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{{ form_label(form.businessName) }}</label>
+                            <div class="col-md-9">
+                                <div class="input-icon">
+                                    <i class="icon-briefcase"></i>
+                                    {{ form_widget(form.businessName) }}
+                                    <span class="help-block">
+                                        {{ form_errors(form.businessName) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{{ form_label(form.contactName) }}</label>
+                            <div class="col-md-9">
+                                <div class="input-icon">
+                                    <i class="icon-user"></i>
+                                    {{ form_widget(form.contactName) }}
+                                    <span class="help-block">
+                                        {{ form_errors(form.contactName) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if (user.role.role == 'ROLE_ADMIN' or user.role.role == 'ROLE_CUSTOMER_SERVIC') %}
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">{{ form_label(form.category) }}</label>
+                                <div class="col-md-9">
+                                    <div class="input-icon">
+                                        <i class="icon-map-marker"></i>
+                                        {{ form_widget(form.category) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.category) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <button type="submit" id="submit_business_btn" class="btn green pull-right ">
+                                    Send Free Invite <i class="m-icon-swapright m-icon-white"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{{ form_start(form) }}
+    {{ form_row(form.category) }}
+
+    {% if checker.forAddon('non received documents', app.user) == false and nrd is defined and nrd is not null %}
+        <p>
+            <a href="{{ path('products_show', {'slug': nrd.slug}) }}" class="btn btn-primary">
+                <i class="fa fa-shopping-cart"></i> Link To NRD
+            </a>
+        </p>
+    {% endif %}
+
+    {% if checker.forAddon('non received listings', app.user) == false and nrl is defined and nrl is not null %}
+        <p>
+            <a href="{{ path('products_show', {'slug': nrl.slug}) }}" class="btn btn-primary">
+                <i class="fa fa-shopping-cart"></i> Link To NRL
+            </a>
+        </p>
+    {% endif %}
+
+    {% if checker.forAddon('15 day expired listings', app.user) == false and el15 is defined and el15 is not null %}
+        <p>
+            <a href="{{ path('products_show', {'slug': el15.slug}) }}" class="btn btn-primary">
+                <i class="fa fa-shopping-cart"></i> Link To Expired Listings
+            </a>
+        </p>
+    {% endif %}
+
+    {{ form_row(form.template_number) }}
+    {{ form_row(form.email_title) }}
+
+    <div class="panel-group accordion" id="accordion1">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_1" aria-expanded="false">
+                        Available Variables
+                    </a>
+                </h4>
+            </div>
+            <div id="collapse_1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                <div class="panel-body">
+                    <p class="nrd-block block hidden">
+                        <b>For NRD</b><br>
+                        <span data-value="*agent_full_name*" class="nrd badge badge-primary">User Full Name</span>
+                        <span data-value="*documents_count*" class="nrl badge badge-primary">Documents Count</span>
+                        <span data-value="*transaction_address*" class="nrd badge badge-primary">Transaction Full Address</span>
+                    </p>
+                    <p class="nrl-block block hidden">
+                        <b>For NRL</b><br>
+                        <span data-value="*agent_name*" class="nrl badge badge-primary">User Full Name </span>
+                        <span data-value="*transaction_mls_number*" class="nrl badge badge-primary">Transaction MLS ID</span>
+                        <span data-value="*transaction_address*" class="nrl badge badge-primary">Transaction Full Address</span>
+                    </p>
+                    <p class="el-block block hidden">
+                        <b>For Expire Listings</b><br>
+                        <span data-value="*agent_first_name*" class="expire badge badge-primary">User First Name</span>
+                        <span data-value="*agent_last_name*" class="expire badge badge-primary">User Last Name</span>
+                        <span data-value="*transaction_address*" class="expire badge badge-primary">Transaction Full Address</span>
+                        <span data-value="*event_time*" class="expire badge badge-primary">Event Time</span>
+                    </p>
+                    <p class="shredding-block block hidden">
+                        <b>For Shredding PDF</b><br>
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ form_row(form.email_body) }}
+{{ form_end(form) }}

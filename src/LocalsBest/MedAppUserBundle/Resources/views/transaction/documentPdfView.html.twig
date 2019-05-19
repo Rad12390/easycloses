@@ -1,0 +1,312 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link href="{{ asset('system/global/plugins/fancybox/source/jquery.fancybox.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+
+    <style type="text/css">
+        .portfolio-info span {
+            color: #16a1f2;
+            display: block;
+            font-size: 30px;
+            margin-top: 5px;
+            font-weight: 200;
+            text-transform: uppercase;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- script src="/assets/plugins/fancybox/source/jquery.fancybox.pack.js"></script -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.pack.js"></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('system/pages/scripts/ui-toastr.js') }}"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            $('.portlet-body').on('click', '.transfer_pending', function(){
+                var id = $(this).attr('data-id');
+                var pageNumber  = $(this).attr('data-pageNo');
+                var pageTotal   = $(this).attr('data-pageTotal');
+                var collapse    = $(this).attr('data-collapse');
+                var documentName = [];
+                var folderName = [];
+                var imageUrl = [];
+                if($('#image_urls').val() !== '') {
+                    imageUrl.push($('#image_urls').val());
+                }
+                if($('#folder_names').val() !== '') {
+                    folderName.push($('#folder_names').val());
+                }
+                if($('#doc_names').val() !== '') {
+                    documentName.push($('#doc_names').val());
+                }
+                var url = $(this).attr('data-url');
+                if(url !== '') {
+                  imageUrl.push(url);
+                }
+                var folder = $(this).attr('data-folder');
+                if(folder !== '') {
+                  folderName.push(folder);
+                }
+                var name = $(this).attr('data-name');
+                if(name !== '') {
+                  documentName.push(name);
+                }
+                $('#image_urls').val(imageUrl);
+                $('#doc_names').val(documentName);
+                $('#folder_names').val(folderName);
+
+                $('#imageRowId_'+id).remove();
+                $("div#imageDisplay").append('<div class="row" style="margin-top: 10px;" id="newRowAddedByAjax_'+ id +'"><div class="col-md-2 portfolio-btn"><a class="btn bigicn-only red reverse_transfer_pending" data-url="'+ url +'" data-folder="'+ folder +'" data-name="'+ name +'" data-id="'+ id +'" data-collapse="'+ collapse +'" data-pageNo="'+ pageNumber +'" data-pageTotal="'+ pageTotal +'"><i class="m-icon-big-swapleft m-icon-white"></i></a></div><div class="col-md-8"><div class="portfolio-info"><div id=""><strong>'+ folder +'</strong></div><div><strong></strong></div><span>Page '+ pageNumber +' of ' + pageTotal +'</span></div></div><div class="col-md-2 portfolio-text"><div class="item"><a class="fancybox-button fancybox" data-rel="fancybox-button" title="demoform1_1 Page 1" href="'+ url +'"><div class="zoom"><img src="'+ url +'" class="logo-default" style="max-height: 150%;max-width: 100%;" alt="Photo"><div class="zoom-icon"></div></div></a></div></div></div>');
+            });
+
+            $('.portlet-body').on('click', '.reverse_transfer_pending', function(){
+                var id = $(this).attr('data-id');
+                var url = $(this).attr('data-url');
+                var folder = $(this).attr('data-folder');
+                var name = $(this).attr('data-name');
+                var collapse = $(this).attr('data-collapse');
+                var pageNumber  = $(this).attr('data-pageNo');
+                var pageTotal   = $(this).attr('data-pageTotal');
+
+                var imageUrlString = $('#image_urls').val();
+                var imageArray = imageUrlString.split(',');
+                imageArray.splice( $.inArray(url,imageArray) ,1 );
+                var imageUrl = imageArray.join(',');
+                $('#image_urls').val(imageUrl);
+
+                var nameString = $('#doc_names').val();
+                var nameArray = nameString.split(',');
+                nameArray.splice($.inArray(url,nameArray) ,1);
+                var newName = nameArray.join(',');
+                $('#doc_names').val(newName);
+
+                var folderString = $('#folder_names').val();
+                var folderArray = folderString.split(',');
+                folderArray.splice($.inArray(url,folderArray) ,1);
+                var folderName = folderArray.join(',');
+                $('#folder_names').val(folderName);
+
+                $('#newRowAddedByAjax_'+ id).remove();
+                var randomNumber = Math.floor(Math.random()*1000);
+
+                $('#collapse_' + collapse).children('.imageRow_ByAjax').append('<div class="row" style="margin-top: 10px;" id="imageRowId_'+randomNumber+'"><div class="col-md-2 portfolio-text"><div class="item"><a class="fancybox-button fancybox" data-rel="fancybox-button" title="demoform1_1 Page 1" href="'+ url +'"><div class="zoom"><img src="'+ url +'" class="logo-default" style="max-height: 150%;max-width: 100%;" alt="Photo"><div class="zoom-icon"></div></div></a></div></div><div class="col-md-8"><div class="portfolio-info"><div><strong>'+ folder +'</strong></div><div><strong></strong></div><span>Page '+ pageNumber +' of ' + pageTotal +'</span></div></div><div class="col-md-2 portfolio-btn"><a class="btn bigicn-only green transfer_pending" data-url="'+ url +'" data-folder="'+ folder +'" data-name="'+ name +'" data-id="'+ randomNumber +'" data-collapse="'+ collapse +'" data-pageNo="'+ pageNumber +'" data-pageTotal="'+ pageTotal +'"><i class="m-icon-big-swapright m-icon-white"></i></a></div>');
+            });
+
+            $("#pdfGenerator").submit(function() {
+                var url = $(this).attr('action'); // the script where you handle the form input.
+
+                if ($("#image_urls").val() != '') {
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: $(this).serialize(), // serializes the form's elements.
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data.result == 1) {
+                                $("#imageDisplay").empty();
+
+                                toastr.options = {
+                                    "closeButton": true,
+                                    "debug": false,
+                                    "newestOnTop": false,
+                                    "progressBar": false,
+                                    "positionClass": "toast-top-center",
+                                    "preventDuplicates": false,
+                                    "onclick": null,
+                                    "showDuration": "1000",
+                                    "hideDuration": "1000",
+                                    "timeOut": "10000",
+                                    "extendedTimeOut": "1000",
+                                    "showEasing": "swing",
+                                    "hideEasing": "linear",
+                                    "showMethod": "fadeIn",
+                                    "hideMethod": "fadeOut"
+                                };
+                                toastr.success('Choose more Docs to assign or hit the "Back to Transaction"', 'Documents Uploaded');
+
+                                $("#image_urls").val("");
+                                $("#folder_names").val("");
+                                $("#doc_names").val("");
+
+                                $("#documentType option[value='" + data.document_type + "']").remove();
+                                $("#documentType").select2("val", "");
+                            }
+                        }
+                    });
+                } else {
+                    toastr.options = {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-center",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "1000",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.error('Please choose pages.', 'Error');
+                }
+                return false; // avoid to execute the actual submit of the form.
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('transaction_index') }}">Transactions</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        File Manager
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-12">
+                <a class="btn btn-warning pull-left" href="{{ path('transaction_view', {'id': id, 'link-token': linkToken}) }}">
+                    <i class="icon-action-undo"></i> Back to transaction
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-bars"></i> File Manager
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="panel-group accordion" id="accordion1">
+                        {% for document in totalDocuments %}
+                            {% set randomId = random() %}
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_{{ randomId }}" aria-expanded="false">
+                                            <h4 style="display:inline;color: #16a1f2;">{{ document['name'] }}
+                                                <span class="pull-right">Open <i class="fa fa-angle-right"></i>
+                                                </span>
+                                            </h4>
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="collapse_{{ randomId }}" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                    <div class="panel-body imageRow_ByAjax">
+                                        {% if document['images'] is defined and document['images'] is not null %}
+                                            {% set imageLength = document['images']|length %}
+                                            {% set i = 0 %}
+                                            {% for imageUrl in document['images']%}
+                                                {% set randomImageId = random() %}
+                                                <div class="row" id="imageRowId_{{ randomImageId }}" style="margin-top: 10px;">
+                                                    <div class="col-md-2 portfolio-text">
+                                                        <div class="item">
+                                                            <a class="fancybox-button fancybox" data-rel="fancybox-button" title="demoform1_1 Page 1" href="{{ imageUrl }}">
+                                                                <div class="zoom">
+                                                                    <img src="{{ imageUrl }}" class="logo-default" style="max-height: 150%;max-width: 100%;" alt="Photo">
+                                                                    <div class="zoom-icon"></div>
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    {#<div class="span8">
+                                                        <div class="portfolio-info">
+                                                            <div><strong>osc-demo_1</strong></div>
+                                                            <div><strong></strong></div>
+                                                            <span>Page 1 of 3</span>
+                                                        </div>
+                                                    </div>#}
+                                                    {% if i < imageLength%}
+                                                        {% set j = i + 1 %}
+                                                        <div class="col-md-8">
+                                                            <div class="portfolio-info">
+                                                                {% set folderName = document['folderName']|split('.') %}
+                                                                {% set extension = folderName[1]|split('-') %}
+                                                                <div><strong>{{ folderName[0] }}.{{ extension[0] }}</strong></div>
+                                                                <div><strong></strong></div>
+                                                                <span>Page {{ j }} of {{ imageLength }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2 portfolio-btn">
+                                                            <a class="btn bigicn-only green transfer_pending" data-url="{{ imageUrl }}" data-folder="{{ folderName[0] }}.{{ extension[0] }}" data-name="{{ document['name'] }}" data-id="{{ randomImageId }}" data-collapse="{{ randomId }}" data-pageNo="{{ j }}" data-pageTotal="{{ imageLength }}"><i class="m-icon-big-swapright m-icon-white"></i></a>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                {% set i = i + 1 %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-bars"></i> File Manager
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-danger add_document" href="{{ path('transaction_documentType_ajax', {'id': id })}}" data-target="#ajax" data-toggle="modal">
+                            Add New Type
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <form id="pdfGenerator" method="POST" action="{{ path('transaction_pdfCombine',{'id': id})}}">
+                        <div class="row" id="documentTypeReloadByAjax">
+                            <div class="col-md-12">
+                                <select id="documentType" name="documentType_id" class="form-control select2me select2-offscreen" data-placeholder="Choose Doc type" tabindex="-1" title="">
+                                    <option value=""></option>
+                                    {% if totalListingDocumentTypes|length >= 1 %}
+                                        <optgroup label="Listing">
+                                            {% for type in totalListingDocumentTypes%}
+                                                <option value="{{ type['id'] }}">{{ type['name'] }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endif%}
+
+                                    {% if totalClosingDocumentTypes|length >= 1 %}
+                                        <optgroup label="Closing">
+                                            {% for type in totalClosingDocumentTypes%}
+                                                <option value="{{ type['id'] }}">{{ type['name'] }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endif%}
+                                </select>
+                            </div>
+                        </div>
+				        <div class="row" style="margin-top: 10px;">
+                            <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <button class="btn btn-success create_pdf col-md-12" id="create_pdf" type="submit">Assign Documents</button>
+                                </div>
+                            <div class="col-md-2"></div>
+				        </div>
+				        <input type="hidden" name="image_urls[]" id="image_urls">
+                        <input type="hidden" name="folder_names[]" id="folder_names">
+                        <input type="hidden" name="doc_names[]" id="doc_names">
+							
+                        <div id="imageDisplay" style="margin-top: 10px;"></div>
+                    </form>
+			    </div>
+		    </div>
+        </div>
+    </div>
+{% endblock%}

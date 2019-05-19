@@ -1,0 +1,73 @@
+    {% extends '::base.html.twig' %}
+
+{% form_theme form_edit 'bootstrap_3_layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.min.js') }}"></script>
+
+    <script>
+        $(function () {
+            $("textarea").wysihtml5({
+                "stylesheets": ["/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+            });
+
+            $("#localsbest_userbundle_product_type").on('change', function(){
+                if($(this).val() == 'counter') {
+                    $('#localsbest_userbundle_product_subscriptionPeriod').attr('disabled', false);
+                    $('#localsbest_userbundle_product_subscriptionPeriod').prop('required', true);
+                    $('#localsbest_userbundle_product_subscriptionCharges').attr('disabled', true);
+                    $('#localsbest_userbundle_product_value').attr('disabled', false);
+                }
+                if($(this).val() == 'item') {
+                    $('#localsbest_userbundle_product_subscriptionPeriod').attr('disabled', true);
+                    $('#localsbest_userbundle_product_subscriptionPeriod').prop('required', false);
+                    $('#localsbest_userbundle_product_subscriptionCharges').attr('disabled', true);
+                    $('#localsbest_userbundle_product_value').attr('disabled', false);
+                }
+
+                if($(this).val() == 'subscription') {
+                    $('#localsbest_userbundle_product_subscriptionPeriod').attr('disabled', false);
+                    $('#localsbest_userbundle_product_subscriptionPeriod').prop('required', true);
+                    $('#localsbest_userbundle_product_subscriptionCharges').attr('disabled', false);
+                    $('#localsbest_userbundle_product_value').attr('disabled', true);
+                }
+            });
+
+            $("#localsbest_userbundle_product_type").trigger('change');
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <h1>Product Type #{{ entity.id }} Edit</h1>
+
+    {{ form_start(form_edit) }}
+        {{ form_row(form_edit.product) }}
+        {{ form_row(form_edit.type) }}
+
+        <i>* Set zero price (0) for free product type;</i><br>
+        <i>* Set negative price (-1) for contact us product type;</i>
+        {{ form_row(form_edit.price) }}
+
+        {{ form_row(form_edit.setupFee) }}
+        {{ form_row(form_edit.margin) }}
+        {{ form_row(form_edit.value) }}
+        {{ form_row(form_edit.subscriptionPeriod) }}
+        {{ form_row(form_edit.subscriptionCharges) }}
+        {{ form_row(form_edit.submit) }}
+    {{ form_end(form_edit) }}
+
+    <a class="btn btn-default" href="{{ path('admin_products') }}">
+        Back to the list
+    </a>
+
+{% endblock %}

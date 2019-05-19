@@ -1,0 +1,25 @@
+{% if products|length > 0 %}
+    {% for product in products %}
+        <div class="product-info box" style="margin: 15px 0;">
+            <h4 style="color: #c9302c;">Must Include Base Product</h4>
+            <a href="{{ path('products_show', {'slug': product.slug}) }}">{{ product.title }}</a>
+            <ul>
+                {% for type in product.types %}
+                    <li>
+                        <label>
+                            <input value="{{ type.id }}" class="parent-product-type" type="radio" name="parent_product_type_{{ product.id }}">
+                            {% if (type.price+type.setupFee) == 0 %}
+                                Free
+                            {% else %}
+                                {{ type.priceString }}
+                            {% endif %}
+                        </label>
+                    </li>
+                {% endfor %}
+            </ul>
+            {#<a disabled="disabled" href="#" class="btn btn-xs btn-primary to_cart" data-value="{{ product.id }}">#}
+                {#<i class="fa fa-shopping-cart"></i> Add to cart#}
+            {#</a>#}
+        </div>
+    {% endfor %}
+{% endif %}

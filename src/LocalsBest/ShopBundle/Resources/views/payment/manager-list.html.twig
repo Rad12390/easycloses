@@ -1,0 +1,152 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}
+    Payments Table - Products
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Payments Results
+    </li>
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+     <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/moment.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-date-time-pickers.min.js') }}"></script>
+{% endblock %}
+
+{% block content -%}
+     <div class="row">
+        <div class="col-md-12">
+            <div class="portlet light form-fit ">
+                <div class="portlet-body form">
+                    <form action="{{path('shop_summary_summary')}}" class="form-horizontal form-bordered" method="POST">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="input-group input-large date-picker input-daterange" data-date="10/11/2012" data-date-format="yyyy-mm-dd">
+                                    <input type="text" class="form-control" name="from">
+                                    <span class="input-group-addon"> to </span>
+                                    <input type="text" class="form-control" name="to"> 
+                                </div>
+                                <!-- /input-group -->
+                                <span class="help-block"> Select date range </span>
+                            </div>
+
+                            <div class="col-md-2">
+                                <button type="submit" class="btn blue btn-outline">
+                                    <i class="fa fa-check"></i> Submit</button>
+
+
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+                      
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-check"></i> Payments Results
+                <span>{{ tooltip_text.getText('Payment Results','header')|raw }}</span>
+            </div>
+        </div>
+        <div class="portlet-body">
+            
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Buyer</th>
+                            <th>Date</th>
+                            <th>Item</th>
+                            <th>Amount</th>
+                            <th>Rebate(%)</th>
+                            <th>Rebate($)</th>
+                            <th>Biz Share</th>
+                            <th>Business</th>
+                            <th>Charity</th>
+                            <th>Employee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            {% set charityPercent = 0 %}
+                            {% set businessPercent = 0 %}
+                            {% set employeePercent = 0 %}
+                            {% if order.splitHystory is not null %} 
+                            
+                            {% set charityPercent = order.splitHystory.charityPercent %}
+                            {% set businessPercent = order.splitHystory.businessPercent %}
+                            {% set employeePercent = order.splitHystory.employeePercent %}
+                            {% endif %}
+                         {#   <tr class="text-primary text-center">
+                                <td colspan="2">Buyer: {{ order.user.fullName }}</td>
+                                <td colspan="2">Order: {{ order.code }}</td>
+                                <td colspan="1">{{ order.createdAt|date("m.d.Y") }}</td>
+                            </tr>#}
+                            {% for key , shopItem in order.shopItems %}
+                                <tr>
+                                    {% set price  = shopItem.price*shopItem.quantity%}
+                                    {% set wholesale = shopItem.price / (1 + shopItem.markup / 100) %}
+                                    {% set stripeFee = shopItem.price * (2.9 / 100) + 0.3 %}
+                                    {% set businessEntity = order.business %}
+                                    {% set businessOwner = businessEntity.owner %}
+                                    {% set paymentSplitSettings = businessOwner.paymentSplitSettings %}
+                                    {% set managerPercentage = businessEntity.shopPercentage is null ? defaultPercentage/100 : businessEntity.shopPercentage/100 %}
+                                   
+                                    {% set rebateAmount = (price * shopItem.rebatePercent)/100 %}
+                                    {% set bizShare = (rebateAmount * 25)/100 %}
+                                    {% set bizShare = rebateAmount - bizShare %}
+                                    {% set charityAmount = bizShare*charityPercent/100 %}
+                                    {% set managerAmount = bizShare*businessPercent/100 %}
+                                    {% set employeeAmount = bizShare*employeePercent/100%}
+                                    {% if key == 0%}
+                                   
+                                    <td>{{ order.user.fullName }}</td>
+                                    <td>{{ order.createdAt|date("m.d.Y") }}</td>
+                                        {% else %}
+                                            <td></td>
+                                            <td></td>
+                                            {% endif %}
+                                            <td>{{ shopItem.title }}</td>
+                                   
+                                    <td>${{ price }}</td>
+                                    <td>{{shopItem.rebatePercent}}% </td>
+                                    <td>${{rebateAmount}} </td>
+                                    <td>${{bizShare | number_format}}</td>
+                                    <td>${{ managerAmount|number_format }}</td>
+                                    <td>${{ charityAmount|number_format }}</td>
+                                    <td>${{ employeeAmount|number_format }}</td>
+                                </tr>
+                            {% else %}
+                                <tr class="text-danger text-center">
+                                    <td colspan="5">
+                                        <i>Empty Order</i>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    There are no Orders
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

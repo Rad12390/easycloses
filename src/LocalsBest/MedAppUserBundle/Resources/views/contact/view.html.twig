@@ -1,0 +1,197 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+    <link href="{{ asset('system/global/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('system/global/plugins/dropzone/basic.min.css') }}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-fileinput-kartik/css/fileinput.min.css') }}"/>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.min.js') }}"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/dropzone/3.8.4/dropzone.min.js"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-fileinput-kartik/js/fileinput.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js') }}"></script>
+
+    <script>
+        jQuery(document).ready(function () {
+            $(".modal-content").on('submit', "#add-note-form", function() {
+                $("#save").attr('disabled', true);
+
+                var url = $(this).attr('action');
+                var data = new FormData($(this)[0]);
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: data,
+                    dataType: 'json',
+                    async:false
+                });
+
+//            location.reload(true);
+                return false;
+            });
+
+            $(".modal-content").on('click', '#create-post', function(){
+                if( $(this).is(':checked') ) {
+                    $("#post-info").show();
+                    $("#input-pd").fileinput({
+            //            uploadUrl: "/file-upload-batch/1",
+            //            uploadAsync: false,
+            //            minFileCount: 2,
+            //            maxFileCount: 5,
+                        overwriteInitial: false,
+                        initialPreviewAsData: true, // identify if you are sending preview data only and not the raw markup
+                        initialPreviewFileType: 'image', // image is the default and can be overridden in config below
+                        purifyHtml: true // this by default purifies HTML data for preview
+                    }).on('filesorted', function(e, params) {
+                        console.log('File sorted params', params);
+                    }).on('fileuploaded', function(e, params) {
+                        console.log('File uploaded params', params);
+                    });
+                } else {
+                    $("#post-info").hide()
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(function () {
+             $('#review-click').on('click', function (event) {
+                var id = $(this).data('reviewid');
+                if ($(this).data('saved') == "0") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('review_important_ajax', {'objectId': objectId.id ,'objectType': object})}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            $("#noteBox").load("{{ path('contact_view', {'id': file.id}) }} #noteBox");
+                        }
+
+                        return false;
+                    });
+                } else {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('review_not_important_ajax', {'objectId': objectId.id ,'objectType': object})}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            $("#noteBox").load("{{ path('contact_view', {'id': file.id}) }} #noteBox");
+                        }
+                        return false;
+                    });
+                }
+
+            });
+
+            $('#contact_tags').tagsInput({
+                width: 'auto',
+                defaultText: 'Add Tags',
+                interactive: true,
+                onAddTag: function(tag) {
+                    $.post('{{ path('tag_add', {'id': file.id ,'type': objectType}) }}', {'tag': tag} )
+                    .done(function( data ) {
+
+                        if(data.result == 'fail') {
+                            swal({
+                                title: "WARNING",
+                                text: "This tag was not added to this contact.",
+                                type: "warning"
+                            });
+                        } else {
+                            if(data.tag == 'closed') {
+                                var statusSelect = $("#change-is_active");
+                                statusSelect.val(0);
+                                statusSelect.trigger('change');
+                            }
+                        }
+
+                    });
+
+                },
+                onRemoveTag: function(tag) {
+                    $.post('{{ path('tag_remove', {'id': file.id ,'type': objectType}) }}', {'tag': tag} );
+                    if(tag.toLowerCase() == 'closed') {
+                        var statusSelect = $("#change-is_active");
+                        statusSelect.val(1);
+                        statusSelect.trigger('change');
+                    }
+                }
+            });
+
+            $("#change-category").on('change', function(){
+                response = $.post('{{ path('contacts_change_category_ajax', {'contactId': file.id}) }}', { 'category': $(this).val() });
+            });
+
+            $("#change-is_active").on('change', function(){
+                response = $.post('{{ path('contacts_change_is_active_ajax', {'contactId': file.id}) }}', { 'is_active': $(this).val() });
+            });
+
+            $("#change-type").on('change', function(){
+                response = $.post('{{ path('contacts_change_type_ajax', {'contactId': file.id}) }}', { 'type': $(this).val() });
+            });
+
+            {% if app.user.role.level < 7 %}
+                $(".table-group-action-submit").on('click', function(e) {
+                    e.preventDefault();
+                    contactIDs = [{{ file.id }}];
+                    $('#ajax').modal( {'remote': '{{ path('contacts_assign_window') }}' + '?contact=' + '{{ file.id }}'} );
+                });
+            {% endif %}
+
+            $(".wp-content").slimScroll({
+                height: '250px'
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block title %}
+    {{ file.firstname }}&nbsp;{{ file.lastname }}
+{% endblock %}
+
+{% block page_title %}
+    {{ file.firstname }}&nbsp;{{ file.lastname }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('contact_index') }}">Contacts</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        {{file.firstname}}&nbsp;{{file.lastname}}
+    </li>
+{% endblock %}
+
+{% block content %}
+    {% if file.user is null %}
+        {% include ('@LocalsBestUser/contact/_view-content.html.twig') %}
+    {% else %}
+        <div class="tabbable tabbable-custom tabbable-full-width">
+            <ul class="nav nav-tabs">
+                <li>
+                    <a href="#contact" data-toggle="tab"> Contact </a>
+                </li>
+                <li class="active">
+                    <a href="#member" data-toggle="tab"> Member </a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane" id="contact">
+                    {% include ('@LocalsBestUser/contact/_view-content.html.twig') %}
+                </div>
+                <!--end tab-pane-->
+
+                <div class="tab-pane active" id="member">
+                    {{ render(controller('LocalsBestUserBundle:User:viewContent', {'username': file.user.username})) }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

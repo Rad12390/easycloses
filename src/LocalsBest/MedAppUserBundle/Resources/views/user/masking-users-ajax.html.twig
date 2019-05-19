@@ -1,0 +1,31 @@
+<div class="mt-list-container">
+    <ul>
+        {% for user in users %}
+            <li class="mt-list-item">
+                <div class="list-thumb">
+                    <a href="{{ path('locals_best_user_homepage', {'_switch_user': user.username}) }}">
+                        {{ vich_uploader_custom.getImage(user, 'file', false)|raw }}
+                    </a>
+                </div>
+                <div class="list-datetime bold uppercase font-red">
+                    {{ user.role.name }}
+                </div>
+                <div class="list-item-content">
+                    <h4>
+                        <a href="{{ path('locals_best_user_homepage', {'_switch_user': user.username}) }}">
+                            {{ user.fullname }}
+                        </a>
+                    </h4>
+                    <p>
+                        {% for business in user.businesses %}
+                            <i>{{ business.name ~ ' ' }}</i>
+                        {% endfor %}
+                        <br>
+                        <b><i class="fa fa-envelope"></i> {% if user.primaryEmail is not null %}{{ user.primaryEmail.email }}{% endif %}</b>
+                        <b><i class="fa fa-phone"></i> {% if user.primaryPhone is not null %}{{ user.primaryPhone.number }}{% endif %}</b>
+                    </p>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

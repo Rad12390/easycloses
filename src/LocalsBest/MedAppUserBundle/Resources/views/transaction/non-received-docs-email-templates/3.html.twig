@@ -1,0 +1,8 @@
+Good day {% if user is defined %}{{ user.fullName }}{% else %}*agent_full_name*{% endif %}. Please do not forget that you have unfinished transaction {% if transaction is defined %}{{ transaction.fullAddress }}{% else %}*transaction_address*{% endif %}.
+We are still waiting for you to upload {% if docs is defined %}{{ docs }}{% else %}*documents_count*{% endif %} document(s) required to further proceeding. Kindly insist that you
+upload document(s) left to the system to not slow down your office workflow.<br>
+<br>
+If you experience any difficulties in uploading documents to the transaction, please call 1 (888) 740-0550 and
+LocalsBest will assist you.<br>
+<br>
+Thank you for your care and have a good day!

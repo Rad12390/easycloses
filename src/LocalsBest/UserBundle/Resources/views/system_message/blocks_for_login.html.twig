@@ -1,0 +1,6 @@
+{% for message in messages %}
+    <div class="alert alert-{{ message.type }} fade in">
+        <i class="fa-lg fa {% if message.type in ['info', 'success'] %}fa-info-circle{% else %}fa-warning{% endif %}"></i>  <strong>{{ message.title }}</strong><br>
+        {{ message.body }}
+    </div>
+{% endfor %}

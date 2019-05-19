@@ -1,0 +1,52 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title" id="myModalLabel">Confirm Disapproved Document</h4>
+    </div>
+    {% if typeId is defined and object is defined %}
+        <form action="{{ path('document_rejected', {'typeId': typeId, 'object': object, 'from_transaction': fromTransaction}) }}" method="POST" class="form-horizontal">
+    {% else %}
+        <form action="{{ path('document_reject', {'slug': document.slug}) }}" method="POST" class="form-horizontal">
+    {% endif %}
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">	
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">To:</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="to" name="to" value="{{ primaryEmail }}">
+                            </div>
+                        </div>
+                        {% if object is not null %}
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">{% if docType is defined and docType == true %}Property Address{% else %}{{ object }}{% endif %}:</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="address" name="address" value="{% if objectValue is defined %}{{ objectValue }}{% else %}{{ userProperty }}{% endif %}">
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">Note:</label>
+                            <div class="col-md-9">
+                                {{ form_widget(form.rejectnote) }}
+                            </div>
+                        </div>		
+                    </div>
+                </div>
+            </div>   
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="disapprove">Submit Disapproval</button>
+        </div>
+    {{ form_end(form) }}
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('form').submit(function() {
+            $(this).find("button[type='submit']").prop('disabled',true);
+        });
+    });
+</script>

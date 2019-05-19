@@ -1,0 +1,26 @@
+Hello {{ vendor.contactName }},
+<br>
+I wanted to let you know about the free new service we’re using: EasyCloses.com, which is a really great way to get
+more business.<br>
+<br>
+Easy Closes is a leading provider of customer services for professionals who work with home buyers, sellers and
+renters. I can now order any type of job or service 24/7 in my Easy Closes account. It’s like having my own personal
+assistant to help with any services my clients or me need for a home.<br>
+<br>
+I’m sure your business would benefit from being in front of all my clients when they need to order the services you
+offer. The great thing is that you can sign up for <b>FREE</b>! You can also take advantage of their paid version,
+which offers many extra benefits, and promotes your business to EVERYONE at my company.<br>
+<br>
+I strongly suggest you click on the link below and sign yourself up – it really is a great way to get more FREE
+business!<br>
+<br>
+Hope you’ll take advantage of the opportunity. I’d love to see your company in the Easy Closes directory.<br>
+<br>
+<a href="{{ url('register', {token: token}) }}">Click here here to sign up now</a><br>
+<br>
+All the best,<br>
+<br>
+{{ app.user.fullName }}<br>
+{{ app.user.businesses.first.name }}<br>
+{{ app.user.primaryEmail.email }}<br>
+{{ app.user.primaryPhone.number }}<br>

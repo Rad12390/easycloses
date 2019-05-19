@@ -1,0 +1,76 @@
+{% extends '::ec-shop-layout.html.twig' %}
+
+{% block title %}
+    Orders
+{% endblock %}
+
+
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <aside class="sidebar-left">
+                    <ul class="nav nav-pills nav-stacked nav-arrow">
+                        <li class="active">
+                            <a>Orders History</a>
+                        </li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-9">
+                        <table class="table table-order">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if orders|length > 0 %}
+                                    {% for order in orders %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path('order_show', {'code': order.code}) }}">
+                                                    #{{ order.code }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if order.total==0 %}
+                                                    {{'Free'}}
+                                                {% else %}
+                                                    {{ order.status|capitalize }}
+                                                {% endif %}
+                                            </td>
+                                            <td>${{ order.total|number_format }}</td>
+                                            <td>{{ order.createdAt|date("m-d-Y H:i") }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">
+                                            There is no Orders yet.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="gap"></div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

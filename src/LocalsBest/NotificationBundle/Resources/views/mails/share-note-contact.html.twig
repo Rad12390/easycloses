@@ -1,0 +1,9 @@
+Hello {% if contact is defined and contact is not null %}{{ contact.firstname }},{% else %}!{% endif %}
+<br/>
+<br/>
+{{ note.note}}
+<br>
+<br>
+{{ user.firstname}}&nbsp;{{ user.lastname}} <br>
+{{ user.primaryEmail.email}}<br>
+{{ user.primaryPhone.number}}

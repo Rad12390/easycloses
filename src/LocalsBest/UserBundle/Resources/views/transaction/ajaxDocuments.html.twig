@@ -1,0 +1,100 @@
+<div class="content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">{{ transactionAddress.street }}, {{ transactionAddress.city }}, {{ transactionAddress.state }}, {{ transactionAddress.zip }}</h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+
+                {% if(documentType is null) %}
+                    <h1 style="text-align: center;">No documents for Approval.</h1>
+                    <script>window.location.href = "{{ path('transaction_view', {'id' : transaction.id}) }}";</script>
+                {% else %}
+                    <div class="col-md-7">
+                        <!-- BEGIN PREVIEW PORTLET-->
+                        <div class="portlet box">
+
+                            <div class="portlet-body" id="pdfPreview">
+                                {% include '@LocalsBestUser/document/preview.html.twig' with { 'file' : documentType.document } %}
+                            </div>
+                        </div>
+                        <!-- END PREVIEW PORTLET-->
+                    </div>
+                    <div class="col-md-5">
+                        <!-- BEGIN ALERTS PORTLET-->
+                        <div class="portlet blue box">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    <i class="fa fa-navicon"></i>{{ documentType.document.clearFileName }}
+                                </div>
+                            </div>
+                            <div class="portlet-body">
+                                <table class="table table-hover table-striped table-bordered">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            Name :
+                                        </td>
+                                        <td>
+                                            {{ documentType.document.createdBy.firstname }} {{ documentType.document.createdBy.lastname}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Full Address :
+                                        </td>
+                                        <td>
+                                            {{ documentType.transaction.fullAddress }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Document Type :
+                                        </td>
+                                        <td>
+                                            {{ documentType.name }}
+                                        </td>
+                                    </tr>
+                                    {% if app.user.isDocumentApprover != 0 or (documentType.document.furtherAction != 0 and app.user.username in sharedFurtherActions) or app.user.role.level == 4 or app.user.role.level == 1 %}
+                                    <tr>
+                                        <td>
+                                            {% if documentType.status != 'A'%}
+                                                <a class="btn green" id="approve" onclick="approve({{ documentType.id }}, {{ documentType.transaction.id }})">
+                                                    <i class="fa fa-thumbs-o-up"></i>
+                                                </a>
+                                            {% endif %}
+                                            <a data-target="#ajax" data-toggle="modal" class="btn red" href="{{ path('ajax_reject_document', {'transactionId' : documentType.transaction.id, 'documentTypeId': documentType.id }) }}" >
+                                                <i class="fa fa-thumbs-o-down"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right">
+                                            {% if prev == true %}
+                                                <a class="btn btn-default" onclick="nextDocument({{ documentType.id }}, 'prev', {{ documentType.transaction.id }})">
+                                                    <i class="fa fa-arrow-left"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if next == true %}
+                                                <a class="btn btn-default" onclick="nextDocument({{ documentType.id }}, 'next', {{ documentType.transaction.id }})">
+                                                    <i class="fa fa-arrow-right"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                        <!-- <td><span id="download_attachment"></span></td> -->
+                                    </tr>
+                                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- END DESCRIPTION PORTLET-->
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+
+    </div>
+</div>

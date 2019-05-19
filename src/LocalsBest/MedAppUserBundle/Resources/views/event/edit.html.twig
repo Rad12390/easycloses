@@ -1,0 +1,657 @@
+{% extends "::base.html.twig" %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('event_index') }}">Events & Alerts</a>
+    </li>
+    {% if slug != 'new' %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Edit Event
+        </li>
+    {% else %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Create Event
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css') }}" />
+
+    <style>
+        .share-block {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+
+    <script>
+        var usersRestPath = "{{ path('rest_user_getall')}}?query=%QUERY";
+        
+        jQuery(document).ready(function () {
+            $("#share-toggle").on('click', function(){
+                $(".share-block").show();
+            });
+
+            showCustomBox();
+
+            $('#shareType').on('change', function(){
+                if($(this).val() == 'custom') {
+                    $("#remote").show();
+                } else {
+                    $("#remote").hide();
+                }
+            });
+            
+            $(".form_meridian_datetime").datetimepicker({
+                autoclose: true,
+                todayBtn: true,
+                todayHighlight: true,
+                format: "mm/dd/yyyy HH:ii P",
+                showMeridian: true,
+                fontAwesome: true,
+                pickerPosition: "bottom-left"
+            });
+
+            var selectedUsernames = new Array();
+            
+            var selectedUsernamesAssign = new Array();
+            
+            //share only start
+
+            {% if checker.forAddon('events & alerts sharing', app.user) %}
+                $.each($("#selectedusers").val().split(','), function () {
+                    if (this.trim().length) {
+                        selectedUsernames.push(this.toString());
+                    }
+                });
+
+                //share only end
+
+                //assign only start
+
+                $.each($("#selectedusers_assign").val().split(','), function () {
+                    if (this.trim().length) {
+                        selectedUsernamesAssign.push(this.toString());
+                    }
+                });
+            {% endif %}
+
+            //assign only end
+
+            //share only start
+
+            $('.share_btn_remove').on('click', function (event) {
+                if (!confirm('Are you sure?')) {
+                    return false;
+                }
+
+                var username = $(this).data('username');
+                var id = $(this).data('removeid');
+
+                if ($(this).data('saved') == "1") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('share_remove_ajax')}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            for (var i = 0; i < selectedUsernames.length; i++) {
+                                if (selectedUsernames[i] == username) {
+                                    selectedUsernames.splice(i, 1);
+                                }
+                            }
+                        }
+                        
+                        $('#remote #selectedusers').val(selectedUsernames.join(', ') + ', ');
+
+                        $('#remote .typeahead').val('').focus();
+
+                        $('#share_box_' + id + '').remove();
+                        
+                        alert(data.message);
+
+                        return;// false;
+                    });
+                }
+                        $('#remote #selectedusers').val(selectedUsernames.join(', ') + ', ');
+
+                        $('#remote .typeahead').val('').focus();
+
+                        $('#share_box_' + id + '').remove();
+                    });
+                
+            //share only end
+
+
+            //assign only start
+
+            $('.assign_btn_remove').on('click', function (event) {
+                if (!confirm('Are you sure?')) {
+                    return false;
+                }
+
+                var username = $(this).data('username');
+                var id = $(this).data('removeid');
+
+                if ($(this).data('saved') == "1") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('assign_remove_ajax', {slug: slug })}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            for (var i = 0; i < selectedUsernamesAssign.length; i++) {
+                                if (selectedUsernamesAssign[i] == username) {
+                                    selectedUsernamesAssign.splice(i, 1);
+                                }
+                            }
+                        }
+                        
+                        $('#remote_assign #selectedusers_assign').val(selectedUsernamesAssign.join(', ') + ', ');
+
+                        $('#remote_assign .typeahead').val('').focus();
+
+                        $('#assign_box_' + id + '').remove();
+
+                        alert(data.message);
+
+                        return;// false;
+                    });
+                }
+                $('#remote_assign #selectedusers_assign').val(selectedUsernamesAssign.join(', ') + ', ');
+
+                $('#remote_assign .typeahead').val('').focus();
+
+                $('#assign_box_' + id + '').remove();
+            });
+
+            //assign only end
+        {% verbatim %}
+                var bestPictures = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: usersRestPath,
+                        wildcard: '%QUERY'
+                    }
+                });
+
+                bestPictures.initialize();
+
+                // share only start
+
+                $('#remote .typeahead').typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'username',
+                    source: bestPictures.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{username}}</h4>',
+                            '<p>{{fullname}}</p>',
+                            '</div>',
+                            '</div>',
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    //console.log(typeof item.username);
+                    //console.log(typeof selectedUsernames[0]);
+                    if ($.inArray(item.username, selectedUsernames) === -1) {
+                        var mediaHtml = Handlebars.compile([
+                            '<div class="media share_box todo-tasklist-item todo-tasklist-item-border-yellow" id="share_box_{{id}}">',
+                            '<input class="hidden" type="hidden" id="share_box_user_{{id}}" value="{{username}}">',
+                            '<a class="pull-left" href="#">',
+                            '<img class="media-object" src="{{ profilepic }}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">',
+                            '</a>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{ fullname }}</h4>',
+                            '{{ role }}',
+                            '<button type="button" class="btn red pull-right share_btn_remove" data-removeid="{{id}}" data-username="{{username}} data-saved="0">',
+                            '<i class=" icon-trash"></i> &nbsp; Remove', '</button>',
+                            '</div>',
+                            '</div>'
+                        ].join(''));
+
+                        selectedUsernames.push(item.username);
+
+                        $(".add-event-form").prepend(mediaHtml(item));
+
+                        $('#remote #selectedusers').val(selectedUsernames.join(', ') + ', ');
+
+                        $('#remote .typeahead').val('').focus();
+                    } else {
+                        alert("This Event already shared with this user");
+                        $('#remote .typeahead').val('').focus();
+                        return false;
+                    }
+
+                });
+
+                // share only end
+
+                // assign only start
+
+                $('#remote_assign .typeahead').typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'username',
+                    source: bestPictures.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{username}}</h4>',
+                            '<p>{{fullname}}</p>',
+                            '</div>',
+                            '</div>',
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    //console.log(typeof item.username);
+                    //console.log(typeof selectedUsernames[0]);
+                    if ($.inArray(item.username, selectedUsernamesAssign) === -1) {
+                        var mediaHtml = Handlebars.compile([
+                            '<div class="media assign_box todo-tasklist-item todo-tasklist-item-border-yellow" id="assign_box_{{id}}">',
+                            '<input class="hidden" type="hidden" id="assign_box_user_{{id}}" value="{{username}}">',
+                            '<a class="pull-left" href="#">',
+                            '<img class="media-object" src="{{ profilepic }}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">',
+                            '</a>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{ fullname }}</h4>',
+                            '{{ role }}',
+                            '<button class="btn red pull-right assign_btn_remove" data-removeid="{{id}}" data-username="{{username}} data-saved="0">',
+                            '<i class=" icon-trash"></i> &nbsp; Remove', '</button>',
+                            '</div>',
+                            '</div>'
+                        ].join(''));
+
+                        selectedUsernamesAssign.push(item.username);
+
+                        $(".assign_div").prepend(mediaHtml(item));
+
+                        $('#remote_assign #selectedusers_assign').val(selectedUsernamesAssign.join(', ') + ', ');
+
+                        $('#remote_assign .typeahead').val('').focus();
+                    } else {
+                        alert("This Event already assign with this user");
+                        $('#remote_assign .typeahead').val('').focus();
+                        return false;
+                    }
+
+                });
+
+                // assign only end
+
+        {% endverbatim %}
+                $("select#event_type").change(function () {
+                    showCustomBox();
+                });
+                
+                $('.form-body').on('click', '.btn-remove', function (event) {
+                    var name = $(this).attr('data-related');
+                    $('*[data-content="' + name + '"]').remove();
+
+                    return false;
+                });
+
+                // Event alert
+
+                $('.add-event-alert').on('click', function () {
+
+                    var collectionHolder = $('#' + $(this).attr('data-target'));
+                    var prototype = collectionHolder.attr('data-prototype');
+                    var form = prototype.replace(/__name__/g, collectionHolder.children().length);
+
+                    collectionHolder.append(form);
+
+                    $(".form_meridian_datetime").datetimepicker({
+                        autoclose: true,
+                        todayBtn: true,
+                        todayHighlight: true,
+                        format: "mm/dd/yyyy HH:ii P",
+                        showMeridian: true,
+                        fontAwesome: true,
+                        pickerPosition: "bottom-left"
+                    });
+
+                    $('.date-picker').datepicker({
+                        rtl: false,
+                        todayHighlight: true,
+                        orientation: "left",
+                        autoclose: true
+                    });
+
+                    var test = $("input[type=checkbox]:not(.toggle, .make-switch, .icheck), input[type=radio]:not(.toggle, .star, .make-switch, .icheck)");
+                    if (test.size() > 0) {
+                        test.each(function () {
+                            if ($(this).parents(".checker").size() === 0) {
+                                $(this).show();
+                            }
+                        });
+                    }
+
+                    return false;
+                });
+            });
+            
+            function showCustomBox()
+            {
+                if ($("select#event_type").val().toLowerCase() === 'custom' 
+                        && $("#event_custom").val() !== null) {
+                    $(".custom_box").removeClass('hidden');
+                    $(".custom_box #event_custom").focus();
+                } else {
+                    $(".custom_box").addClass('hidden');
+                }
+            }
+    </script>
+
+{% endblock %}
+
+{% block title %}
+    {% if slug != 'new' %}
+        Edit Event
+    {% else %}
+        Add Event
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% import _self as forms %}
+    {% macro event_alert_prototype(widget, remove_text) %}
+        {% if widget.vars.prototype is defined %}
+            {% set form = widget.vars.prototype %}
+            {% set name = widget.vars.prototype.vars.name %}
+        {% else %}
+            {% set form = widget %}
+            {% set name = widget.vars.full_name %}
+        {% endif %}
+
+        <tr data-content="{{widget.vars.id}}_{{ name }}">
+            <td width="35%">
+                <div class="checkbox-inline">
+                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                        email
+                        {{ form_widget(form.email) }}
+                        <span></span>
+                    </label>
+                    {% if checker.forAddon('notification settings text', app.user) %}
+                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                            text
+                            {{ form_widget(form.phone) }}
+                            <span></span>
+                        </label>
+                    {% endif %}
+                </div>
+            </td>
+            <td width="45%">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="input-group date form_meridian_datetime form_datetime bs-datetime">
+                            {{ form_widget(form.date) }}
+                        <span class="input-group-addon">
+                            <button style="margin-right: 0;" class="btn default date-reset" type="button"><i class="fa fa-times"></i></button>
+                        </span>
+                        <span class="input-group-addon">
+                            <button style="margin-right: 0;" class="btn default date-set" type="button"><i class="fa fa-calendar"></i></button>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td width="5%">
+
+
+            </td>
+            <td width="15%">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-gear"></i>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" style="left: -190%;">
+                        <li>
+                            <a data-related="{{widget.vars.id}}_{{ name }}" class="btn-remove">
+                                <i class="fa fa-times"></i> Remove alert
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    {% endmacro %}
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="portlet blue box">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-calendar"></i> Create Event
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    {% if slug != 'new' %}
+                        {% if objectId is not null and objectType is not null%}
+                            <form action="{{ path('event_edit_object', {'slug': slug, 'objectId': objectId, 'objectType': objectType}) }}" method="POST" class="form-horizontal">
+                        {% else %}
+                            <form action="{{ path('event_edit', {'slug': slug}) }}" method="POST" class="form-horizontal">
+                        {% endif %}
+                    {% else %}
+                        {% if objectId is not null and objectType is not null%}
+                            <form action="{{ path('event_add_object', {'objectId': objectId, 'objectType': objectType}) }}" method="POST" class="form-horizontal">
+                        {% else %}
+                            <form action="{{ path('event_add') }}" method="POST" class="form-horizontal">
+                        {% endif %}
+                    {% endif %}
+                    <div class="modal-body">
+                        <div class="portlet-body form">
+                            <div class="form-body">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="input-icon right">
+                                            {{ form_widget(form.title) }}
+                                            <span class="help-block">
+                                                {{ form_errors(form.title) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <div class="input-group date form_meridian_datetime form_datetime bs-datetime">
+                                            {{ form_widget(form.time) }}
+                                            <span class="input-group-addon">
+                                                <button class="btn default date-reset" type="button"><i class="fa fa-times"></i></button>
+                                            </span>
+                                            <span class="input-group-addon">
+                                                <button class="btn default date-set" type="button"><i class="fa fa-calendar"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group date form_meridian_datetime form_datetime bs-datetime">
+                                            {{ form_widget(form.endTime) }}
+                                            <span class="input-group-addon">
+                                                <button class="btn default date-reset" type="button"><i class="fa fa-times"></i></button>
+                                            </span>
+                                            <span class="input-group-addon">
+                                                <button class="btn default date-set" type="button"><i class="fa fa-calendar"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="input-icon right">
+                                            {{ form_widget(form.type) }}
+                                            <span class="help-block">
+                                                {{ form_errors(form.type) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group custom_box hidden">
+                                    <div class="col-md-12">
+                                        <div class="input-icon right">
+                                            {{ form_widget(form.custom) }}
+                                            <span class="help-block">
+                                                {{ form_errors(form.custom) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="input-icon right">
+                                            {{ form_widget(form.description) }}
+                                            <span class="help-block">
+                                                {{ form_errors(form.description) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if checker.forAddon('events & alerts sharing', app.user) %}
+                                    <div class="form-group">
+                                        <div class="col-md-12" style="margin-bottom: 20px;">
+                                            <button type="button" class="btn btn-primary col-md-2" id="share-toggle">
+                                                Share
+                                            </button>
+                                            <div id="remote" class="col-md-10 share_div add-event-form" style="display: none;">
+                                                <input class="typeahead" type="text" placeholder="Enter User(s) For Share">
+                                                <input id="selectedusers" type="text" class="hidden" name="shares" value="{{ sharedwithusernames }}">
+                                            </div>
+                                        </div>
+
+                                        <br>
+
+                                        <div class="col-md-12 share-block">
+                                            {% if (app.user.role.level >= 1 and app.user.role.level <= 5) or (app.user.role.level == 7) or (app.user.role.level == 6)  %}
+                                                    <label class="col-md-2 control-label" for="shareType" style="text-align: left">
+                                                        Choose Group:
+                                                    </label>
+                                                    <div class="col-md-10">
+                                                        <select id="shareType" name="shareType" class="form-control">
+                                                            <option selected value="">-No Group-</option>
+                                                            {% if app.user.role.level <= 5 %}
+                                                                <option value="staff">Staff</option>
+                                                                <option value="non-staff">Non Staff</option>
+                                                                <option value="company">Company Wide</option>
+                                                                <option value="vendors">Vendors</option>
+                                                                <option value="clients">Clients</option>
+                                                            {% endif %}
+
+                                                            {% if(app.user.businesses[0].id == 54) %}
+                                                                {% if app.user.role.level == 7 %}
+                                                                    {% if app.user.team is not null %}
+                                                                        <option value="team">Team</option>
+                                                                    {% endif %}
+                                                                    <option value="clients">Clients</option>
+                                                                {% endif %}
+                                                            {% endif %}
+
+                                                            <option value="custom">Individual Users</option>
+                                                        </select>
+                                                    </div>
+                                            {% endif %}
+                                            {% for share in file.shares %}
+                                                <div class="media share_box todo-tasklist-item todo-tasklist-item-border-green col-md-10" id="share_box_{{share.id}}">
+                                                    <input class="hidden" type="hidden" id="share_box_user_{{share.id}}" value="{{ share.user.username}}">
+                                                    <a class="pull-left" href="#">
+                                                        <img class="media-object" src="{% if share.user.filename is not empty %} {{ vich_uploader_asset(share.user, 'file') }} {% else %} https://www.placehold.it/64x64/EFEFEF/AAAAAA&amp;text=no+image {% endif %}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">
+                                                    </a>
+                                                    <div class="media-body pull-left">
+                                                        <h4 class="media-heading">{{ share.user.fullname }}</h4>{{ share.user.role.name }}
+                                                    </div>
+                                                    <button class="btn red pull-right share_btn_remove" data-removeid="{{share.id}}" data-username="{{share.user.username}}" data-saved="1"><i class=" icon-trash"></i> &nbsp; Remove</button>
+                                                </div>
+                                            {% endfor %}
+                                            <!-- Existing share list ends -->
+                                            <br />
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="form-group" style="display: none;">
+                                    <div class="col-md-12">
+                                        <label>Created by:</label>
+                                        {% for assignedTo in file.assignedTo %}
+                                            <div class="media assign_box todo-tasklist-item todo-tasklist-item-border-yellow" id="assign_box_{{assignedTo.id}}">
+                                                <input class="hidden" type="hidden" id="assign_box_user_{{assignedTo.id}}" value="{{assignedTo.username}}">
+                                                <a class="pull-left" href="#">
+                                                    <img class="media-object" src="{% if assignedTo.filename is not empty %} {{ vich_uploader_asset(assignedTo, 'file') }} {% else %} https://www.placehold.it/64x64/EFEFEF/AAAAAA&amp;text=no+image {% endif %}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">
+                                                </a>
+                                                <div class="media-body pull-left">
+                                                    <h4 class="media-heading">{{ assignedTo.fullname }}</h4>{{ assignedTo.role.name }}
+                                                </div>
+                                                <button class="btn red pull-right assign_btn_remove" data-removeid="{{assignedTo.id}}" data-username="{{assignedTo.username}}" data-saved="1"><i class=" icon-trash"></i> &nbsp; Remove</button>
+                                            </div>
+                                        {% endfor %}
+                                        <div id="remote_assign" class="assign_div">
+                                            <input class="typeahead" type="text" placeholder="Change Event Creator">
+                                            <input id="selectedusers_assign" type="text" class="hidden" name="assignedTo" value="{{ assignwithusernames }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th width="35%">Alert &nbsp;<a data-target="post_event_alert" class="add-event-alert"><i class="icon-plus"></i> Add</a></th>
+                                                <th width="55%">Time</th>
+                                                <th width="10%"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="post_event_alert" data-prototype="{{ forms.event_alert_prototype(form.alerts, 'Remove alert')|escape }}">
+                                            {% for widget in form.alerts.children %}
+                                                {{ forms.event_alert_prototype(widget, 'Remove alert') }}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="{{ path('event_index') }}" class="btn btn-danger">
+                             Cancel
+                        </a>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hidden">
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,127 @@
+<style type="text/css">
+    .multi_upload_next{
+        display: none;
+    }
+
+    .dropzone_big .dz-preview .dz-details, .dropzone_big-previews .dz-preview .dz-details {
+         width: 106px;
+    }
+</style>
+
+<script>
+    function dropzoneInit() {
+        var trans_id = $('#split_trans_id').attr('value');
+
+        if (dropzone_pdf_splitter instanceof Dropzone) {
+            dropzone_pdf_splitter.destroy();
+        }
+
+        var dropzone_pdf_splitter = new Dropzone("div#dropzone_pdf_splitter_56469762186023784", {
+            url: "{{ path('pdf_upload', {'id': id})}}",
+            method: "post",
+            dictDefaultMessage: "Drag or Click",
+            createImageThumbnails: true,
+            maxFilesize: 25,
+            acceptedFiles: ".pdf",
+            clickable: true,
+            enqueueForUpload: true,
+            paramName: "file",
+            previewTemplate: '<div class="dz-preview dz-file-preview">\
+                                            <div class="dz-details">\
+                                            <div class="dz-filename"><span data-dz-name></span></div>\
+                                            <div class="dz-size" data-dz-size></div>\
+                                            <img data-dz-thumbnail />\
+                                            </div>\
+                                            <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span>Processing..</div>\
+                                            <div class="dz-success-mark"><span>?</span></div>\
+                                            <div class="dz-error-mark"><span>?</span></div>\
+                                            <div class="dz-error-message"><span data-dz-errormessage></span></div>\
+                                            </div>',
+            init: function () {
+                this.on('success', function (file, data) {
+                    if (typeof data === 'object') {
+                        var documentName = [];
+                        var folderName = [];
+                        if($('#doc_type_id').val() !== '') {
+                            documentName.push($('#doc_type_id').val());
+                        }
+                        if($('#doc_folder_names').val() !== '') {
+                            folderName.push($('#doc_folder_names').val());
+                        }
+                        $.each(data, function(key, image) {
+                            documentName.push(image.originalFileName);
+                            folderName.push(image.folderName);
+                            //$("div#display").append('<img src="' + image.url + '"><br/>');
+                        });
+                        $('#doc_type_id').val(documentName);
+                        $('#doc_folder_names').val(folderName);
+                        //console.log($('#doc_type_id').val());
+
+                        jQuery('.dz-progress .dz-upload').css('width', '100%');
+                    }
+                    $('#multi_upload_next').removeClass('multi_upload_next');
+                });
+
+                this.on('uploadprogress', function( file, progress, bytesSent ){
+                    jQuery('.dz-progress .dz-upload').css('width',progress/2+'%');
+                });
+            }
+        });
+    }
+
+    $('.pdf_splitter').ready(function() {
+        dropzoneInit();
+    });
+
+    $(".split_pdf").on('click', function(){
+        $( document ) .ajaxComplete(function(){
+            dropzoneInit();
+        })
+    })
+</script>
+
+<div class="modal-content">
+    <div class="row pdf_splitter">
+        <div class="col-md-12">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h3 id="myModalLabel1">Split or Join PDF Files</h3>
+            </div>
+            <form method="POST" action="{{ path('transaction_pdfSplit_detail',{'id': id})}}">
+                <div class="modal-body">
+                    <div id="dropzone_pdf_splitter_56469762186023784" class="dropzone dropzone_big" ></div>
+                    <input type="hidden" name="doc_type_ids[]" id="doc_type_id">
+                    <input type="hidden" name="doc_folder_names[]" id="doc_folder_names">
+                </div>
+                <div class="modal-footer">
+                    <button id="multi_upload_next" class="btn green big btn-block multi_upload_next" type="submit">Next<i class="m-icon-big-swapright m-icon-white"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="display"></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

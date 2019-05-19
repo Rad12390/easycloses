@@ -1,0 +1,38 @@
+{#<p>Hi <b>{{ user.fullName }}</b>,</p>
+{% if price > 0 %}
+<p>This is to confirm  your Order of the package {{ sku.package.title }} from {{vendor.fullName}} {{vendor.primaryPhone.number}} for ${{price}}</p>
+{% else %}
+    <p> This is to confirm  your Order of the package {{ sku.package.title }} from {{vendor.fullName}} {{vendor.primaryPhone.number}} which is absolutely free of charge!</p>
+{% endif %}
+<p>Your package contains the following items</p>
+ {% for item in items %}
+    <li>{{loop.index}}{{item}} {{item_quantity[loop.index-1]}}</li>
+{% endfor %}
+ {% if price > 0 %}
+ <p>Should you need additional information on this purchase please contact the vendor directly so they may assist you.</p>
+ {% else %}
+    <p>Should you have any clarifications on this request  that you made in the Shop, please call customer service in 888 740-0550 so we can assist you.</p>
+ {% endif %}
+ <p> Thank you for your order!</p>
+ <p>LocalsBest.com</p><a href="{{ url('ec_shop_main_page') }}">Link to shop</a>#}
+ 
+<p>Hi <b>{{ user.fullName }}</b>,</p>
+{% if price > 0 %}
+<p>This is to confirm  your Order of the package {{ sku.package.title }} from {{vendor.fullName}}, {{vendor.primaryPhone.number}} for ${{price}}</p>
+{% else %}
+    <p> This is to confirm  your Order of {{ sku.package.title }} from {{vendor.fullName}}, {{vendor.primaryPhone.number}} which is Free.</p>
+{% endif %}
+{% if items|length > 1 %}
+    <p>Your package contains the following items</p>
+     {% for item in items %}
+        <li>{{item}}</li>
+    {% endfor %}
+{% endif %}
+ {% if price > 0 %}
+ <p>Should you need additional information on this purchase please contact the vendor directly so they may assist you.</p>
+ {% else %}
+    <p>Should you need additional information on this purchase please contact the vendor directly so they may assist you.</p>
+ {% endif %}
+ <p> Thank you for your order!</p>
+ <p>LocalsBest.com</p><a href="{{ url('ec_shop_main_page') }}">Link to shop</a>
+

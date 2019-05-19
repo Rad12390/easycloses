@@ -1,0 +1,36 @@
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-gear"></i>
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu pull-right" role="menu">
+        <li>
+            <a href="{{ path('transaction_view', {'id': transaction.id}) }}" >Detail Page</a>
+        </li>
+        {% if (transaction.closing is not null) %}
+            <li>
+                <a href="{{ path('transaction_edit_closing', {'transaction': transaction.id, 'closing' : transaction.closing.id}) }}" >Edit Closing</a>
+            </li>
+        {% endif %}
+
+        {% if (transaction.listing is not null) %}
+            <li>
+                <a href="{{ path('transaction_edit_listing', {'id': transaction.id}) }}" >Edit Listing</a>
+            </li>
+        {% endif %}
+        {% if (app.user.role.level <= 5) %}
+            <li>
+                <a href="{{ path('transaction_delete', {'id': transaction.id}) }}" >
+                    Archive
+                </a>
+            </li>
+        {% endif %}
+        <li>
+            {% if file.represent == 'Seller'%}
+                <a  href="{{ path('transaction_edit_closing_by_type', {'transaction': transaction.id ,'type': 'Buyer'}) }}" >Add Buyer</a>
+            {% elseif file.represent == 'Landlord'%}
+                <a  href="{{ path('transaction_edit_closing_by_type', {'transaction': transaction.id ,'type': 'Tenant'}) }}" >Add Tenant</a>
+            {% endif %}
+        </li>
+    </ul>
+</div>

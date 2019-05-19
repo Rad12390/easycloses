@@ -1,0 +1,113 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block content -%}
+    <h1>Plan creation</h1>
+
+    {{ form_start(form) }}
+        {# render the task's only field: description #}
+
+        <div class="row" style="margin-top: 15px;">
+            <div class="col-md-12">
+                {{ form_widget(form.submit) }}
+
+                <a class="btn btn-default" href="{{ path('admin_plans') }}">
+                    Back to the list
+                </a>
+            </div>
+        </div>
+
+        {{ form_row(form.name) }}
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% for i in form.rows.0 %}
+                        <th>
+                            {{- form_label(i) -}}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% set iRow = 1 %}
+                {% for row in form.rows if iRow<6 %}
+                    <tr>
+                        {% for i in row %}
+                            <td>
+                                {{- form_widget(i) -}}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% set iRow = iRow + 1 %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <select id="valueForChecked">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">do not sell</option>
+        </select>
+        <button type="button" id="valueSet">Set</button>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="checkAll"></th>
+                    <th>Name</th>
+                    <th>Industry Group</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for type in industryTypes %}
+                    <tr>
+                        <td><input type="checkbox" class="indType" value="1"></td>
+                        <td>{{ type.name }}</td>
+                        <td>
+                            <select name="industry_groups[{{ type.id }}]" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">do not sell</option>
+                            </select>
+                        </td>
+                        <td>
+                            <i class="fa fa-times"></i>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {{ form_end(form) }}
+
+
+    <script>
+        $(document).ready(function(){
+            $("#checkAll").change(function () {
+                $("input:checkbox.indType").prop('checked', $(this).prop("checked"));
+                if($(this).prop("checked")) {
+                    $("input:checkbox.indType").parent().addClass('checked');
+                } else {
+                    $("input:checkbox.indType").parent().removeClass('checked');
+                }
+            });
+
+            $("#valueSet").on('click', function(){
+                var indGroupValue = $("#valueForChecked").val();
+                $.each( $( "input:checked" ), function( i, el ){
+                    tr = $(el).parent().parent().parent().parent();
+                    $(tr).find('select').val(indGroupValue);
+                });
+            })
+        });
+    </script>
+{% endblock %}

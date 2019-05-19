@@ -1,0 +1,127 @@
+{% extends "::base.html.twig" %}
+{% block title %}Vendors{% endblock %}
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-angle-right"></i>
+        <a href="{{ path('vendor_index') }}">Vendors</a>
+    </li>
+{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets 
+     'plugins/datatables/plugins/bootstrap/dataTables.bootstrap.css'   
+        
+        
+        filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    <link rel="stylesheet" type="text/css" href="http://datatables.net/release-datatables/extensions/Responsive/css/dataTables.responsive.css">
+    {% endstylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts 
+        'plugins/datatables/media/js/jquery.dataTables.min.js'
+        'plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js'
+    %}
+    {% endjavascripts %}
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery('#example').DataTable({
+                responsive: true,
+                "order": [],
+                columnDefs: [
+                    { targets: 'no-sort', orderable: false }
+                ]
+            });
+
+            {#$('#example tr').live('click', function () {
+                var id = $(this).attr('data-id');
+            });#}
+        });
+    </script>
+{% endblock %}
+
+
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-cogs"></i>Vendors
+            </div>
+            <div class="tools">
+                <a href="javascript:;" class="collapse" data-original-title="" title="">
+                </a>
+                
+            </div>
+        </div>
+        <div class="portlet-body flip-scroll">
+            <table {% if vendors|length >= 1 %}id="example"{% endif %} class="table table-bordered table-striped table-condensed flip-content">
+                <thead class="flip-content">
+                    <tr>
+                        <th >
+                            Contact Name
+                        </th>
+                        <th >
+                            Number
+                        </th>
+                        <th >
+                            Email
+                        </th>
+                        <th >
+                            Business Type
+                        </th>
+                        <th >
+                            Last Updated
+                        </th>
+                        <th >
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if vendors|length >= 1 %}
+                        {% for vendor in vendors %}
+                            <tr>
+                                <td>
+                                    {{vendor.contactName}}
+                                </td>
+                                <td>
+                                    {{vendor.number}}
+                                </td>
+                                <td>
+                                    {{vendor.email}}
+                                </td>
+                                <td>
+                                   {{vendor.businessType.name}}
+                                </td>
+                                <td>{{vendor.updated|date('m-d-Y')}}</td>
+                                <td >
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-gear"></i>
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu right-aligned" role="menu">
+                                            <li>
+                                                <a href="{{ path('vendor_edit', {'id': vendor.id}) }}" >
+                                                Edit</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>   
+                        {% endfor %}
+                    {% else%}
+                        <tr><td colspan="8" align="middle"><span class="small">No record found</span></td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}	

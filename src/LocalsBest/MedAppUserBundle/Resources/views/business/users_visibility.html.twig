@@ -1,0 +1,88 @@
+<script>
+    function toggle(source) {
+        checkboxes = $(".hiddenUser:visible");
+        for(var i=0, n=checkboxes.length;i<n; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+
+    $(document).ready(function () {
+        $('#roles').on('change', function(){
+            var value = $(this).val().replace(" ", "_");
+            $("tr").show();
+            if(value != '') {
+                $("tbody tr:not(." + value + ')').hide();
+            }
+        });
+    });
+</script>
+
+{% block content %}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-search"></i> Global Company Search
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div id="app">
+                <form method="post" action="{{ path('business_search_permissions_update') }}">
+                    <div class="row" style="margin-bottom: 15px;">
+                        <div class="col-md-4">
+                            <label class="mt-checkbox mt-checkbox-outline">
+                                Do not show my company
+                                <input type="hidden" name="hide_business" value="0">
+                                <input type="checkbox" {% if business.searchHidden == 1 %} checked {% endif %} name="hide_business" value="1">
+                                <span></span>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select id="roles" class="form-control">
+                                <option value="">- None -</option>
+                                <option>Manager</option>
+                                <option>Assistant Manager</option>
+                                <option>Team Leader</option>
+                                <option>Agent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary pull-right" type="submit">Submit</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <td width="33%"></td>
+                                <td width="33%"></td>
+                                <td width="33%">
+                                    <label class="mt-checkbox mt-checkbox-outline">
+                                        Check/Uncheck all
+                                        <input onclick="toggle(this)" type="checkbox" name="" value="">
+                                        <span></span>
+                                    </label>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in users %}
+                            <tr class="{{ user.role.name|replace({' ': '_'}) }}">
+                                <td>{{ user.firstName }} {{ user.lastName }}</td>
+                                <td>{{ user.role.name }}</td>
+                                <td>
+                                    <label class="mt-checkbox mt-checkbox-outline">
+                                        <input type="hidden" name="hidden[{{ user.id }}]" value="0">
+                                        <input {% if user.searchVisible == 1 %} checked {% endif %} class="hiddenUser {{ user.role.name|replace({' ': '_'}) }}" type="checkbox" name="hidden[{{ user.id }}]" value="1">
+                                        <span></span>
+                                    </label>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

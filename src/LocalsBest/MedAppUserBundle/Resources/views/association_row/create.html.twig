@@ -1,0 +1,30 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+    <h4 class="modal-title">Add Association</h4>
+</div>
+<form method="POST" role="form" class="form-horizontal" action="{{ path('association_row_create', { 'type': type, 'username': userProfile_username }) }}">
+    <div class="modal-body">
+        <div class="form-body">
+            <div class="form-group">
+                <label for="association" class="col-md-3 control-label">Association Name</label>
+                <div class="col-md-9">
+                    <select name="association" id="association" class="form-control" required>
+                        {% for item in associations %}
+                            <option value="{{ item.id }}">{{ item.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="associationId" class="col-md-3 control-label">Association ID</label>
+                <div class="col-md-9">
+                    <input class="form-control" name="associationId" id="associationId" pattern=".{4,}" required title="4 characters minimum" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn green btn-outline">Save</button>
+    </div>
+</form>

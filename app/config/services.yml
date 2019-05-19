@@ -1,0 +1,83 @@
+services:
+    ct_file_store_s3:
+        class: Aws\S3\S3Client
+        factory: ["@aws.s3", "factory"]
+        arguments:
+            -
+                region: %aws_region%
+                version: latest
+                credentials:
+                    key: %aws_key%
+                    secret: %aws_secret_key%
+
+    namer.user_file:
+        class: LocalsBest\MedAppUserBundle\Services\Namer
+        arguments: ['@service_container']
+
+    localsbest.docs_for_approve:
+        class: LocalsBest\MedAppUserBundle\Services\DocsForApprove
+        arguments: ["@service_container", "@doctrine.orm.entity_manager"]
+
+    localsbest.resource.counter:
+            class: LocalsBest\MedAppUserBundle\Services\ResourceCounter
+            arguments: ["@service_container", "@doctrine.orm.entity_manager"]
+    
+    localsbest.custom_quote:
+        class: LocalsBest\MedAppUserBundle\Services\customQuote
+        arguments: ["@service_container", "@doctrine.orm.entity_manager"]
+        
+    localsbest.contact_request:
+        class: LocalsBest\MedAppUserBundle\Services\contactRequest
+        arguments: ["@service_container", "@doctrine.orm.entity_manager"]
+
+    app.twig_extension:
+        class: LocalsBest\MedAppUserBundle\Twig\AppExtension
+        public: false
+        tags:
+            - { name: twig.extension }
+
+    localsbest.vich_uploader_custom:
+        class: LocalsBest\MedAppUserBundle\Services\VichUploaderCustom
+        arguments: ['@service_container']
+
+    localsbest.checker:
+        class: LocalsBest\MedAppUserBundle\Services\Checker
+        arguments: ['@service_container', '@doctrine.orm.entity_manager']
+
+    app.switch_user_listener:
+         class: LocalsBest\MedAppUserBundle\Listener\SwitchUserListener
+         arguments:
+            - "@security.token_storage"
+            - "@ib_user.oauth_user_provider"
+            - "@security.user_checker"
+            - "@security.user.provider.concrete.db_provider"
+            - "@security.access.decision_manager"
+            - "@logger"
+         tags:
+             - { name: kernel.event_listener, event: security.switch_user, method: onSwitchUser }
+
+    localsbest.tooltip_text:
+        class: LocalsBest\MedAppUserBundle\Services\TooltipText
+        arguments: ['@service_container', '@doctrine.orm.entity_manager']
+        
+    localsbest.button_text:
+        class: LocalsBest\MedAppUserBundle\Services\ButtonText
+        arguments: ['@service_container', '@doctrine.orm.entity_manager']
+
+    app.menu_builder:
+        class: LocalsBest\MedAppUserBundle\Menu\MenuBuilder
+        arguments: ["@knp_menu.factory"]
+
+    app.main_menu:
+        class: Knp\Menu\MenuItem # the service definition requires setting the class
+        factory: ["@app.menu_builder", createMainMenu]
+        arguments: ["@request_stack", "@service_container"]
+        tags:
+            - { name: knp_menu.menu, alias: main } # The alias is what is used to retrieve the menu
+
+    app.client.stripe:
+        class: LocalsBest\ShopBundle\Client\StripeClient
+        arguments: ['@service_container', '%payment%', '@doctrine.orm.entity_manager', '@logger']
+
+    monolog.formatter.html:
+        class: Monolog\Formatter\HtmlFormatter

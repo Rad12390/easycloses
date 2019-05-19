@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+<!--<![endif]-->
+    <!-- BEGIN HEAD -->
+    <head>
+        <meta charset="utf-8"/>
+        <title>
+            {% block title %}{% endblock %} - EasyCloses
+        </title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <meta content="{% block meta_description %}{% endblock %}" name="description"/>
+        <meta content="" name="author"/>
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css"/>
+        <link href="{{ asset('system/global/plugins/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/simple-line-icons/simple-line-icons.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+
+        {% block stylesheets %}
+        {% endblock %}
+
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="{{ asset('system/global/css/components.min.css') }}" rel="stylesheet" id="style_components" type="text/css" />
+        <link href="{{ asset('system/global/css/plugins.min.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <link href="{{ asset('system/layouts/layout/css/layout.min.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('system/layouts/layout/css/custom.css') }}" rel="stylesheet" type="text/css" />
+        <!-- END THEME LAYOUT STYLES -->
+
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link rel="shortcut icon" href="{{ asset('favicon.ico')}}"/>
+
+        <script src="{{ asset('system/global/plugins/jquery.min.js') }}" type="text/javascript"></script>
+
+        {#<script type="text/javascript" >#}
+        {#jQuery(document).ready(function(){#}
+        {#if ( $.browser.msie ) {#}
+        {#alert('We do not currently support IE. Please log in with another browser');#}
+        {#}#}
+        {#})#}
+        {#</script>#}
+    </head>
+    <!-- END HEAD -->
+    <!-- BEGIN BODY -->
+    <body class="page-header-fixed page-quick-sidebar-over-content" style="background-color: #FFFFFF;">
+        <div class="clearfix"> </div>
+        <!-- BEGIN PAGE CONTENT-->
+        <div class="col-md-12 {% if page_class is defined %} {{ page_class }} {% endif %}" style="margin-top: 50px;">
+            <div class="row">
+
+                {% for label, flashes in app.session.flashbag.all %}
+                    {% for flash in flashes %}
+                        <div class="alert alert-{{ label }} alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                            <p>{{ flash }}</p>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+        <!-- END PAGE CONTENT-->
+
+        <div class="modal fade" id="ajax" role="basic" aria-hidden="true">
+            <div class="page-loading page-loading-boxed">
+                <img src="/img/loading-spinner-grey.gif" alt="" class="loading">
+                <span>
+                    &nbsp;&nbsp;Loading...
+                </span>
+            </div>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                </div>
+            </div>
+        </div>
+
+        <!--[if lt IE 9]>
+            <script src="{{ asset('system/global/plugins/respond.min.js') }}"></script>
+            <script src="{{ asset('system/global/plugins/excanvas.min.js') }}"></script>
+            <script src="{{ asset('system/global/plugins/ie8.fix.min.js') }}"></script>
+            <!--[endif]-->
+
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="{{ asset('system/global/plugins/bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/js.cookie.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/jquery.blockui.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}" type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="{{ asset('system/global/scripts/app.min.js') }}" type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <script src="{{ asset('system/layouts/layout/scripts/layout.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/layouts/layout/scripts/demo.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/layouts/global/scripts/quick-sidebar.min.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('system/layouts/global/scripts/quick-nav.min.js') }}" type="text/javascript"></script>
+        <!-- END THEME LAYOUT SCRIPTS -->
+        <!-- Begin JAVASCRIPT BLOCK -->
+        <script type="text/javascript" src="{{ asset('system/easycloses-scripts/masking.js') }}"></script>
+
+        <script>
+            jQuery(document).ready(function () {
+    //                $('body').on('hidden.bs.modal', '.modal', function () {
+    //                    $(this).removeData('bs.modal');
+    //                    $('.modal-content', this).empty();
+    //                });
+
+                $( "input[type=text]" ).val(function( index, value ) {
+                    return value.replace(/&amp;/g, '&');
+                });
+            });
+        </script>
+
+        {% block javascripts %}
+        {% endblock %}
+        <!-- END JAVASCRIPT BLOCK -->
+    </body>
+<!-- END BODY -->
+</html>

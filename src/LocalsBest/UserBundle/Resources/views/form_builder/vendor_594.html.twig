@@ -1,0 +1,95 @@
+<input type="hidden" name="signForm[showed]"  id="formShowed" value="1">
+
+<div class="form-group">
+    <label class="col-md-3 control-label">Requesting</label>
+    <div class="col-md-9">
+        <div class="checkbox-list">
+            <label class="checkbox-inline">
+                <input type="radio" class="requesting" name="signForm[requesting]" value="Installation" checked=""> Installation
+            </label>
+            <label class="checkbox-inline">
+                <input type="radio" class="requesting" name="signForm[requesting]" value="Removal"> Removal
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-md-3 control-label" for="signPanel">Sign Panel <span class="font-red">*</span></label>
+    <div class="col-md-9">
+        <select required name="signForm[signPanel]" id="signPanel" class="form-control installation">
+            <option value="">Select One ...</option>
+            <option value="Pickup at real estate office">Pickup to real estate office</option>
+            <option value="You have my sign panel in stock">You have my sign panel in stock</option>
+            <option value="I will install my own sign panel">I will install my own sign panel</option>
+            <option value="Contact me to make arrangements">Contact me to make arrangements</option>
+        </select>
+
+        <select required name="signForm[signPanel]" id="signPanel" class="form-control removal hidden" disabled>
+            <option value="">Select One ...</option>
+            <option value="Pickup at real estate office">Return sign panel to real estate office</option>
+            <option value="You have my sign panel in stock">Keep sign panel in stock</option>
+            <option value="I will install my own sign panel">I will remove my sign panel</option>
+            <option value="Contact me to make arrangements">Contact me to make arrangements</option>
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-md-3 control-label">Check all that apply</label>
+    <div class="col-md-9">
+        <div class="radio-list">
+            <label class="radio-inline">
+                <input name="signForm[checkAllThatApply][]" type="checkbox" id="inlineCheckbox21" value="Sprinkler System"> Sprinkler System
+            </label>
+            <label class="radio-inline">
+                <input name="signForm[checkAllThatApply][]" type="checkbox" id="inlineCheckbox22" value="Invisible Fencing"> Invisible Fencing
+            </label>
+            <label class="radio-inline">
+                <input name="signForm[checkAllThatApply][]" type="checkbox" id="inlineCheckbox22" value="Corner lot"> Corner lot
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-md-3 control-label">Available Addons</label>
+    <div class="col-md-9">
+        <div class="radio-list">
+            <label class="radio-inline">
+                <input name="signForm[availableAddons][]" type="checkbox" id="inlineCheckbox21" value="Brochur Box"> Brochure Box
+            </label>
+            <label class="radio-inline">
+                <input name="signForm[availableAddons][]" type="checkbox" id="inlineCheckbox22" value="Name Rider"> Name Rider
+            </label>
+            <label class="radio-inline">
+                <input name="signForm[availableAddons][]" type="checkbox" id="inlineCheckbox22" value="Solar Light"> Solar Light
+            </label>
+        </div>
+    </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+        $('input[type=radio][class=requesting]').change(function() {
+            if (this.value == 'Installation') {
+                variable1 = $("select.removal");
+                variable1.attr('disabled', 'disabled');
+                variable1.addClass('hidden');
+
+                variable2 = $("select.installation");
+                variable2.attr('disabled', false);
+                variable2.removeClass('hidden');
+            }
+            else if (this.value == 'Removal') {
+                variable1 = $("select.installation");
+                variable1.attr('disabled', 'disabled');
+                variable1.addClass('hidden');
+
+                variable2 = $("select.removal");
+                variable2.attr('disabled', false);
+                variable2.removeClass('hidden');
+            }
+        });
+    });
+</script>

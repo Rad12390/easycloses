@@ -1,0 +1,37 @@
+imports:
+    - { resource: config.yml }
+
+#framework:
+#    validation:
+#        cache: apc
+
+#doctrine:
+#    orm:
+#        metadata_cache_driver: apc
+#        result_cache_driver: apc
+#        query_cache_driver: apc
+
+monolog:
+    handlers:
+        main:
+            type:         fingers_crossed
+            action_level: error
+            handler:      grouped
+        grouped:
+            type:    group
+            members: [streamed, deduplicated]
+        streamed:
+            type:  stream
+            path:  '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+        deduplicated:
+            type:    stream
+            handler: swift
+        swift:
+            type:       swift_mailer
+            from_email: 'mike@mylocalsbest.com'
+            to_email:   'schep0r@gmail.com'
+            subject:    'An Error Occurred! %%message%%'
+            level:      critical
+            formatter:  monolog.formatter.html
+            content_type: text/html

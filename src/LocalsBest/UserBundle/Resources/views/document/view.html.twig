@@ -1,0 +1,391 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+
+    <script>
+        var usersRestPath = "{{ path('rest_user_getall')}}?query=%QUERY";
+
+        jQuery(document).ready(function () {
+            var selectedUsernames = new Array();
+            var userReadReciepts = [];
+            var userFurtherActions = [];
+            
+            if($('#sharedUserReadReciepts').val() !== '')
+            {
+                userReadReciepts.push($('#sharedUserReadReciepts').val());
+            }
+            
+            $('.read_reciept_user').on('click', function (){
+                var checkValue = $(this).val();
+                if ($(this).prop("checked")) {
+                    
+                    userReadReciepts.push(checkValue);
+                
+                } else {
+                
+                    for (var i = 0; i < userReadReciepts.length; i++) {
+                        if (userReadReciepts[i] == checkValue) {
+                            userReadReciepts.splice(i, 1);
+                        }
+                    }
+                }
+                $('#sharedUserReadReciepts').val(userReadReciepts);
+                console.log($('#sharedUserReadReciepts').val());
+            });
+            
+            if($('#sharedUserFurtherActions').val() !== '')
+            {
+                userFurtherActions.push($('#sharedUserFurtherActions').val());
+            }
+            
+            $('.further_action_user').on('click', function (){
+                var checkValue = $(this).val();
+                if ($(this).prop("checked")) {
+                    
+                    userFurtherActions.push(checkValue);
+                
+                } else {
+                
+                    for (var i = 0; i < userFurtherActions.length; i++) {
+                        if (userFurtherActions[i] == checkValue) {
+                            userFurtherActions.splice(i, 1);
+                        }
+                    }
+                }
+                $('#sharedUserFurtherActions').val(userFurtherActions);
+                console.log($('#sharedUserFurtherActions').val());
+            });
+            
+            $.each($("#selectedusers").val().split(','), function () {
+                if (this.trim().length) {
+                    selectedUsernames.push(this.toString());
+                }
+            });
+            
+            //console.log(selectedUsernames);
+
+            $('.share_btn_remove').on('click', function (event) {
+                if (!confirm('Are you sure?')) {
+                    return false;
+                }
+
+                var username = $(this).data('username');
+                var id = $(this).data('removeid');
+
+                if ($(this).data('saved') == "1") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('share_remove_ajax')}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            for (var i = 0; i < selectedUsernames.length; i++) {
+                                if (selectedUsernames[i] == username) {
+                                    selectedUsernames.splice(i, 1);
+                                }
+                            }
+                        }
+
+                        alert(data.message);
+                        
+                        $('#remote #selectedusers').val(selectedUsernames.join(',') + ',');
+                
+                        $('#remote .typeahead').val('').focus();
+
+                        $('#share_box_' + id + '').remove();
+
+                        return false;
+                    });
+                }
+            });
+        {% verbatim %}
+                var bestPictures = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: usersRestPath,
+                        wildcard: '%QUERY'
+                    }
+                });
+
+                bestPictures.initialize();
+
+                $('#remote .typeahead').typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'username',
+                    source: bestPictures.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{username}}</h4>',
+                            '<p>{{fullname}}</p>',
+                            '</div>',
+                            '</div>',
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    //console.log(typeof item.username);
+                    //console.log(typeof selectedUsernames[0]);
+                    if ($.inArray(item.username, selectedUsernames) === -1) {
+                        var mediaHtml = Handlebars.compile([
+                            '<div class="media share_box todo-tasklist-item todo-tasklist-item-border-yellow" id="share_box_{{id}}">',
+                            '<input class="hidden" type="hidden" id="share_box_user_{{id}}" value="{{username}}">',
+                            '<a class="pull-left" href="#">',
+                            '<img class="media-object" src="{{ profilepic }}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">',
+                            '</a>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">\n\
+                            <span class="pull-left">Request a Read Receipt</span>&nbsp;&nbsp;\n\
+                            <input type="checkbox" class="read_reciept_user" value="{{username}}">\n\
+                            </h4>',
+                            '<h4 class="media-heading">\n\
+                            <span class="pull-left">Request Accept Decline</span>&nbsp;&nbsp;\n\
+                            <input type="checkbox" class="further_action_user" value="{{username}}">\n\
+                            </h4>',
+                            '<h4 class="media-heading">{{ fullname }}</h4>',
+                            '{{ role }}<br />',
+                            '<button class="btn red pull-right share_btn_remove" data-removeid="{{id}}" data-username="{{username}} data-saved="0">',
+                            '<i class=" icon-trash"></i> &nbsp; Share Remove', '</button>',
+                            '</div>',
+                            '</div>'
+                        ].join(''));
+
+                        selectedUsernames.push(item.username);
+
+                        $(".share-portlet .portlet-body").prepend(mediaHtml(item));
+
+                        $('#remote #selectedusers').val(selectedUsernames.join(',') + ',');
+
+                        $('#remote .typeahead').val('').focus();
+                    } else {
+                        alert("This Document already shared with this user");
+                        $('#remote .typeahead').val('').focus();
+                        return false;
+                    }
+
+                });
+
+        {% endverbatim %}
+            });
+    </script>
+
+{% endblock %}
+
+{% block title %}
+    {{ file.clearFileName }}
+{% endblock %}
+
+{% block page_title %}
+    {{ file.clearFileName }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-angle-right"></i>
+        <i class="fa fa-file-text"></i>
+        <a href="{{ path('document_index') }}">Documents</a>
+    </li>
+    <li>
+        <i class="fa fa-angle-right"></i>
+        {% include '@LocalsBestCommon/ui/filetype.html.twig' with {'filetype':  file.extension } %}
+        <a href="{{ path(app.request.attributes.get('_route'),
+                           app.request.attributes.get('_route_params')) }}">{{ file.clearFileName }}</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <!-- BEGIN PREVIEW PORTLET-->
+            <div class="portlet purple box">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-eye"></i>Preview
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse">
+                        </a>
+                        <a href="javascript:;" class="remove">
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    {% include '@LocalsBestUser/document/preview.html.twig' with { 'file' : file } %}
+                </div>
+            </div>
+            <!-- END PREVIEW PORTLET-->
+        </div>
+        <div class="col-md-6">
+            <div class="row" style="margin-bottom:5px;">
+			<div class="col-md-12">
+                <a class="btn default" href="{{ path('document_index') }}"><i class="m-icon-swapleft m-icon-black"></i> Summary</a>
+                {% if nextResult > 0 %}
+                    {% set query = 'next' %}
+				    <a class="btn default pull-right" href="{{ path('document_view_query', {'slug': file.slug, 'query': query}) }}">Next Document <i class="m-icon-swapright m-icon-black"></i></a>
+                {% endif %}
+                {% if previousResult > 0 %}
+                    {% set query = 'previous' %}
+                    <a class="btn default pull-right" style="margin-right:3px;" href="{{ path('document_view_query', {'slug': file.slug, 'query': query}) }}"><i class="m-icon-swapleft m-icon-black"></i> Previous Document</a>
+                {% endif %}
+            </div>
+		</div>
+            <!-- BEGIN ALERTS PORTLET-->
+            <div class="portlet blue box">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-navicon"></i>Description
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse"></a>
+                        <a href="javascript:;" class="remove"></a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <table class="table table-hover table-striped table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    Name :
+                                </td>
+                                <td>
+                                    {{ file.createdBy.firstname }} {{ file.createdBy.lastname}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    File Name :
+                                </td>
+                                <td>
+                                    {{ file.clearFileName }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Status :
+                                </td>
+                                <td>
+                                    {% include '@LocalsBestCommon/ui/status.html.twig' with {'status' : file.status} %}
+                                </td>
+                            </tr>
+                            {% if file.rejectComment is defined and file.rejectComment != '' %}
+                                <tr>
+                                    <td>
+                                        Reject Comment :
+                                    </td>
+                                    <td>
+                                        {{ file.rejectComment }}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if app.user.isDocumentApprover != 0 or (file.furtherAction != 0 and app.user.username in sharedFurtherActions) or app.user.role.level == 4 %}
+                            <tr>
+                                <td colspan="2">
+                                    <a class="btn green" href="{{ path('document_approved', {'slug': file.slug}) }}" >
+                                        Accept <i class="fa fa-thumbs-o-up"></i>
+                                    </a>
+                                    <a data-target="#ajax" data-toggle="modal" class="btn red" href="{{ path('document_reject', {'slug': file.slug}) }}" >
+                                        Decline <i class="fa fa-thumbs-o-down"></i>
+                                    </a>
+                                    <a class="btn btn-info pull-right" href="{{ path('download_single_document', {'slug': file.slug}) }}">
+                                        Download <i class="fa fa-cloud-download"></i>
+                                    </a>
+                                </td>
+                                    <!-- <td><span id="download_attachment"></span></td> -->
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- END DESCRIPTION PORTLET-->
+
+            <!-- BEGIN ALERTS PORTLET-->
+            <div class="portlet box blue" id="noteBox">
+                <div class="portlet-title">
+                    <div class="caption">Notes </div>
+                    <div class="tools">
+                        <a href="{{ path('note_add', {'id': file.id ,'type': objectType}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">
+                            Add</a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <ul class="chats">
+                        {% if notes|length >= 1 %}
+                            {% for note in notes %}
+                                {{ include ('@LocalsBestCommon/note/single.html.twig',{note: note}) }}
+                            {% endfor %}
+                        {% endif %}
+                    </ul> 	
+                </div>
+            </div>
+            <!-- END DESCRIPTION PORTLET-->
+            <!-- BEGIN SHARE PORTLET-->
+            <div class="portlet blue box share-portlet">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-share-alt"></i>Shares
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse">
+                        </a>
+                        <a href="javascript:;" class="remove">
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <!-- Existing share list starts -->
+                    {% for share in file.shares %}
+                        <div class="media share_box todo-tasklist-item todo-tasklist-item-border-green" id="share_box_{{share.id}}">
+                            <input class="hidden" type="hidden" id="share_box_user_{{share.id}}" value="{{ share.user.username}}">
+                            <a class="pull-left" href="#">
+                                <img class="media-object" src="{% if share.user.filename is not empty %} {{ vich_uploader_asset(share.user, 'file') }} {% else %} https://www.placehold.it/64x64/EFEFEF/AAAAAA&amp;text=no+image {% endif %}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">
+                            </a>
+                            <div class="media-body pull-left">
+                                <h4 class="media-heading">
+                                    <span class="pull-left">
+                                        Request a Read Receipt
+                                    </span>&nbsp;&nbsp;
+                                    <input type="checkbox" class="read_reciept_user" value="{{share.user.username}}"{% if share.readReciept == true %} checked="checked" {% endif%}/>
+                                </h4>
+                                <h4 class="media-heading">
+                                    <span class="pull-left">
+                                        Request Accept Decline
+                                    </span>&nbsp;&nbsp;
+                                    <input type="checkbox" class="further_action_user" value="{{share.user.username}}"{% if share.furtherAction == true %} checked="checked" {% endif%}/>
+                                </h4>
+                                <h4 class="media-heading">{{ share.user.fullname }}</h4>{{ share.user.role.name }}
+                            </div>
+                            <button class="btn red pull-right share_btn_remove" data-removeid="{{share.id}}" data-username="{{share.user.username}}" data-saved="1"><i class=" icon-trash"></i> &nbsp; Share Remove</button>
+                        </div>
+                    {% endfor %}
+                    <!-- Existing share list ends -->
+                    <br />
+                    <form action="{{ path('document_share', {'slug': file.slug}) }}" method="POST" enctype="multipart/form-data" name="shareValue" >
+                        <div id="remote">
+                            <input class="typeahead" type="text" placeholder="-- Group Users --">
+                            <input id="selectedusers" type="hidden" class="hidden" name="shares" value="{{ sharedwithusernames }}">
+                            <input id="sharedUserReadReciepts" type="hidden" class="hidden" name="readReciepts" value="{{ sharedReadReciepts }}">
+                            <input id="sharedUserFurtherActions" type="hidden" class="hidden" name="furtherActions" value="{{ sharedFurtherActions }}">
+                        </div>
+                        <div class="margin-top-10">
+                            <button type="submit" class="btn green" id="share_btn"><i class="icon-share"></i> Share</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- END SHARE PORTLET-->
+        </div>
+    </div>
+
+{% endblock %}

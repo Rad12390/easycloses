@@ -1,0 +1,100 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/pages/css/profile.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+    <link href="{{ asset('system/global/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('system/global/plugins/dropzone/basic.min.css') }}" rel="stylesheet" type="text/css"/>
+
+    <style>
+        .table-responsive {
+            overflow-x: inherit !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/dropzone/dropzone.min.js') }}"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.doc-checkbox').on('change', function () {
+                var total = $('input.doc-checkbox:checked').length;
+
+                if (total > 0) {
+                    $("#send-docs-by-email").removeAttr('disabled');
+                } else {
+                    $("#send-docs-by-email").attr('disabled', true);
+                }
+            });
+
+            $('#send-docs-by-email').on('click', function(){
+
+                var total = $('input.doc-checkbox:checked').length;
+
+                if (total == 0) {
+                    return false;
+                }
+
+                documents = [];
+
+                $.each( $('.doc-checkbox'), function( i, val ) {
+                    if ($(val).prop("checked") && $(val).val() != '') {
+                        documents.push($(val).val());
+                    }
+                });
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('user_docs_send_email') }}",
+                    dataType: "html",
+                    data: {
+                        type: 'users',
+                        documents: documents
+                    },
+                    success:function(data){
+                        $("#email .modal-content").html(data);
+                        $("#email").modal();
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block title %}
+    {{ user.firstName}} {{ user.lastName }}
+{% endblock %}
+
+{% block page_title %}
+    {{ user.firstName}} {{ user.lastName }}
+{% endblock %}
+
+{% block page_title_small %}
+    ( {{ user.role.name }} )
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('users_index') }}">Users</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        {{user.firstname}}&nbsp;{{user.lastname}}
+    </li>
+{% endblock %}
+
+{% block content %}
+
+    {% include('@LocalsBestUser/user/_view-content.html.twig') %}
+
+{% endblock %}

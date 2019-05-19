@@ -1,0 +1,171 @@
+{% extends "::base.html.twig" %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block title %}Email Templates{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('email_templates_list') }}">
+            Email Templates
+        </a>
+    </li>
+
+    <li>
+        <i class="fa fa-circle"></i>
+        New Email Template
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+
+    <script type="text/javascript">
+        editorInstance = '';
+
+        var handleWysihtml5 = function() {
+            if (!jQuery().wysihtml5) {
+                return;
+            }
+
+            editorInstance = $('.wysihtml5').wysihtml5({
+                "stylesheets": ["/system/global/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+            });
+        };
+
+        function changeMailTemplate() {
+            $.ajax({
+                method: "GET",
+                url: "/find-email-template",
+                data: {
+                    number: $('#localsbest_userbundle_emailtemplate_template_number').val(),
+                    category: $("#localsbest_userbundle_emailtemplate_category").val()
+                },
+                dataType: "html",
+                success:function(data){
+                    var wysihtml5Editor = $('.wysihtml5').data("wysihtml5").editor;
+
+                    // append you data at cursor position in editor
+                    wysihtml5Editor.setValue(data);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            handleWysihtml5();
+
+            {% if app.user.businesses[0].id != 179 %}
+                $("#localsbest_userbundle_emailtemplate_category option[value='Shredding PDF']").remove();
+
+                {% if checker.forAddon('non received documents', app.user) == false %}
+                    $("#localsbest_userbundle_emailtemplate_category option[value='Non Received Documents']").remove();
+                {% endif %}
+
+                {% if checker.forAddon('non received listings', app.user) == false %}
+                    $("#localsbest_userbundle_emailtemplate_category option[value='Non Received Listings']").remove();
+                {% endif %}
+
+                {% if checker.forAddon('15 day expired listings', app.user) == false %}
+                    $("#localsbest_userbundle_emailtemplate_category option[value='Expired Listings']").remove();
+                {% endif %}
+
+                $("#localsbest_userbundle_emailtemplate_category").on('change', function(){
+                    var current = $(this).val();
+
+                    if(current == 'Expired Listings' || current == 'Shredding PDF') {
+
+                        $('.block').addClass('hidden');
+                        $('.el-block').removeClass('hidden');
+
+                        $("#localsbest_userbundle_emailtemplate_template_number option[value='2']").remove();
+                        $("#localsbest_userbundle_emailtemplate_template_number option[value='3']").remove();
+                        $("#localsbest_userbundle_emailtemplate_template_number option[value='4']").remove();
+                    }
+
+                    if(current == 'Non Received Documents') {
+                        $('.block').addClass('hidden');
+                        $('.nrd-block').removeClass('hidden');
+                    }
+
+                    if(current == 'Non Received Listings') {
+                        $('.block').addClass('hidden');
+                        $('.nrl-block').removeClass('hidden');
+                    }
+
+                    if(current == 'Shredding PDF') {
+                        $('.block').addClass('hidden');
+                        $('.shredding-block').removeClass('hidden');
+                    }
+
+                    if ((current != 'Expired Listings' && current != 'Shredding PDF') && $('#localsbest_userbundle_emailtemplate_template_number option').length == 1) {
+                        $("#localsbest_userbundle_emailtemplate_template_number").append('<option value="2">2</option>');
+                        $("#localsbest_userbundle_emailtemplate_template_number").append('<option value="3">3</option>');
+                        $("#localsbest_userbundle_emailtemplate_template_number").append('<option value="4">4</option>');
+                    }
+
+                    changeMailTemplate();
+                });
+
+                $("#localsbest_userbundle_emailtemplate_category").trigger('change');
+            {% else %}
+                $("#localsbest_userbundle_emailtemplate_category option[value='Expired Listings']").remove();
+                $("#localsbest_userbundle_emailtemplate_category option[value='Non Received Listings']").remove();
+                $("#localsbest_userbundle_emailtemplate_category option[value='Non Received Documents']").remove();
+
+
+                $("#localsbest_userbundle_emailtemplate_template_number option[value='2']").remove();
+                $("#localsbest_userbundle_emailtemplate_template_number option[value='3']").remove();
+                $("#localsbest_userbundle_emailtemplate_template_number option[value='4']").remove();
+            {% endif %}
+
+            $("#localsbest_userbundle_emailtemplate_template_number").on('change', function() {
+                changeMailTemplate();
+            });
+
+            $('.badge-primary').on('click', function(){
+                var val = $(this).data('value');
+                var wysihtml5Editor = $('.wysihtml5').data("wysihtml5").editor;
+
+                // append you data at cursor position in editor
+                wysihtml5Editor.composer.commands.exec("insertHTML", val);
+
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-sticky-note-o"></i> New Email Template
+            </div>
+            <div class="actions">
+                <a class="btn btn-warning " href="{{ path('users_profile') ~ '#business_email_templates' }}">
+                    <i class="icon-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+
+        <div class="portlet-body">
+            <div class="row">
+                <div class="col-md-12">
+
+                    {% include('@LocalsBestUser/email_template/_form.html.twig') %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

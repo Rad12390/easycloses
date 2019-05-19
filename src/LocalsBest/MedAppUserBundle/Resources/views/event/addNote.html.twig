@@ -1,0 +1,21 @@
+<div class="modal-content">
+    <form action="{{ path('event_note_add', {'slug': slug }) }}" method="POST">
+
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <h4>Some Input Note</h4>
+                    <p>
+                        {{ form_widget(form.note) }}
+                    </p>
+
+                </div>
+            </div>   
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn green"><i class="fa fa-check"></i> Save Changes</button>
+        </div>
+        {{ form_end(form) }}
+</div>

@@ -1,0 +1,45 @@
+{% extends "::base.html.twig" %}
+
+
+
+{% block content %}
+    <div class="portlet light bordered">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="icon-equalizer font-red-sunglo"></i>
+                <span class="caption-subject font-red-sunglo bold uppercase">Property Add</span>
+                {#<span class="caption-helper">form actions without bg color</span>#}
+            </div>
+        </div>
+        <div class="portlet-body form">
+            <!-- BEGIN FORM-->
+             {{ form }}
+                    <div class="form-body">
+                            <div class="form-group">
+                                    <div class="col-md-9">
+                                            {{ form_widget(propertyForm.address) }}
+                                            <span class="help-block">
+                                            {{ form_errors(propertyForm.address) }}
+                                        </span>
+                                    </div>
+                            </div>
+
+                            <div class="form-group">
+                                    <div class="col-md-9">
+                                            {{ form_widget(propertyForm.type) }}
+                                            <span class="help-block">
+                                            {{ form_errors(propertyForm.type) }}
+                                        </span>
+                                    </div>
+                            </div>
+                    </div>
+                    <div class="form-actions right1">
+                            <button type="button" class="btn default">Cancel</button>
+                            <button type="submit" class="btn green">Submit</button>
+                    </div>
+            {{ form_end(propertyForm) }} 
+            <!-- END FORM-->
+        </div>
+    </div>
+</div>
+{% endblock %}

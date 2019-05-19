@@ -1,0 +1,3 @@
+<a href="{{ path('user_view', {'username': user.username}) }}">
+    <img data-placement="bottom" data-original-title="{{ user.fullname }} ( {{ user.username}} )" class="tooltips" height="32" width="32" src="{% if user.fileName is not empty %}{{ vich_uploader_asset(user, 'file') }}{% else %} https://www.placehold.it/32x32/EFEFEF/AAAAAA&text=no+image {% endif %}" alt="{{ user.filename }}"/>
+</a>

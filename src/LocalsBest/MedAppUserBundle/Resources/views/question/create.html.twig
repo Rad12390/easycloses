@@ -1,0 +1,17 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+    <h4 class="modal-title">Create a Yes/No Question:<small> If agent answers yes, it will add the Document Name you choose below</small></h4>
+</div>
+<form class="form-horizontal" role="form" method="POST" action="{{ path('question_add') }}">
+    <div class="modal-body">
+        <div class="form-body">
+            {% include('@LocalsBestUser/question/_form.html.twig') %}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Cancel</button>
+        <input type="submit" class="btn green" value="Create">
+    </div>
+</form>
+
+{% include('@LocalsBestUser/question/_script.html.twig') %}

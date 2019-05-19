@@ -1,0 +1,64 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Plan "{{ entity.name }}"</h1>
+
+    <a class="btn btn-default" href="{{ path('admin_plans') }}">
+        Back to the list
+    </a>
+
+    <a class="btn btn-warning" href="{{ path('admin_plans_edit', { 'id': entity.id }) }}">
+        Edit
+    </a>
+    {{ form(delete_form) }}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Industry Group</th>
+                <th>St. Gold Price</th>
+                <th>Gold Price</th>
+                <th>St. Silver Price</th>
+                <th>Silver Price</th>
+                <th>St. Bronze Price</th>
+                <th>Bronze Price</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in entity.rows %}
+            <tr>
+                <td>{{ row.industryGroup }}</td>
+                <td>${{ row.setupGoldPrice|number_format(2, '.', ',') }}</td>
+                <td>${{ row.goldPrice|number_format(2, '.', ',') }}</td>
+                <td>${{ row.setupSilverPrice|number_format(2, '.', ',') }}</td>
+                <td>${{ row.silverPrice|number_format(2, '.', ',') }}</td>
+                <td>${{ row.setupBronzePrice|number_format(2, '.', ',') }}</td>
+                <td>${{ row.bronzePrice|number_format(2, '.', ',') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Industry Group</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in entity.rows %}
+            {% for type in item.industryType %}
+                <tr>
+                    <td>{{ type.name }}</td>
+                    <td>{{ item.industryGroup }}</td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        <tr>
+
+        </tr>
+        </tbody>
+    </table>
+{% endblock %}

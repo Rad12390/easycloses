@@ -1,0 +1,65 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    Shredding Documents
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">
+        <i class="fa fa-circle"></i>
+        Shredding Documents
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <!-- END JAVASCRIPTS -->
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery('#example').DataTable({
+                order: [],
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                ajax: "{{ path('datatable_shredding_documents_limit') }}",
+                dom: 'flrtip'
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-file-text-o"></i> Shredding Documents
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="example" class="table table-bordered">
+                        <thead>
+                            <tr role="row" class="heading">
+                                <th> Customer </th>
+                                <th> Address </th>
+                                <th> Created </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End: life time stats -->
+{% endblock %}

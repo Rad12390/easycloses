@@ -1,0 +1,107 @@
+<h3>Pay Via Credit/Debit Card</h3>
+<form action="{{ path('shop_charge') }}" id="payment-form" method="post">
+    <input type="hidden" name="orderCode" value="{{ order.code }}">
+    <!-- <legend>Personal Information</legend> -->
+    <div class="form-group">
+        <label for="">First & Last Name</label>
+        <input type="text" data-stripe="name" name="username" id="card-name" value="{{ app.user.fullName }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+        <label for="">E-mail</label>
+        <input type="text"  name="user_email" value="{{ app.user.primaryEmail.email }}" class="form-control">
+    </div>
+
+    <legend>Card Information</legend>
+    <div class="cc-form">
+        <div class="clearfix">
+            <div class="form-group form-group-cc-number">
+                <label>Card Number</label>
+                <input type="text" data-stripe="number" id="card-number" class="form-control" /><span class="cc-card-icon"></span>
+            </div>
+            <div class="form-group form-group-cc-cvc">
+                <label>CVC</label>
+                <input type="text" data-stripe="cvc" required  id="card-cvc" class="form-control" />
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label>Month</label>
+                    <select class="form-control" data-stripe="exp-month" required id="card-expiry-month" autocomplete="cc-exp-month" data-placeholder="Month" tabindex="1">
+                        <option value="">Month</option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                        <option value="06">06</option>
+                        <option value="07">07</option>
+                        <option value="08">08</option>
+                        <option value="09">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Year</label>
+                    <select class="form-control" data-stripe="exp-year" id="card-expiry-year" required id="expiration_year" autocomplete="cc-exp-year" data-placeholder="Year" tabindex="1">
+                        <option value="">Year</option>
+                        {% for i in range("now"|date("Y"), "now"|date("Y")+12) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="submit" id="payBtn" class="btn btn-primary" value="Proceed">
+    <div class="alert alert-danger" id="errorsdiv" style="display:none;"><span class="payment-errors"></span></div>
+</form>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<script type="text/javascript">
+
+    Stripe.setPublishableKey('{{ stripe_public_key }}');
+
+    //callback to handle the response from stripe
+    function stripeResponseHandler(status, response) {
+        if (response.error) {
+            //enable the submit button
+            $('#payBtn').removeAttr("disabled");
+            //display the errors on the form
+            $("#errorsdiv").css("display","block");
+            $(".payment-errors").html(response.error.message);
+        } else {
+            var form$ = $("#payment-form");
+            //get token id
+            var token = response['id'];
+            //insert the token into the form
+            form$.append("<input type='hidden' id='stripeToken' name='stripeToken' value='" + token + "' />");
+            //submit form to the server
+            form$.get(0).submit();
+        }
+    }
+    $(document).ready(function() {
+        $("#payment-form").submit(function(event) {
+            event.preventDefault();
+            //alert("Called");
+            //disable the submit button to prevent repeated clicks
+            $('#payBtn').attr("disabled", "disabled");
+
+            //create single-use token to charge the user
+            //var data = $('#card-expiration').val();
+            //var arr = data.split('/');
+            Stripe.createToken({
+                number: $('#card-number').val(),
+                cvc: $('#card-cvc').val(),
+                exp_month: $('#card-expiry-month').val(),
+                exp_year: $('#card-expiry-year').val()
+            }, stripeResponseHandler);
+
+            //submit from callback
+            return false;
+        });
+    });
+</script>

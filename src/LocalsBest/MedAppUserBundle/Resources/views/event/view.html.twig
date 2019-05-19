@@ -1,0 +1,326 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+
+    <script>
+        var usersRestPath = "{{ path('rest_user_getall')}}?query=%QUERY";
+
+        jQuery(document).ready(function () {
+            var selectedUsernames = new Array();
+
+            $.each($("#selectedusers").val().split(','), function () {
+                if (this.trim().length) {
+                    selectedUsernames.push(this.toString());
+                }
+            });
+
+            //console.log(selectedUsernames);
+
+            $('.share_btn_remove').on('click', function (event) {
+                if (!confirm('Are you sure?')) {
+                    return false;
+                }
+
+                var username = $(this).data('username');
+                var id = $(this).data('removeid');
+
+                if ($(this).data('saved') == "1") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('share_remove_ajax')}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            for (var i = 0; i < selectedUsernames.length; i++) {
+                                if (selectedUsernames[i] == username) {
+                                    selectedUsernames.splice(i, 1);
+                                }
+                            }
+                        }
+                        alert(data.message);
+                        return false;
+                    });
+                }
+                $('#remote #selectedusers').val(selectedUsernames.join(', ') + ', ');
+
+                $('#remote .typeahead').val('').focus();
+
+                $('#share_box_' + id + '').remove();
+            });
+        {% verbatim %}
+                var bestPictures = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: usersRestPath,
+                        wildcard: '%QUERY'
+                    }
+                });
+
+                bestPictures.initialize();
+
+                $('#remote .typeahead').typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'username',
+                    source: bestPictures.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{username}}</h4>',
+                            '<p>{{fullname}}</p>',
+                            '</div>',
+                            '</div>',
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    //console.log(typeof item.username);
+                    //console.log(typeof selectedUsernames[0]);
+                    if ($.inArray(item.username, selectedUsernames) === -1) {
+                        var mediaHtml = Handlebars.compile([
+                            '<div class="media share_box todo-tasklist-item todo-tasklist-item-border-yellow" id="share_box_{{id}}">',
+                            '<input class="hidden" type="hidden" id="share_box_user_{{id}}" value="{{username}}">',
+                            '<a class="pull-left" href="#">',
+                            '<img class="media-object" src="{{ profilepic }}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">',
+                            '</a>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{ fullname }}</h4>',
+                            '{{ role }}',
+                            '<button class="btn red pull-right share_btn_remove" data-removeid="{{id}}" data-username="{{username}} data-saved="0">',
+                            '<i class=" icon-trash"></i> &nbsp; Share Remove', '</button>',
+                            '</div>',
+                            '</div>'
+                        ].join(''));
+
+                        selectedUsernames.push(item.username);
+
+                        $(".share-portlet .portlet-body").prepend(mediaHtml(item));
+
+                        $('#remote #selectedusers').val(selectedUsernames.join(', ') + ', ');
+
+                        $('#remote .typeahead').val('').focus();
+                    } else {
+                        alert("This Event already shared with this user");
+                        $('#remote .typeahead').val('').focus();
+                        return false;
+                    }
+
+                });
+
+        {% endverbatim %}
+
+            $('.status_change').change(function () {
+                var status = $(this).val();
+
+                if (status !== '') {
+                    $.post(
+                        '{{ path('event_status_change_ajax', {'id': file.id }) }}',
+                        {'status': status},
+                        function (data) {}
+                    );
+                }
+                return false;
+            });
+            
+        });
+    </script>
+
+{% endblock %}
+
+{% block title %}
+    {{ file.title }}
+{% endblock %}
+
+{% block page_title %}
+    {{ file.title }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('event_index') }}">Events & Alerts</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Event "{{ file.title }}"
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <!-- BEGIN PREVIEW PORTLET-->
+            <div class="portlet purple box">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-eye"></i>Preview
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <table class="table table-hover table-striped table-bordered">
+                        <tbody>
+                            {% set color = ''%}
+
+                            {% if file.status.status == 'new' and file.eventStatus is not null and file.eventStatus == false %}
+                                {% set color = '#d84a38' %}
+                            {% elseif file.status.status == 'new' and file.eventStatus is not null and file.eventStatus == true %}
+                                {% set color = '#ffb848' %}
+                            {% else %}
+                                {% if file.status.status == 'open' and file.endTime < date() %}
+                                    {% set color = 'warning' %}
+                                {% elseif file.status.status == 'open' and file.endTime > date() %}
+                                    {% set color = 'success' %}
+                                {% else %}
+                                    {% set color = 'primary' %}
+                                {% endif %}
+                            {% endif %}
+                            <tr>
+                                <td>Title:</td>
+                                <td>
+                                    {{ file.title }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Event Type:</td>
+                                <td>
+                                    {% if file.type == 'Custom'%}{{ file.custom }}{% else %}{{ file.type }}{% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Owner:</td>
+                                <td>
+                                    {% if file.owner is not null %}
+                                        {{ file.owner.name }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Status:</td>
+                                <td>
+                                <span class="label label-{{ color }}">
+                                        {{ file.status.status}}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Last Updated:</td>
+                                <td>
+                                    {{ file.updated|date('m/d/Y H:i A') }}
+                                </td>
+                            </tr>
+
+                            {% if file.completed is not null %}
+                                <tr>
+                                    <td>Completed:</td>
+                                    <td>
+                                        {{ file.completed|date('m/d/Y H:i A') }}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td>Start Time:</td>
+                                    <td>
+                                        {{ file.time|date('m/d/Y H:i A') }}
+                                        {% if file.endTime is not null %}
+                                            <strong>to</strong> {{ file.endTime|date('m/d/Y H:i A') }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <td>Description:</td>
+                                <td>
+                                    {{ file.description }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- END DESCRIPTION PORTLET-->
+            
+            <!-- BEGIN ALERTS PORTLET-->
+        </div>
+
+        <div class="col-md-6">
+            <div>
+                <select id="statusType_status" name="statusType[status]" required="required" class="form-control status_change">
+                    <option value="">Select</option>
+                    <option {% if file.status.status|lower == 'open' %}selected{% endif %} value="3">Open</option>
+                    <option {% if file.status.status|lower == 'closed' %}selected{% endif %} value="5">Closed</option>
+                </select>
+            </div>
+
+            <div class="portlet box blue" id="noteBox" style="margin-top: 10px;">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-comments"></i> Notes
+                    </div>
+                    <div class="actions">
+                        {% set objectType = 'LocalsBestUserBundle:Event' %}
+                        <a class="btn  btn-danger" href="{{ path('note_add', {'id': file.id ,'type': objectType}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">
+                            Add</a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <ul class="chats">
+                        {% if notes|length >= 1 %}
+                            {% for note in notes %}
+                                {{ include ('@LocalsBestCommon/note/single.html.twig',{note: note}) }}
+                            {% endfor %}
+                        {% endif %}
+                    </ul> 	
+                </div>
+            </div>
+        <div class="portlet blue box share-portlet">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-share-alt"></i> Shares
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <!-- Existing share list starts -->
+                    {% for share in file.shares %}
+                        <div class="media share_box todo-tasklist-item todo-tasklist-item-border-green" id="share_box_{{share.id}}">
+                            <input class="hidden" type="hidden" id="share_box_user_{{share.id}}" value="{{ share.user.username}}">
+                            <a class="pull-left" href="#">
+                                <img class="media-object" src="{% if share.user.filename is not empty %} {{ vich_uploader_asset(share.user, 'file') }} {% else %} https://www.placehold.it/64x64/EFEFEF/AAAAAA&amp;text=no+image {% endif %}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">
+                            </a>
+                            <div class="media-body pull-left">
+                                <h4 class="media-heading">{{ share.user.fullname }}</h4>{{ share.user.role.name }}
+                            </div>
+                            {% if app.user == share.user or app.user.role.level < share.user.role.level or app.user.role.level == 4 %}
+                                <button class="btn red pull-right share_btn_remove" data-removeid="{{share.id}}" data-username="{{share.user.username}}" data-saved="1">
+                                    <i class=" icon-trash"></i> &nbsp; Share Remove
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <!-- Existing share list ends -->
+                    <br />
+                    <form action="{{ path('event_share', {'slug': file.slug}) }}" method="POST" enctype="multipart/form-data" name="shareValue" >
+                        <div id="remote">
+                            <input class="typeahead" type="text" placeholder="-- Group Users --">
+                            <input id="selectedusers" type="hidden" class="hidden" name="shares" value="{{ sharedwithusernames }}">
+                        </div>
+                        <div class="margin-top-10">
+                            <button type="submit" class="btn green" id="share_btn"><i class="icon-share"></i> Share</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

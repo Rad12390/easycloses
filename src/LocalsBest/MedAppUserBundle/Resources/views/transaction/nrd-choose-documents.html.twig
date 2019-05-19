@@ -1,0 +1,196 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Choose Documents Types{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('transaction_index') }}">Transactions</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Choose Documents Types
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+            var isClicked   = false;
+            var formSubmit  = false;
+
+            $("input").on('click', function(){
+                isClicked = true;
+            });
+
+            $("#save").on('click', function(){
+                formSubmit = true;
+            });
+
+            $(window).bind('beforeunload', function () {
+                if(isClicked == true && formSubmit == false) {
+                    return 'Are you sure you want to leave?';
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                Choose Documents Types
+            </div>
+            <div class="actions">
+                <a class="btn  btn-warning" href="{{ path('transaction_non_received_documents') }}">
+                    Back
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <form method="post" action="{{ path('transaction_nrd_choose_doc_types') }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="portlet box blue">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    Listing Documents
+                                </div>
+                            </div>
+                            <div class="portlet-body">
+                                {% set values = [] %}
+                                {% for item in docRules if item.creating == "Listing" %}
+                                    {% if item.documentName not in values %}
+                                        {% set values = values|merge([item.documentName]) %}
+                                        <div class="form-group">
+                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                {{ item.documentName }}
+                                                <input type="checkbox" value="{{ item.documentName }}"
+                                                   {% for el in userImpDocs if (el.type == 'listing' and el.documentName == item.documentName) %}
+                                                       checked
+                                                   {% endfor %}
+                                                   name="docs[listing][]">
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <hr>
+                                {% for item in yesNoDocs if item.creating == "Listing" %}
+                                    {% if item.documentName not in values %}
+                                        {% set values = values|merge([item.documentName]) %}
+                                        <div class="form-group">
+                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                {{ item.documentName }}
+                                                <input type="checkbox" value="{{ item.documentName }}"
+                                                        {% for el in userImpDocs if (el.type == 'listing' and el.documentName == item.documentName) %}
+                                                            checked
+                                                        {% endfor %}
+                                                       name="docs[listing][]">
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="portlet box blue">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    Closing Documents
+                                </div>
+                            </div>
+                            <div class="portlet-body">
+                                {% set values = [] %}
+                                {% for item in docRules if (item.creating == "Closing" and item.status|lower not in ['sold not paid', 'leased not paid', 'sold paid', 'leased paid']) %}
+                                    {% if item.documentName not in values %}
+                                        {% set values = values|merge([item.documentName]) %}
+                                        <div class="form-group">
+                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                {{ item.documentName }}
+                                                <input type="checkbox" value="{{ item.documentName }}"
+                                                    {% for el in userImpDocs if (el.type == 'closing' and el.documentName == item.documentName) %}
+                                                        checked
+                                                    {% endfor %}
+                                                   name="docs[closing][]">
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <hr>
+                                {% for item in yesNoDocs if item.creating == "Closing" %}
+                                    {% if item.documentName not in values %}
+                                        {% set values = values|merge([item.documentName]) %}
+                                        <div class="form-group">
+                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                {{ item.documentName }}
+                                                <input type="checkbox" value="{{ item.documentName }}"
+                                                    {% for el in userImpDocs if (el.type == 'closing' and el.documentName == item.documentName) %}
+                                                        checked
+                                                    {% endfor %}
+                                                   name="docs[closing][]">
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="portlet box blue">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    Sold + Leased not Paid Documents
+                                </div>
+                            </div>
+                            <div class="portlet-body">
+                                {% for item in docRules if (item.creating == "Closing" and item.status|lower in ['sold not paid', 'leased not paid']) %}
+                                    {% if item.documentName not in values %}
+                                        {% set values = values|merge([item.documentName]) %}
+                                        <div class="form-group">
+                                            <label class="mt-checkbox mt-checkbox-outline">
+                                                {{ item.documentName }}
+                                                <input type="checkbox" value="{{ item.documentName }}"
+                                                        {% for el in userImpDocs if (el.type == 'closing_sold_not_paid' and el.documentName == item.documentName) %}
+                                                            checked
+                                                        {% endfor %}
+                                                       name="docs[closing_sold_not_paid][]">
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button id="save" type="submit" class="btn btn-success">
+                            <i class="fa fa-check"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="" role="basic" aria-hidden="true" style="display: none; padding-right: 15px;">
+        <div class="modal-dialog modal-lg" style="transform: none !important;">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

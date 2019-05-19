@@ -1,0 +1,76 @@
+<div class="render_business {% if vendors|length > 8 %}scroller{% endif %}" id="render_business">
+    <div class="row">
+        {% if vendors is empty %}
+            <h2>No matching vendors found</h2>
+        {% else %}
+            <ul class="thumbnails bxslider" style="padding-left: 15px;">
+                {% for vendor in vendors %}
+                    {# Convert vendors category number to badget (set badget color and text) #}
+                    {% if vendor.vendorCategory == 3 %}
+                        {% set color = "#D4AF37" %}
+                        {% set name  = "Gold" %}
+                    {#{% elseif vendor.vendorCategory == 2 and isFromMainPage == false %}#}
+                        {#{% set color = "#C0C0C0" %}#}
+                        {#{% set name  = "Silver" %}#}
+                    {% elseif vendor.vendorCategory == 1 %}
+                        {% set color = "#CD7F32" %}
+                        {% set name  = "Bronze" %}
+                    {% else %}
+                        {% set color = "#000000" %}
+                        {% set name  = "" %}
+                    {% endif %}
+                    <li class="vendor-box">
+                        <div class="flip-container" ontouchstart="this.classList.toggle('hover');">
+                            <div class="flipper">
+                                <div class="front">
+                                    <div class="col-sm-12 space-mobile well border_shadow" style="{% if vendor.vendorCategory > 0 %}min-height:200px;{% else %}min-height:95px;{% endif %} margin-bottom:0;background-color:#fff;position:relative;border: 1px solid;text-align: center; overflow: hidden;">
+                                            <div style="
+                                                 position: absolute;
+                                                 top: 10px;
+                                                 left: -35px;
+                                                 transform: rotate(-45deg);
+                                                 font-size: 16px;
+                                                 background-color: {{color}};
+                                                 display: block;
+                                                 width: 110px;
+                                                 text-align: center;
+                                                 ">{{ name }}</div>
+
+                                            {# Show vendor logo if his category is not free #}
+                                            {% if vendor.vendorCategory > 0 %}
+                                                <div class="img_contain" style="height: 105px; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-align: center; -webkit-align-items: center; -webkit-box-align: center; align-items: center;">
+                                                    {% if vendor.businesses.first.fileName is null or vendor.businesses.first.fileName is empty %}
+                                                        <img src="/images/empty-vendor.jpg" alt="" style="max-width:100%; max-height:90px; margin: 0 auto;">
+                                                    {% else %}
+                                                        <img src="{{ vich_uploader_asset(vendor.businesses[0], 'file') }}" alt="" style="max-width:100%; max-height:90px; margin: 0 auto;">
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+
+                                            <div style="bottom: 10px;position: absolute;text-align: center;width: 79%;">
+                                                <h5 style="font-size: 10px;">
+                                                    <strong>{{ vendor.firstname }} {{ vendor.lastname }}</strong><br/>
+                                                    {{ vendor.businesses[0].name }}<br>
+                                                    Bio<br>
+                                                    {% for t_ype in vendor.businesses[0].types %}
+                                                        {{ t_ype.name }}<br>
+                                                    {% endfor %}
+                                                </h5>
+                                            </div>
+                                        </div>
+                                </div>
+                                <div class="back">
+                                    <a style="color: #000000; text-decoration: none;" href="{{ path('vendor_bio_ajax', {'vendorId': vendor.id}) }}" data-target="#ajax" data-toggle="modal">
+                                        <div class="col-sm-12 space-mobile well border_shadow" style="{% if vendor.vendorCategory > 0 %}min-height:200px;{% else %}min-height:95px;{% endif %} margin-bottom:0;background-color:#e4e4e4; position:relative;border: 1px solid; text-align: center; overflow: hidden;">
+                                            <h4>Click for More Info</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>

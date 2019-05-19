@@ -1,0 +1,7 @@
+parameters:
+#    locals_best_common.example.class: LocalsBest\CommonBundle\Example
+
+services:
+#    locals_best_common.example:
+#        class: %locals_best_common.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

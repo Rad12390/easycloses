@@ -1,0 +1,7 @@
+{% for category in categories %}
+    <li {% if selected == category.id %}class="active"{% endif %} data-toggle="tooltip" data-placement="bottom" title="{{ category.description }}">
+        <a href="{{ path('products', url|merge({'category':category.id })) }}">
+            {% if category.icon is not null %}<i class="fa {{ category.icon }}"></i>{% endif %} {{ category.title }}
+        </a>
+    </li>
+{% endfor %}

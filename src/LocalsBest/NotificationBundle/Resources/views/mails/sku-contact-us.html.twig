@@ -1,0 +1,9 @@
+Hello,
+<br>
+{{ entity.userName }} create Contact Us request on {{ entity.createdAt|date("m/d/Y H:i") }}{% if entity.sku is not null %} for sku: "{{ entity.sku.title }}"{% endif %}. Contact Us Notes are :<br>
+<br>
+{{ entity.note }}<br>
+<br>
+Created by {{ entity.userName }} (Email: {{ entity.email }}), {{ entity.phone }}<br>
+<br>
+Thank You, Localsbest Concierge for Easycloses.com

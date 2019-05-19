@@ -1,0 +1,79 @@
+<script>
+    jQuery(document).ready(function () {
+        $('.modal-content').modal('hide');
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+
+        $('#create_doc_type_name').on('click', function() {
+            var docName = $('#doc_type_name').val();
+            var typeName = $("#transactionType option:selected").text();
+            var typeVal = $("#transactionType option:selected").val();
+
+            if(docName === '') {
+                alert('Please Enter Document Name');
+                $("#doc_type_name").focus();
+                return false;
+            } else if(typeVal === '') {
+                alert('Select Transaction Type');
+                return false;
+            } else {
+                $.post(
+                    '{{ path('document_type_add_ByAjax', {'id': id }) }}',
+                    {'docName': docName, 'typeName': typeName, 'typeVal': typeVal},
+                    function (data) {
+                        var data = jQuery.parseJSON(data);
+
+                        alert('New Document type Added Successfully');
+
+
+                        var newOption = new Option(data.documentName, data.documentId, true, true);
+
+                        if ($("select#documentType optgroup[label=" + data.type + "]").length == 0) {
+                            var groupTemplate = $('<optgroup label="' + data.type + '" />');
+                            $("select#documentType").append(groupTemplate);
+                        }
+
+                        $("select#documentType optgroup[label=" + data.type + "]").append(newOption).trigger('change');
+
+                        $('#ajax').modal('hide');
+                        return data;
+                    }
+                );
+            }
+        });
+        
+    });
+</script>
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" data-target="#myModal"></button>
+    <h4 class="modal-title">Add Document Type</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <input type="text" class="col-md-12 form-control" name="doc_type_name" id="doc_type_name" placeholder="Add Document Type">
+            </div>
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <div class="col-md-12">
+            <div class="form-group">
+                <select id="transactionType" class="form-control">
+                    {% if allTransactionTypes|length >= 1 %}
+                        <option value="">Select Type..</option>
+                        {% for type in allTransactionTypes %}
+                            <option value="{{ type['id'] }}">{{ type['type'] }}</option>
+                        {% endfor %}
+                    {% endif%}
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-primary" id="create_doc_type_name"><i class="fa fa-check"></i> Save changes</button>
+</div>

@@ -1,0 +1,168 @@
+{% extends 'knp_menu_base.html.twig' %}
+
+{% macro attributes(attributes) %}
+    {% for name, value in attributes %}
+        {%- if value is not none and value is not same as(false) -%}
+            {{- ' %s="%s"'|format(name, value is same as(true) ? name|e : value|e)|raw -}}
+        {%- endif -%}
+    {%- endfor -%}
+{% endmacro %}
+
+{% block compressed_root %}
+    {% spaceless %}
+        {{ block('root') }}
+    {% endspaceless %}
+{% endblock %}
+
+{% block root %}
+    {% set listAttributes = item.childrenAttributes %}
+    {{ block('list') -}}
+{% endblock %}
+
+{% block list %}
+    {% if item.hasChildren and options.depth is not same as(0) and item.displayChildren %}
+        {% import _self as knp_menu %}
+        <ul class="{% if item.attribute('subMenu') is defined and item.attribute('subMenu') == true %}sub-menu{% else %}page-sidebar-menu searchingAllElement{% endif %}" {{ knp_menu.attributes(listAttributes) }}>
+            {{ block('children') }}
+           
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% block children %}
+    {# save current variables #}
+    {% set currentOptions = options %}
+    {% set currentItem = item %}
+    {# update the depth for children #}
+    {% if options.depth is not none %}
+        {% set options = options|merge({'depth': currentOptions.depth - 1}) %}
+    {% endif %}
+    {# update the matchingDepth for children #}
+    {% if options.matchingDepth is not none and options.matchingDepth > 0 %}
+        {% set options = options|merge({'matchingDepth': currentOptions.matchingDepth - 1}) %}
+    {% endif %}
+    {% for item in currentItem.children %}
+        {{ block('item') }}
+    {% endfor %}
+    {# restore current variables #}
+    {% set item = currentItem %}
+    {% set options = currentOptions %}
+{% endblock %}
+
+{% block item %}
+    {% if item.displayed %}
+        {% if item.attribute('concierge') is not null and item.attribute('concierge') == true %}
+            {{ block('concierge') }}
+        {% else %}
+            {# building the class of the item #}
+            {%- set classes = item.attribute('class') is not empty ? [item.attribute('class')] : [] %}
+            {%- if matcher.isCurrent(item) %}
+                {%- set classes = classes|merge([options.currentClass]) %}
+            {%- elseif matcher.isAncestor(item, options.matchingDepth) %}
+                {%- set classes = classes|merge([options.ancestorClass]) %}
+            {%- endif %}
+            {%- if item.actsLikeFirst %}
+                {%- set classes = classes|merge([options.firstClass]) %}
+            {%- endif %}
+            {%- if item.actsLikeLast %}
+                {%- set classes = classes|merge([options.lastClass]) %}
+            {%- endif %}
+
+            {# Mark item as "leaf" (no children) or as "branch" (has children that are displayed) #}
+            {% if item.hasChildren and options.depth is not same as(0) %}
+                {% if options.branch_class is not empty and item.displayChildren %}
+                    {%- set classes = classes|merge([options.branch_class]) %}
+                {% endif %}
+            {% elseif options.leaf_class is not empty %}
+                {%- set classes = classes|merge([options.leaf_class]) %}
+            {%- endif %}
+
+            {%- set attributes = item.attributes %}
+            {%- if classes is not empty %}
+                {%- set attributes = attributes|merge({'class': classes|join(' ')}) %}
+            {%- endif %}
+            {# displaying the item #}
+            {% import _self as knp_menu %}
+            <li{{ knp_menu.attributes(attributes) }} class="nav-item">
+                {%- if item.uri is not empty and (not matcher.isCurrent(item) or options.currentAsLink) %}
+                    {{ block('linkElement') }}
+                {%- else %}
+                    {{ block('spanElement') }}
+                {%- endif %}
+                {# render the list of children#}
+                {%- set childrenClasses = item.childrenAttribute('class') is not empty ? [item.childrenAttribute('class')] : [] %}
+                {%- set childrenClasses = childrenClasses|merge(['menu_level_' ~ item.level]) %}
+                {%- set listAttributes = item.childrenAttributes|merge({'class': childrenClasses|join(' ') }) %}
+                {{ block('list') }}
+            </li>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block linkElement %}
+    {% import _self as knp_menu %}
+    <a {% if item.attribute('subMenu') is defined and item.attribute('subMenu') == true %}class="nav-link nav-toggle"{% endif %} href="{{ item.uri }}"{{ knp_menu.attributes(item.linkAttributes) }}>
+        <i class="{{ item.attribute('icon') }}"></i>
+        {{ block('label') }}
+        {{ block('badget') }}
+        <span class="selected"></span>
+        {% if item.attribute('subMenu') is defined and item.attribute('subMenu') == true %}
+            <span class="arrow"></span>
+        {% endif %}
+    </a>
+{% endblock %}
+
+{% block spanElement %}
+    {% import _self as knp_menu %}
+    <span{{ knp_menu.attributes(item.labelAttributes) }}>{{ block('label') }}</span>
+{% endblock %}
+
+{% block label %}
+    <span class="title">
+        {% if options.allow_safe_labels and item.getExtra('safe_label', false) %}
+            {{ item.label|raw }}
+        {% else %}
+            {{ item.label }}
+        {% endif %}
+    </span>
+{% endblock %}
+
+{% block badget %}
+    {{ item.attribute('badget')|raw }}
+{% endblock %}
+
+{% block concierge %}
+    <li id="concierge">
+        <div class="portlet box {% if( app.user.businesses[0].themeColor == 'purple' ) %} purple {% else %} grey {% endif %}">
+            <div class="portlet-title">
+                <div class="caption" style="font-size: 14px; padding-left: 5px">
+                    <i class="fa fa-phone" style="font-size: 16px;"></i>
+                    <span class="title searchBy">Concierge</span>
+                </div>
+            </div>
+            <div class="portlet-body gradient-bg">
+                <div class="row-fluid">
+                    <div class="span3 text-center">
+                        <img src="{{ asset('img/csr.jpg') }}" hieght="109px" width="83px">
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span12 text-center">
+                        <span style="font-size: 17px;"><i class="fa fa-phone"></i> 888-740-0550</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </li>
+{% endblock %}
+
+{#{% block concierge %}#}
+    {#<li id="pdf_form">#}
+            {#<div class="portlet-title">#}
+                {#<div class="caption" style="font-size: 14px; padding-left: 5px">#}
+                    {#<i class="fa fa-phone" style="font-size: 16px;"></i>#}
+                    {#<a href="{{ path('pdf_form') }}"><span class="title searchBy">Pdf form</span></a>#}
+                {#</div>#}
+            {#</div>#}
+    {#</li>#}
+{#{% endblock %}#}

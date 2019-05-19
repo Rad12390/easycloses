@@ -1,0 +1,81 @@
+{% extends "::base.html.twig" %}
+
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block title %}
+    Invite Paid Service
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('vendor_index') }}">Service Directory</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Paid Service Invite
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row" style="margin:15px;">
+
+        <div class="col-md-5">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-info-circle"></i> Paid Business Invite
+                    </div>
+                </div>
+                <div class="portlet-body" style="font-weight: 400; font-size: 16px;">
+                    <p>
+                        Easy Closes lists and advertises professionals who deal with buyers, sellers and renters needing services for their home. We are careful to only list companies who have a proven track record and who excel in customer service.
+                    </p>
+                    <p>
+                        With your position and experience, you are no doubt aware of a variety of companies in your area that would meet our criteria. We’d be delighted if you would share with us one or more of your favorite service providers that might appreciate more business
+                    </p>
+                    <p>
+                        <b>Invite your favorite business to create an account and work with your entire office.</b>
+                    </p>
+                    <p>
+                        We are currently looking for businesses who would be interested in a paid listing. For a small fee, your favorite business may take advantage of a host of benefits. So many businesses have told us that they’ve made their money back after just one job. It’s a terrific opportunity for any business!
+                    </p>
+                    <p>
+                        <b>Fill in the form now to help your favorite businesses get more jobs – it’s fast and easy!</b>
+                    </p>
+                </div>
+            </div>   
+        </div>		
+
+        <div class="col-md-7 submit_form">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-database"></i> Submit Service
+                    </div>
+                </div>
+
+                <div class="portlet-body form">
+                    <div class="row" style="margin: 0;">
+                        <br>
+                        <div class="col-md-12">
+                            {{ form_start(form) }}
+                            {{ form(form) }}
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

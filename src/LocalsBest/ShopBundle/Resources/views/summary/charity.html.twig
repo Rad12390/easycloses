@@ -1,0 +1,102 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}
+    Summary - Manager
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Charity Summary
+    </li>
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    
+{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/css/components.min.css') }}" />
+    <style>
+        td.collapse-icon{
+            background: url("../images/") no-repeat 0 0;
+        }
+        
+    </style>
+{% endblock %}   
+{% block content -%}
+    
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-gift"></i>Charity Summary </div>
+            <div class="tools">
+                <a href="javascript:;" class="collapse"> </a>
+                <a href="#portlet-config" data-toggle="modal" class="config"> </a>
+                <a href="javascript:;" class="reload"> </a>
+                <a href="javascript:;" class="remove"> </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            
+            <table class="table">
+  <thead>
+    <tr>
+      <th>Payee</th>
+      <th>Business Name</th>
+      <th>Amount</th>
+      <th>Address</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr class="lvlcollapse" level="2" style="background:#eee; position: relative; cursor: pointer;">
+            <td>{{order.payee}}</td>
+            <td>{{order.businessName}}	</td>
+            <td>${{order.total}}</td>
+            <td>{{order.address}}</td>
+            <td class="collapse-icon"><span></span></td>
+    </tr>        
+    <tr class="lvlcollapse" level="3" style="display: none;">
+        	<td colspan="4">
+           {% for history in order.history %}
+                <ul style="padding:0;">
+                	<li style="width: 284px; list-style: none; display: inline-block;">{{history.payee}}</li>
+                	<li style="width: 270px; list-style: none; display: inline-block;">{{history.businessName}}</li>
+                	<li style="width: 133px; list-style: none; display: inline-block;">${{history.total}}</li>
+                	<li style="width: auto; list-style: none; display: inline-block;">{{history.address}}</li>
+                </ul>
+   
+            {% endfor %}
+            
+            </td>
+                       
+        </tr>       
+    {% endfor %}
+  </tbody>
+</table>
+        </div>
+    </div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-latest.js"></script>
+<script>
+    $(document).ready(function(){
+        $(".lvlcollapse").click(function() {
+            var level = $(this).attr("level");
+            $(this).nextAll(".lvlcollapse").each(function() {
+                var sublvl = $(this).attr("level");
+                if ( sublvl > level ) {
+                    $(this).toggle();
+                } else {
+                    return false;
+                }
+            });
+	});
+    });
+</script>
+
+    
+{% endblock %}

@@ -1,0 +1,12 @@
+<div class="todo-tasklist-item todo-tasklist-item-border-red">
+    <img class="todo-userpic pull-left" src="{% if share is defined and share.createdBy.fileName is not empty %}{{ vich_uploader_asset(share.createdBy, 'file') }}{% else %}https://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image {% endif%}" width="27px" height="27px">
+    <div class="todo-tasklist-item-title">
+        {% if share is defined and share.createdBy.fullname is not empty %}{{ share.createdBy.fullname }}&nbsp;&nbsp;<small>{{ share.createdBy.username }}</small>{% endif%}
+    </div>
+    <div class="todo-tasklist-item-text">
+        {% if share is defined  %}<h4 class="media-heading">{{ share.user.fullname }}</h4>{{ share.user.role.name }}{% endif%}
+    </div>
+    <div class="todo-tasklist-controls pull-left">
+        <span class="todo-tasklist-date"><i class="fa fa-calendar"></i> {% if share is defined  %}{{ time_diff(share.created) }}{% endif%} </span>
+    </div>
+</div>

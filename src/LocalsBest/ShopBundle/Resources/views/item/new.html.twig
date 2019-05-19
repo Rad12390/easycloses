@@ -1,0 +1,550 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}"/>
+    <style>
+      label.required.buyer_type {padding-left: 12px;}
+      .select2-container  { width:100% !important}
+      .delete-images{position: absolute;bottom: 0;z-index: 999;left: 105px;height:34px;font-size:14px;}
+      #localsbest_shopbundle_item_type{margin-left: 20px;}
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-select2.js') }}"></script>
+
+    <script>
+        jQuery(document).ready(function () {
+            var handleWysihtml5 = function() {
+                if (!jQuery().wysihtml5) {
+                    return;
+                }
+            };
+            handleWysihtml5();
+
+            $('#localsbest_shopbundle_item_type').on('click', function () {
+                hideFields();
+                var itemType = $(this).find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                if (itemType == 2) {
+                    $('#localsbest_shopbundle_item_plugin').parent().show();
+                } else if (itemType == 3) {
+                    $('#localsbest_shopbundle_item_externalLink').parent().show();
+                } else if (itemType == 4) {
+                    $('#localsbest_shopbundle_item_bucket').parent().show();
+                }
+
+            });
+
+            hideFields();
+
+            function hideFields() {
+                $('#localsbest_shopbundle_item_plugin').val('').parent().hide();
+                $('#localsbest_shopbundle_item_externalLink').val('').parent().hide();
+                $('#localsbest_shopbundle_item_bucket').val('').parent().hide();
+            }
+
+            // code to set Industries restriction as disable if all selected on load
+            var industriesSwitch = $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").val();
+            if(industriesSwitch=='')
+                $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", true);
+            else
+                $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", false);
+
+            // code to set Industries restriction as disable if all selected on selection of radio button
+            $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").change(function(){
+                setTimeout(function(){
+                    var switch_status= $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").find('input[type=radio]:checked').val();
+                    if(switch_status=='')
+                        $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", true);
+                    else
+                        $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", false);
+                }, 50);
+            });
+
+            // code to set business restriction as disable if all selected on load
+            var businessSwitch = $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").val();
+            if(businessSwitch=='')
+                $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", true);
+            else
+                $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", false);
+
+            // code to set Industries restriction as disable if all selected on selection of radio button
+            $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").change(function(){
+                setTimeout(function(){
+                    var switch_status= $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").find('input[type=radio]:checked').val();
+                    if(switch_status=='')
+                        $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", true);
+                    else
+                        $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", false);
+                }, 50);
+            });
+
+            //code to set allignment of radio button as inline
+            $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+
+            $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+
+            $("#localsbest_shopbundle_item_restrictions_0_statesSwitch").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+
+            $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+
+            $("#localsbest_shopbundle_item_restrictions_0_type").val("use");
+            var value= $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+            var role= '{{role}}';
+            if(value==2 && role=='Admin'){
+                $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","block");
+                $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","block");
+                $(".use-restriction").css("display","block");
+               // $("#localsbest_shopbundle_item_restrictions_0_rolesSwitch").closest(".form-group").css("display","block");
+            }
+            else{
+               $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","none");
+               $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","none");
+               $(".use-restriction").css("display","none");
+              // $("#localsbest_shopbundle_item_restrictions_0_rolesSwitch").closest(".form-group").css("display","none");
+            }
+
+            $("#localsbest_shopbundle_item_type").click(function(){
+                var value= $(this).find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                var role= '{{role}}';
+                if(value==2 && role=='Admin'){
+                   $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","none");
+                   $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","none");
+                  // $("#localsbest_shopbundle_item_restrictions_0_rolesSwitch").closest(".form-group").css("display","block");
+                    $(".use-restriction").css("display","block");
+                }
+                else{
+                   $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","none");
+                   $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","none");
+                   $(".use-restriction").css("display","none");
+                 //  $("#localsbest_shopbundle_item_restrictions_0_rolesSwitch").closest(".form-group").css("display","none");
+                }
+            });
+            //restrict state & city dropdown for default ie, without upgrade
+            var status= '{{state_status}}';
+            if(status==1){
+
+                {#$("#localsbest_shopbundle_item_restrictions_0_statesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='enable')
+                        $(this).prop("checked", true);
+                });#}
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='enable')
+                        $(this).prop("checked", true);
+                });
+                //$("#localsbest_shopbundle_item_restrictions_0_statesSwitch").css("display","none");
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","none");
+                $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () {
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 1
+                    });
+                });
+
+                $("#localsbest_shopbundle_item_restrictions_0_cities").on("change", function () {
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        maximumSelectionLength: 3
+                    });
+                });
+            }
+            else if(status==2){
+               {# $("#localsbest_shopbundle_item_restrictions_0_statesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='enable')
+                        $(this).prop("checked", true);
+                });#}
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='enable')
+                        $(this).prop("checked", true);
+                });
+               // $("#localsbest_shopbundle_item_restrictions_0_statesSwitch").css("display","none");
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","none");
+
+                //code for first upgrade of state (ie, can select up to 1 state only)
+                $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () {
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 1
+                    });
+                });
+                //code for first upgrade of state (ie, can select up to 10 cities)
+                $("#localsbest_shopbundle_item_restrictions_0_cities").on("change", function () {
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        maximumSelectionLength: 10
+                    });
+                });
+            }
+            else if(status==3){
+                //$("#localsbest_shopbundle_item_restrictions_0_statesSwitch").css("display","block");
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","block");
+                {#$("#localsbest_shopbundle_item_restrictions_0_statesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='')
+                        $(this).prop("checked", true);
+                });#}
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='')
+                        $(this).prop("checked", true);
+                });
+                $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () {
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 1
+                    });
+                });
+            }
+            else if(status==4){
+                 // code to set Industries restriction as disable if all selected on load
+                var citiesSwitch = $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").val();
+                if(citiesSwitch==''){
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", true);
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        placeholder: "All Cities",
+                    });
+                }
+                else{
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", false);
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        placeholder: "Select Cities",
+                    });
+                }
+
+                // code to set Industries restriction as disable if all selected on selection of radio button
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").change(function(){
+                    setTimeout(function(){
+                        var switch_status= $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type=radio]:checked').val();
+                        if(switch_status==''){
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", true);
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                                placeholder: "All Cities",
+                            });
+                        }
+                        else{
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", false);
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                                placeholder: "Select Cities",
+                            });
+                        }
+                    }, 50);
+                });
+                 $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","block");
+                 $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()==''){
+                        $(this).prop("checked", true);
+                    }
+                });
+                 $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () {
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 50
+                    });
+                });
+            }
+
+            $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () {
+                var states= $(this).val();
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_city_based_state') }}",
+                    data: {
+                        states: states
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    data=[];
+                    for(var i=0;i<response['result'].length;i++){
+                        data.push({id:response['result'][i]['id'], text:response['result'][i]['name']});
+                    }
+                    $("#localsbest_shopbundle_item_restrictions_0_cities option").remove();
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        data: data
+                    })
+
+                })
+            });
+            $(".notifications").css("display","none");
+            $("#localsbest_shopbundle_item_type").find(".radio").eq(0).find("input[type='radio']").prop("checked",true);
+
+
+        });
+
+        var $collectionRestrictionsHolder;
+        var $collectionImagesHolder;
+        var $collectionDispositionsHolder;
+
+        // setup an "add a tag" link
+        var $addRestrictionLink = $('<a href="#" class="btn btn-primary add_restriction_link">Add a Restriction</a>');
+        var $addImageLink = $('<div style="margin-top:10px;"><a href="#" class="btn btn-primary add_image_link">Add a Image</a></div>');
+        var $addDispositionLink = $('<a href="#" class="btn btn-primary add_disposition_link">Add a Disposition</a>');
+        var $newRestrictionLinkLi = $('<li></li>').append($addRestrictionLink);
+        var $newImageLinkLi = $('<li></li>').append($addImageLink);
+        var $newDispositionLinkLi = $('<li></li>').append($addDispositionLink);
+
+        jQuery(document).ready(function() {
+
+            // Get the ul that holds the collection of tags
+            $collectionRestrictionsHolder = $('ul.item-restrictions');
+            $collectionImagesHolder = $('ul.item-images');
+            $collectionDispositionsHolder = $('ul.item-dispositions');
+
+            // add the "add a tag" anchor and li to the tags ul
+            $collectionRestrictionsHolder.append($newRestrictionLinkLi);
+            $collectionImagesHolder.append($newImageLinkLi);
+            $collectionDispositionsHolder.append($newDispositionLinkLi);
+
+
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $collectionRestrictionsHolder.data('index', $collectionRestrictionsHolder.find(':input').length);
+            $collectionImagesHolder.data('index', $collectionImagesHolder.find(':input').length);
+            $collectionDispositionsHolder.data('index', $collectionDispositionsHolder.find(':input').length);
+
+            $addRestrictionLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionRestrictionsHolder, $newRestrictionLinkLi);
+            });
+
+            $addImageLink.on('click', function(e) {
+                
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionImagesHolder, $newImageLinkLi);
+                //code so as to add the order no.
+                var li_count = $(".add_image_link").closest("ul").find('li').length;
+                li_count = (li_count-1);
+                
+                var id= $(".add_image_link").closest("ul").find('li').eq(-2).find('input[type="text"]').attr("id");
+                $("#"+id).val(li_count);
+                var tooltip_order= '<span style="">{{ tooltip_text.getText('Order Number')|raw }}</span>';
+                $(tooltip_order).insertAfter("label[for='"+id+"']");
+            });
+
+            $addDispositionLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionDispositionsHolder, $newDispositionLinkLi);
+            });
+
+            // add a delete link to all of the existing tag form li elements
+            $collectionDispositionsHolder.find('li:not(:last)').each(function() {
+                addFormDeleteLink($(this),$collectionDispositionsHolder);
+            });
+
+            // add a delete link to all of the existing tag form li elements
+           {# $collectionRestrictionsHolder.find('li:not(:last)').each(function() {
+                addFormDeleteLink($(this));
+            });#}
+
+            // add a delete link to all of the existing tag form li elements
+            $collectionImagesHolder.find('li:not(:last)').each(function() {
+                addFormDeleteLink($(this),$collectionImagesHolder);
+            });
+
+            $(".add_restriction_link").trigger("click");
+            $(".add_restriction_link").css("display","none");
+           // $(".use-restriction").find('#localsbest_shopbundle_item_restrictions_1_type').closest('.form-group').remove();
+            $(".use-restriction").find('#localsbest_shopbundle_item_restrictions_1_buyerType').closest('.form-group').remove();
+            //$(".use-restriction").find('#localsbest_shopbundle_item_restrictions_1_roles').closest('.form-group').remove();
+
+            $("#localsbest_shopbundle_item_restrictions_1_states").on("change", function () {
+                var states= $(this).val();
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_city_based_state') }}",
+                    data: {
+                        states: states
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    data=[];
+                    for(var i=0;i<response['result'].length;i++){
+                        data.push({id:response['result'][i]['id'], text:response['result'][i]['name']});
+                    }
+                    $("#localsbest_shopbundle_item_restrictions_1_cities option").remove();
+                    $("#localsbest_shopbundle_item_restrictions_1_cities").select2({
+                        data: data
+                    })
+
+                })
+            });
+           $(".add_image_link").trigger("click");
+
+            $("#localsbest_shopbundle_item_submit_active").click(function(){
+                var image_length= $("ul.item-images").find('li').length;
+                var status=0;
+                if(image_length>1){
+                    for(var i=0;i<image_length-1;i++){
+                        var image= $("ul.item-images li:eq("+i+")").find('img').attr("src");
+                        if(typeof image== 'undefined'){
+                            alert("Please upload the "+(i+1)+" image");
+                            status=1;
+                        }
+                    }
+                    if(status==1){
+                        return false;
+                    }
+                }
+                var itemType = $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                if(itemType==3){
+                    var ext_url= $("#localsbest_shopbundle_item_externalLink").val()
+                    var pattern = /^(http|https)?:\/\/[a-zA-Z0-9-\.]+\.[a-z]{2,4}/;
+                    if(!pattern.test(ext_url)){
+                         alert("Enter the correct External link");
+                         return false;
+                    }
+                }
+            });
+
+            $("#localsbest_shopbundle_item_submit_draft").click(function(){
+                var image_length= $("ul.item-images").find('li').length;
+                var status=0;
+                if(image_length>1){
+                    for(var i=0;i<image_length-1;i++){
+                        var image= $("ul.item-images li:eq("+i+")").find('img').attr("src");
+                        if(typeof image== 'undefined'){
+                            alert("Please upload the "+(i+1)+" image");
+                            status=1;
+                        }
+                    }
+                    if(status==1){
+                        return false;
+                    }
+                }
+                var itemType = $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                if(itemType==3){
+                    var ext_url= $("#localsbest_shopbundle_item_externalLink").val()
+                    var pattern = /^(http|https)?:\/\/[a-zA-Z0-9-\.]+\.[a-z]{2,4}/;
+                    if(!pattern.test(ext_url)){
+                         alert("Enter the correct External link");
+                         return false;
+                    }
+                }
+            });
+
+
+        });
+
+        function addForm($collectionHolder, $newLinkLi) {
+            // Get the data-prototype explained earlier
+            var prototype = $collectionHolder.data('prototype');
+
+            // get the new index
+            if($collectionHolder.selector!='ul.item-restrictions')
+                var index = $collectionHolder.data('index');
+            else
+                var index=1;
+
+            var newForm = prototype;
+            // You need this only if you didn't set 'label' => false in your tags field in TaskType
+            // Replace '__name__label__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            // newForm = newForm.replace(/__name__label__/g, index);
+
+            // Replace '__name__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            newForm = newForm.replace(/__name__/g, index);
+
+            // increase the index with one for the next item
+            $collectionHolder.data('index', index + 1);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+            if($collectionHolder.selector=='ul.item-images'){
+                var $newFormLi = $('<li style="position:relative;"></li>').append(newForm);
+            }
+            else{
+                var $newFormLi = $('<li"></li>').append(newForm);
+            }
+            $newLinkLi.before($newFormLi);
+
+            // add a delete link to the new form
+            if($collectionHolder.selector!='ul.item-restrictions')
+                 addFormDeleteLink($newFormLi,$collectionHolder);
+
+            $('.select2').select2();
+        }
+
+        function addFormDeleteLink($objectFormLi,$collectionImagesHolder) {
+
+           // console.log($collectionImagesHolder.selector);
+           if($collectionImagesHolder.selector=='ul.item-images')
+                var $removeFormA = $('<a class="btn btn-sm btn-danger delete-images" href="#">Delete</a>');
+            else
+                var $removeFormA = $('<a class="btn btn-sm btn-danger" href="#">Delete</a>');
+            $objectFormLi.append($removeFormA);
+
+            $removeFormA.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // remove the li for the tag form
+                $objectFormLi.remove();
+            });
+        }
+        $("#localsbest_shopbundle_item_markup").closest(".form-group").css("display","none");
+        $("#localsbest_shopbundle_item_restrictions").closest(".form-group").css("display","none");
+
+        var tooltip_inventory= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Inventory')|raw }}</span>';
+        $(tooltip_inventory).insertAfter("label[for='localsbest_shopbundle_item_quantity']");
+
+        var button_states= '<span style="float:right;margin-top:-12px;">{{ button_text.getText('4')|raw }}</span>';
+        $(button_states).insertAfter("label[for='localsbest_shopbundle_item_restrictions_0_states']");
+
+        var external_link_status= '{{external_link_status}}';
+        if(external_link_status==0){
+            var button_external_link= '<span style="float:right;margin-top:-10px;">{{ button_text.getText('5')|raw }}</span>';
+            $(button_external_link).insertAfter("label[for='localsbest_shopbundle_item_externalLink']");
+        }
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        Item Creation
+                        <span>{{ tooltip_text.getText('Item Creation','header')|raw }}</span>
+                    </div>
+                    <div class="actions">
+
+                        <a class="btn btn-default" href="{{ path('items') }}">
+                            <i class="fa fa-arrow-left"></i> Back to the List
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="table-responsive">
+                        {{ include('@LocalsBestShop/item/_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

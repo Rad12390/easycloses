@@ -1,0 +1,254 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    {{ entity.0.title }} | Products
+{% endblock %}
+
+{% form_theme feedback_form 'bootstrap_3_layout.html.twig' %}
+
+{% block styles %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/shop/bootstrap-star-rating/css/star-rating.css">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="/shop/bootstrap-star-rating/js/star-rating.js"></script>
+    <script src={{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.js') }}"></script>
+    <script src="{{ asset('shop/js/page-product-detail.js', null, false, 2) }}"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.product-type').on('click', function() {
+                $(".to_cart").attr('disabled', false)
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+
+                {% if app.user %}
+                    <div id="review-dialog" class="mfp-with-anim mfp-hide mfp-dialog clearfix">
+                        <h3>Add a Review</h3>
+
+                        {{ form(feedback_form) }}
+
+                    </div>
+                {% endif %}
+
+                <div class="box" style="border: 5px solid #7f898b;">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="fotorama" data-nav="thumbs" data-allowfullscreen="1" data-thumbheight="150" data-thumbwidth="150">
+                                {% for image in entity.0.images %}
+                                    <img src="{{ vich_uploader_asset(image, 'imageFile') }}" alt="{{ entity.0.title }}" title="{{ entity.0.title }}">
+                                {% else %}
+                                    <img src="/shop/img/800x600.png" alt="{{ entity.0.title }}" title="{{ entity.0.title }}"/>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="product-info box">
+                                {% if entity.0.feedbacks|length > 0 %}
+                                    <ul class="icon-group icon-list-rating text-color" title="{{ entity.averageRating|round(1) }}/5 rating">
+                                        {{ entity.averageRating|round(1)|rating|raw }}
+                                    </ul>
+                                    <small><a href="#" class="text-muted">based on {{ entity.0.feedbacks|length }} reviews</a></small>
+                                {% endif %}
+                                <h3>{{ entity.0.title }}</h3>
+                                <p class="product-info-price">
+                                    {{ entity.0.getPrice }}
+                                </p>
+                                {% if tags is not empty %}
+                                    <p style="border-bottom: 1px solid #d9d9d9; color: #2a8fbd; margin-bottom: 10px; padding-bottom: 10px;">
+                                        {% for tag in tags %}
+                                            <a href="#"><i class="fa fa-tag"></i> {{ tag }}</a>
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
+                                <p class="text-smaller text-muted">
+                                    {{ entity.0.shortDescription|raw }}
+                                </p>
+                                <ul class="list-inline">
+                                    <li>
+                                        {% if entity.0.linkTo is not null %}
+                                            <a target="_blank" href="{{ entity.0.linkTo }}" class="btn btn-primary">
+                                                <i class="fa fa-arrow-circle-right"></i> Visit Now
+                                            </a>
+                                        {% else %}
+                                            <a disabled="disabled" href="#" class="btn btn-primary to_cart" data-value="{{ entity.0.id }}">
+                                                <i class="fa fa-shopping-cart"></i> Add to cart
+                                            </a>
+                                        {% endif %}
+                                    </li>
+                                    {#<li>#}
+                                    <li>
+                                        <a class="btn btn-info" href="{{ path('contact_us', {'product': entity.0.id}) }}">
+                                            Contact Us
+                                        </a>
+                                    </li>
+                                        {#<a href="#" class="btn">#}
+                                            {#<i class="fa fa-star"></i> To Wishlist#}
+                                        {#</a>#}
+                                    {#</li>#}
+                                </ul>
+
+                                {% if entity.0.linkTo is null %}
+                                    <ul style="list-style-type:none">
+                                        {% for type in entity.0.types if (type.price+type.setupFee) >= 0 %}
+                                            <li>
+                                                <label>
+                                                    <input value="{{ type.id }}" class="product-type" type="radio" name="product_type">
+                                                    {% if (type.price+type.setupFee) == 0 %}
+                                                        Free
+                                                    {% else %}
+                                                        {{ type.priceString }}
+                                                    {% endif %}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                        {#<li>#}
+                                            {#<a href="#" class="btn">#}
+                                                {#<i class="fa fa-star"></i> To Wishlist#}
+                                            {#</a>#}
+                                        {#</li>#}
+                                    </ul>
+                                {% endif %}
+                            </div>
+
+                            {{ render(controller('LocalsBestUserBundle:Product:parentProductBlock', { 'product': entity.0.parent })) }}
+
+                            {% if entity.0.children|length > 0 %}
+                                <div class="product-info box" style="margin: 15px 0;">
+                                    <h4 style="color: #5bc0de;">Available Add Ons</h4>
+                                    {% for child in entity.0.children %}
+                                        <a href="{{ path('products_show', {'slug': child.slug}) }}">{{ child.title }}</a>
+                                        <ul>
+                                            {% for childType in child.types %}
+                                                <li>
+                                                    <label>
+                                                        <input value="{{ childType.id }}" class="product-type" type="radio" name="product_type">
+                                                        {{ childType.priceString }}
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+
+
+                        </div>
+                    </div>
+                    <div class="gap"></div>
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs" id="myTab">
+                            <li class="active">
+                                <a href="#tab-1" data-toggle="tab">
+                                    <i class="fa fa-pencil"></i> Description
+                                </a>
+                            </li>
+                            {#<li>#}
+                                {#<a href="#tab-3" data-toggle="tab">#}
+                                    {#<i class="fa fa-truck"></i> Shipping & Payment#}
+                                {#</a>#}
+                            {#</li>#}
+                            <li>
+                                <a href="#tab-4" data-toggle="tab">
+                                    <i class="fa fa-comments"></i> Reviews
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="tab-1">
+                                <p>
+                                    {{ entity.0.description|raw }}
+                                </p>
+                            </div>
+
+                            {#<div class="tab-pane fade" id="tab-3">#}
+                                {#<p>#}
+                                    {#Felis elit netus sed iaculis interdum nullam sem habitasse vulputate laoreet turpis#}
+                                    {#fringilla duis suspendisse arcu ullamcorper scelerisque elit quam dignissim velit lacus#}
+                                    {#urna quam interdum quisque bibendum platea iaculis#}
+                                {#</p>#}
+                                {#<p>#}
+                                    {#Blandit dapibus non natoque purus pellentesque nibh duis neque metus elementum aliquet ut#}
+                                    {#egestas orci elit pellentesque pulvinar in nam class mollis netus dolor augue nec#}
+                                    {#senectus torquent velit fusce#}
+                                {#</p>#}
+                            {#</div>#}
+                            <div class="tab-pane fade" id="tab-4">
+                                {% if app.user %}
+                                    <a class="popup-text btn btn-primary" style="margin-bottom: 15px;" href="#review-dialog" data-effect="mfp-zoom-out">
+                                        <i class="fa fa-pencil"></i> Add a review
+                                    </a>
+                                {% else %}
+                                    <div style="margin-bottom: 15px;">
+                                        <a class="btn btn-primary" href="{{ path('join') }}">
+                                            Join
+                                        </a>
+                                        or
+                                        <a class="btn btn-primary" href="{{ path('login') }}">
+                                            Login
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <ul class="comments-list">
+                                    {% for feedback in entity.0.feedbacks %}
+                                        <li>
+                                            <!-- REVIEW -->
+                                            <article class="comment">
+                                                <div class="comment-author">
+                                                    {% if feedback.user is not null %}
+                                                        {% if feedback.user.fileName is not empty %}
+                                                            <img src="{{ vich_uploader_asset(feedback.user, 'file') }}" style="width: 50px; height: 50px;" alt="{{ feedback.fullName }}" title="{{ feedback.fullName }}">
+                                                        {% else %}
+                                                            <img src="/images/empty-avatar.png" style="width: 50px; height: 50px;" alt="{{ feedback.fullName }}" title="{{ feedback.fullName }}">
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <img src="/images/empty-avatar.png" style="width: 50px; height: 50px;" alt="{{ feedback.fullName }}" title="{{ feedback.fullName }}"/>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="comment-inner">
+                                                    <ul class="icon-group icon-list-rating comment-review-rate" title="{{ feedback.rating }}/5 rating">
+                                                        {{ feedback.rating|rating|raw }}
+                                                    </ul>
+                                                    <span class="comment-author-name">{{ feedback.fullName }}</span>
+                                                    <p class="comment-content">
+                                                        {{ feedback.body }}
+                                                    </p>
+                                                </div>
+                                            </article>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="gap"></div>
+
+                {{ render(controller('LocalsBestUserBundle:Product:related', { 'product': entity.0, 'productLimit': 3 })) }}
+
+            </div>
+
+            <div class="col-md-3">
+                <aside class="sidebar-right">
+                    {{ render(controller('LocalsBestUserBundle:Product:recentViewed', { 'productLimit': 3 })) }}
+                    {{ render(controller('LocalsBestUserBundle:Product:popular', { 'productLimit': 3 })) }}
+                    {{ render(controller('LocalsBestUserBundle:Product:recentReviews', { 'productLimit': 3 })) }}
+                </aside>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

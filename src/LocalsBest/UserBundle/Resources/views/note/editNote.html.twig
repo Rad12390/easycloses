@@ -1,0 +1,71 @@
+{% block javascripts %}
+    <script>
+        jQuery(document).ready(function () {
+            $('.modal-content').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $("#add-note-form").submit(function () {
+                $("#save").attr('disabled', true);
+//                var url = $(this).attr('action');
+//                var data = $(this).serialize();
+//                $.post(url, data, function (data) {
+//                });
+//                location.reload(true);
+//                return false;
+            });
+        });
+    </script>
+{% endblock %}
+
+<div class="modal-content">
+    {% if id is not null %}
+        <form id="add-note-form" action="{{ path('note_edit', {'id': id }) }}" method="POST">
+    {% else %}
+        <form id="add-note-form" action="{{ path('notes_add') }}" method="POST">
+    {% endif %}
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        {{ form_widget(form.note) }}
+                    </p>
+
+                    <p>
+                        <div class="checkbox-list">
+                            <label>
+                                <span class="">
+                                    {{ form_widget(form.important) }}
+                                </span>
+                                {{ form_label(form.important) }}
+                            </label>
+                        </div>
+                    </p>
+
+                    {% if( userNames|length > 0) %}
+                        <h4>Share With</h4>
+                        <ul class="task-list" style="list-style: none; padding: 0; margin: 0;">
+                            {% for name in userNames %}
+                                <li style="position: relative; padding: 10px 0; border-bottom: 1px solid #F4F6F9;">
+                                    <div class="task-checkbox" style="float: left; width: 30px;">
+                                    <span>
+                                        <input type="checkbox" name="usernames[]" value="{{ name }}" checked="checked"/>
+                                    </span>
+                                    </div>
+                                    <div class="task-title">
+                                    <span class="task-title-sp">
+                                        {{ name }}
+                                    </span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn default" data-dismiss="modal">Close</button>
+            <button type="submit" id="save" class="btn green"><i class="fa fa-check"></i> Save Changes</button>
+        </div>
+    {{ form_end(form) }}
+</div>

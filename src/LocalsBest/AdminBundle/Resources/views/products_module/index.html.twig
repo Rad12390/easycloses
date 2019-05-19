@@ -1,0 +1,57 @@
+{% extends '::base.html.twig' %}
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+            $('.is-default-input').on('click', function(){
+                var value = $(this).data('value');
+                $.ajax({
+                    url: '/admin/products-module/change-default/'+value,
+                    method: 'POST',
+                    success: function(data){
+                        alert(data.message);
+                    }
+                });
+            })
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <h1>Bundle maker</h1>
+
+    <a class="btn btn-success" href="{{ path('admin_products_modules_new') }}">
+        Create a new Bundle
+    </a>
+
+    <table class="table records_list">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Is Default?</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entity in entities %}
+                <tr>
+                    <td><a href="{{ path('admin_products_modules_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                    <td>{{ entity.name }}</td>
+                    <td>{{ entity.description }}</td>
+                    <td>
+                        <label class="mt-radio mt-radio-outline">
+                            <input type="radio" class="is-default-input" data-value="{{ entity.id }}" name="is_default_module" {% if entity.isDefault == true %}checked{% endif %} value="1">
+                            <span></span>
+                        </label>
+                    </td>
+                    <td>
+                        <a class="btn btn-xs btn-warning" href="{{ path('admin_products_modules_edit', { 'id': entity.id }) }}">edit</a>
+                        <a class="btn btn-xs btn-info" href="{{ path('admin_products_modules_attache', { 'id': entity.id }) }}">attache</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,16 @@
+<p>Hi <b>{{ vendor.fullName }}</b>,</p>
+{% if price > 0 %}
+<p>This is to confirm order of one of your package {{ sku.package.title }} for ${{price}} is ordered by {{ user.fullName }}</p>
+{% else %}
+    <p> This is to confirm  order of one of your package {{ sku.package.title }} from {{vendor.fullName}} which is absolutely free of charge!</p>
+{% endif %}
+{% if items|length > 1 %}
+    <p>Package contains the following items</p>
+     {% for item in items %}
+        <li>{{loop.index}}  {{ item}}  {{item_quantity[loop.index-1]}}</li>
+    {% endfor %}
+{% endif %}
+<p> Thanks!</p>
+<p> LocalsBest.com</p><a href="{{ url('order_vendor_list') }}">Link to Orders</a>
+
+

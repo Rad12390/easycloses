@@ -1,0 +1,3 @@
+stripe_webhook:
+    path:     /webhook
+    defaults: { _controller: "LocalsBestShopBundle:Stripe:webhook" }

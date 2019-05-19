@@ -1,0 +1,21 @@
+{% extends "::base.html.twig" %}
+{% block content %}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-cogs"></i>Service Category Level
+            </div>
+            <div class="tools">
+                <a href="javascript:;" class="collapse" data-original-title="" title="">
+                </a>
+
+            </div>
+        </div>
+        <div class="portlet-body flip-scroll">
+            {{ form_start(form, { 'attr': {'novalidate': 'novalidate','class': 'form-bordered form-horizontal create_form', 'id': 'create_form'} }) }}
+                {{ form_widget(form.vendorCategory) }}
+                <input type="submit" value="Submit">
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

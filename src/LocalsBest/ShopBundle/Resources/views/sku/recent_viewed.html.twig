@@ -1,0 +1,28 @@
+{% if products|length > 0 %}
+    <div class="sidebar-box">
+        <h5>Recent Viewed</h5>
+        <ul class="thumb-list">
+            {% for sku in products %}
+                <li>
+                    <a href="{{ path('sku_show', { 'id': sku.id }) }}">
+                        {% if sku.package is not empty %}
+                            <img src="{{ vich_uploader_asset(sku.package   , 'file') }}" alt="{{ sku.title }}">
+                        {% else %}
+                            <img src="/shop/img/70x70.png" alt="{{ sku.title }}" title="{{ sku.title }}"/>
+                        {% endif %}
+                    </a>
+                    <div class="thumb-list-item-caption">
+                        <h5 class="thumb-list-item-title">
+                            <a href="{{ path('sku_show', { 'id': sku.id }) }}">
+                                {{ sku.title }}
+                            </a>
+                        </h5>
+                        <p class="thumb-list-item-price">
+                            ${{ sku.retailPrice|number_format }}
+                        </p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

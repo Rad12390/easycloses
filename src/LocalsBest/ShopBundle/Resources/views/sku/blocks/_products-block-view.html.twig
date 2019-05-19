@@ -1,0 +1,72 @@
+<div class="col-md-4">
+    <div class="product-thumb" style="min-height: 468px;max-height: 468px;">
+        <header class="product-header">
+            {% if product.images is not empty %}
+                <img src="{{ vich_uploader_asset(product.package, 'file') }}" alt="{{ product.title }}" title="{{ product.title }}" style="max-height: 145px;min-height: 145px !important;"/>
+            {% else %}
+                <img src="{{ asset('shop/img/800x600.png') }}" alt="{{ product.title }}" title="{{ product.title }}" style="max-height: 145px;min-height: 145px !important;"/>
+            {% endif %}
+        </header>
+        <div class="product-inner" style="min-height: 200px;">
+            <ul class="icon-group icon-list-rating"  title="rating {{ product.averageRating|number_format }}/5">
+                {{ product.averageRating|rating|raw }}
+            </ul>
+            <h5 class="product-title">{{ product.title }}</h5>
+            <p class="product-desciption">
+                {{ product.shortDescription|raw }}
+            </p>
+            <div class="shop-company" style="position:initial;">
+                By {{ product.package.createdBy.owner }}
+             </div>
+            <div class="product-meta">
+                <ul class="product-price-list">
+                    {% if product.package is not null and product.package.type in [5] %}
+                    {% else %}
+                        <li>
+                            <span class="product-price">{% if product.retailPrice == 0 %}Free{% else %}${{ product.retailPrice|number_format }}{% endif %}</span>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="product-actions-list">
+                    <li>
+                        <a class="btn btn-sm" href="{{ path('sku_show', {'id': product.id}) }}">
+                            <i class="fa fa-bars"></i> Details
+                        </a>
+                    </li>
+                </ul>
+                {% if product.package is not null and product.package.type == 6 %}
+                    <ul class="product-actions-list">
+                        <li>
+                            <a class="btn btn-sm" href="{{ path('shop_sku_activation', {'skuId': product.id, 'disposition': 'email'}) }}">
+                                <i class="fa fa-envelope"></i> Email
+                            </a>
+                        </li>
+                        {% if checker.forAddon('text info package', product.createdBy) %}
+                            <li>
+                                <a class="btn btn-sm" href="{{ path('shop_sku_activation', {'skuId': product.id, 'disposition': 'text'}) }}">
+                                    <i class="fa fa-mobile"></i> Text
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                {% elseif product.package is not null and product.package.type == 5 %}
+                    <ul class="product-actions-list">
+                        <li>
+                            <a class="btn btn-info btn-sm" target="_blank" href="{{ product.package.industryPath }}">
+                                <i class="fa fa-link"></i> Show
+                            </a>
+                        </li>
+                    </ul>
+                {% else %}
+                    <ul class="product-actions-list">
+                        <li>
+                            <a href="#" class="btn btn-primary btn-sm to_cart" data-sku="{{ product.id }}">
+                                <i class="fa fa-shopping-cart"></i> Add to cart
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

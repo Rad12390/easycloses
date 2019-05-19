@@ -1,0 +1,11 @@
+<script>
+    $(function () {
+        $("#addAnswer").on('click', function(){
+            $(".form-body").append(
+                '<div class="form-group">' +
+                '<input type="text" value="" name="answers[]" class="form-control" placeholder="Answer">' +
+                '</div>'
+            )
+        });
+    });
+</script>

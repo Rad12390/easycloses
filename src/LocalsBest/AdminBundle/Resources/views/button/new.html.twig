@@ -1,0 +1,22 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block content -%}
+    <h1>Button creation</h1>
+
+    <div class="alert alert-info alert-dismissable">
+        <p>
+            <b>Remember!</b>
+            Please try to <b>not</b> use "Enter" button as line breaker.
+            Use <b>'\n'</b> when you want to create line break. It exclude error that we had earlier.
+            Try to write your text in single line.
+        </p>
+    </div>
+
+    {{ form(form) }}
+
+    <a class="btn btn-default" href="{{ path('admin_buttons') }}">
+        Back to the list
+    </a>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-select2.js') }}"></script>
+
+    <script>
+        jQuery(document).ready(function () {
+            var handleWysihtml5 = function() {
+                if (!jQuery().wysihtml5) {
+                    return;
+                }
+
+                if ($('.wysihtml5').size() > 0) {
+                    var wysihtml5 = $('.wysihtml5').wysihtml5({
+                        "stylesheets": ["system/global/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+                    });
+                    var content = wysihtml5.data("wysihtml5").editor.getValue();
+
+                    if(content.slice(-1) == '.') {
+                        wysihtml5.data("wysihtml5").editor.setValue(content.slice(0, -1));
+                    } else {
+                        wysihtml5.data("wysihtml5").editor.setValue(content + '.');
+                    }
+                }
+            };
+            handleWysihtml5();
+        });
+
+        var $collectionSkusHolder;
+        var $collectionPricesHolder;
+
+        // setup an "add a tag" link
+        var $addSkuLink = $('<a href="#" class="btn btn-primary add_sku_link">Add a SKU</a>');
+        var $newSkuLinkLi = $('<li></li>').append($addSkuLink);
+        var $addPriceLink = $('<a href="#" class="btn btn-primary add_price_link">Add a Price</a>');
+        var $newPriceLinkLi = $('<li></li>').append($addPriceLink);
+
+        jQuery(document).ready(function() {
+            $('.sku-prices').on('change', '.price-type', function (e) {
+                var value = $(this).val();
+                var parent = $(this).parents('li');
+
+                if (value == 'one_time') {
+                    parent.find('.subscription-type').val('').parent().hide();
+                    parent.find('.subscription-interval').val('').parent().hide();
+                } else {
+                    parent.find('.subscription-type').parent().show();
+                    parent.find('.subscription-interval').parent().show();
+                }
+            });
+
+            // TODO: use item markup
+            $('.sku-prices').on('keyup', '.wholesale', function(e) {
+                var value = $(this).val();
+                var parent = $(this).parents('li');
+
+                parent.find('.retail').val(1.5*value);
+            });
+
+            $('.sku-prices').on('keyup', '.retail', function(e) {
+                var value = $(this).val();
+                var parent = $(this).parents('li');
+
+                var result = Number((value/1.5).toFixed(2));
+
+                parent.find('.wholesale').val(result);
+            });
+
+            // Get the ul that holds the collection of tags
+            $collectionSkusHolder = $('ul.combo-skus');
+            $collectionPricesHolder = $('ul.sku-prices');
+
+            // add the "add a tag" anchor and li to the tags ul
+            $collectionSkusHolder.append($newSkuLinkLi);
+            $collectionPricesHolder.append($newPriceLinkLi);
+
+
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $collectionSkusHolder.data('index', $collectionSkusHolder.find(':input').length);
+            $collectionPricesHolder.data('index', $collectionPricesHolder.find(':input').length);
+
+            $addSkuLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionSkusHolder, $newSkuLinkLi);
+            });
+
+            $addPriceLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionPricesHolder, $newPriceLinkLi);
+            });
+        });
+
+        function addForm($collectionHolder, $newLinkLi) {
+            // Get the data-prototype explained earlier
+            var prototype = $collectionHolder.data('prototype');
+
+            // get the new index
+            var index = $collectionHolder.data('index');
+
+            var newForm = prototype;
+            // You need this only if you didn't set 'label' => false in your tags field in TaskType
+            // Replace '__name__label__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            // newForm = newForm.replace(/__name__label__/g, index);
+
+            // Replace '__name__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            newForm = newForm.replace(/__name__/g, index);
+
+            // increase the index with one for the next item
+            $collectionHolder.data('index', index + 1);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+            var $newFormLi = $('<li></li>').append(newForm);
+            $newLinkLi.before($newFormLi);
+
+            $('.select2').select2();
+
+            // add a delete link to the new form
+            addFormDeleteLink($newFormLi);
+
+            $('.price-type').trigger('change');
+        }
+
+        function addFormDeleteLink($objectFormLi) {
+            var $removeFormA = $('<a class="btn btn-sm btn-danger" href="#">delete</a>');
+            $objectFormLi.append($removeFormA);
+
+            $removeFormA.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // remove the li for the tag form
+                $objectFormLi.remove();
+            });
+        }
+
+        function removeParentObject(object) {
+            $(object).parent().remove();
+        }
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('combo') }}">Combos</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+         {% if isCopy is defined and isCopy == true %}
+            Copy Combo
+        {% else %}
+            Create New
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block content -%}
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.title) }}
+        {{ form_row(form.quantity) }}
+        {{ form_row(form.status) }}
+
+        <h3>SKUs</h3>
+        <ul class="list-unstyled combo-skus" data-prototype="{{ form_widget(form.skuSets.vars.prototype)|e('html_attr') }}">
+            {% for sku in form.skuSets %}
+                <li>
+                    {{ form_row(sku.sku) }}
+                    {{ form_row(sku.quantity) }}
+                    <a class="btn btn-sm btn-danger" href="#" onclick="removeParentObject(this)">delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h3>Prices</h3>
+        <ul class="list-unstyled sku-prices" data-prototype="{{ form_widget(form.sku.prices.vars.prototype)|e('html_attr') }}">
+            {% for price in form.sku.prices %}
+                <li>
+                    {{ form_row(price.type) }}
+                    {{ form_row(price.amount) }}
+                    {{ form_row(price.retailAmount) }}
+                    {{ form_row(price.subscriptionType) }}
+                   {#  {{ form_row(price.subscriptionInterval) }} #}
+                    <a class="btn btn-sm btn-danger" href="#" onclick="removeParentObject(this)">delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {{ form_end(form) }}
+
+    <a href="{{ path('combo') }}">
+        Back to the list
+    </a>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    Checkout
+{% endblock %}
+
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3" style="margin-bottom: 15px;">
+                <div class="box clearfix">
+                    <b>Order Status:</b>
+                    {% if order.total==0 %}
+                        {{'Free'}}
+                    {% else %}
+                        {{ order.status|capitalize }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-12" style="margin-bottom: 15px;">
+                <div class="box clearfix">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Product</th>
+                                <th>Options</th>
+                                <th>Price</th>
+                                <th>QTY</th>
+                                <th>Total</th>
+                                {% if order.status == 'paid' %}
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.shopItems %}
+                                <tr>
+                                    <td class="cart-item-image" style="width: 70px;">
+                                        {% if item.sku.package is not empty %}
+                                            <img style="width: 70px; height: 70px;" src="{{ vich_uploader_asset(item.sku.package, 'file') }}" title="{{ item.sku.title }}" alt="{{ item.sku.title }}">
+                                        {% else %}
+                                            <img src="{{ asset('shop/img/70x70.png') }}" title="{{ item.sku.title }}" alt="{{ item.sku.title }}"/>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.title }}</td>
+                                    <td>
+                                        {% for key, option in item.options %}
+                                            <b>{{ key }}:</b> {{ option }}
+                                        {% else %}
+                                            -
+                                        {% endfor %}
+                                    </td>
+                                    <td>${{ item.price|number_format }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>${{ item.total|number_format }}</td>
+                                    {% if order.status == 'paid' %}
+                                        <td>
+                                            {% if item.objecttype == 'charge' %}
+                                                {% if item.refunded is not null and item.refunded == 1 %}
+                                                    <span class="label label-info"><i class="fa fa-check"></i> Refunded</span>
+                                                {% else %}
+                                                    <span class="label label-primary"><i class="fa fa-exclamation"></i> Not Refunded</span>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if item.subscriptionstatus is not null and item.subscriptionstatus == 1 %}
+                                                    <span class="label label-info"><i class="fa fa-check"></i> {{ item.status }}</span>
+                                                {% else %}
+                                                    <span class="label label-success"><i class="fa fa-check"></i> {{ item.status }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.objecttype == 'charge' %}
+                                                {% if item.refunded is null or item.refunded != 1 %}
+                                                    <a href="{{ path('shop_sku_refund', {'itemid' : item.id, 'orderid': order.id}) }}" class="label label-warning">
+                                                        <i class="fa fa-warning"></i> Refund
+                                                    </a>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if item.subscriptionstatus is null or item.subscriptionstatus != 1 %}
+                                                    <a href="{{ path('shop_sku_cancelsub', {'itemid' : item.id, 'orderid': order.id}) }}" class="label label-warning">
+                                                        <i class="fa fa-warning"></i> Cancel
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <ul class="cart-total-list text-center mb0">
+                        <li>
+                            <span>Sub Total</span>
+                            <span>${{ order.total|number_format }}</span>
+                        </li>
+                        <li>
+                            <span>Shipping</span>
+                            <span>$0.00</span>
+                        </li>
+                        <li>
+                            <span>Taxes</span>
+                            <span>$0.00</span>
+                        </li>
+                        <li>
+                            <span>Total</span>
+                            <span>${{ order.total|number_format }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {% if order.status == 'unpaid' %}
+                <div class="col-md-12" style="margin-bottom: 15px;">
+                    <div class="clearfix">
+                        <a href="{{ path('checkout', {'code': order.code}) }}" class="btn btn-primary pull-right">Checkout</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="gap"></div>
+    </div>
+{% endblock %}

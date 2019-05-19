@@ -1,0 +1,11 @@
+{% if indTypes|length > 0 %}
+    <ul class="nav nav-tabs nav-stacked nav-coupon-category">
+        {% for type in indTypes %}
+            <li {% if selected == type.id %}class="active"{% endif %} data-toggle="tooltip" data-placement="bottom">
+                <a href="">
+                    {{ type.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

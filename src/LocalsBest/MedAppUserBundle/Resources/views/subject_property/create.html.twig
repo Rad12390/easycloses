@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+    <h4 class="modal-title">Add Subject Property</h4>
+</div>
+<form method="POST" role="form" class="form-horizontal" action="{{ path('subject_property_create', {'contactId': contactId}) }}">
+    <div class="modal-body">
+        <div class="form-body">
+            {% include('@LocalsBestUser/subject_property/_form.html.twig') %}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-success">Save</button>
+    </div>
+</form>

@@ -1,0 +1,31 @@
+.header {
+  color: #b9c8e0;
+  background-color: #1d365d !important;
+  height: 72px;
+  position: relative;
+}
+.header .fa-home {
+  font-size: 30px;
+  line-height: 72px;
+}
+.header h1 {
+  line-height: 72px;
+}
+.header .header-title {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.nav-tabs .nav-link.active {
+  background-color: rebeccapurple;
+  color: whitesmoke;
+}
+td,
+th {
+  font-size: 15px !important;
+}
+.action-item {
+  cursor: pointer;
+}

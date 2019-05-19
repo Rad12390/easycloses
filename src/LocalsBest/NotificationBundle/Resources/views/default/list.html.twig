@@ -1,0 +1,95 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    Notifications
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Notifications
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            var table = $('#example');
+
+            var oTable = table.dataTable({
+                "columnDefs": [{
+                    "orderable": false
+                }],
+                "order": [
+                    [1, 'desc']
+                ]
+            });
+
+            $('#example tr').on('click', function () {
+                var id = $(this).attr('data-id');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-comment"></i> Notifications
+            </div>
+        </div>
+        <div class="portlet-body">
+            <table id="example" class="table table-bordered table-striped table-condensed">
+                <thead class="flip-content">
+                <tr>
+                    <th > # </th>
+                    <th > Date </th>
+                    <th > Message </th>
+                    <th > Status </th>
+                    <th > Action </th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for item in notifications %}
+                        <tr>
+                            <td>
+                                {{ item.notification.id }}
+                            </td>
+                            <td>
+                                {{ item.notification.created | date('m-d-Y') }}
+                            </td>
+                            <td>
+                                <a href="{{ path(item.notification.targetPath, item.notification.targetParams) }}"> {{ item.notification.message }}</a>
+                            </td>
+                            <td>
+                                {% if(item.read == 1) %}
+                                    <span class="label label-success">Read</span> <i>({{ item.readOn | date('m-d-Y') }})</i>
+                                {% else %}
+                                    <span class="label label-danger">Unread</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-info" href="{{ path(item.notification.targetPath, item.notification.targetParams) }}" >
+                                    <i class="fa fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}

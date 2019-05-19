@@ -1,0 +1,70 @@
+{% extends "::blank.html.twig" %}
+
+{% block title %}
+    Add Business
+{% endblock %}
+
+{% block content %}
+
+<form action="{{ path('add_new_business') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label class="control-label visible-ie8 visible-ie9">{{ form_label(form.name) }}</label>
+        <div class="input-icon">
+            <i class="fa fa-font"></i>
+            {{ form_widget(form.name) }}
+            <span class="help-block">
+                {{ form_errors(form.name) }}
+            </span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label visible-ie8 visible-ie9">{{ form_label(form.contactName) }}</label>
+        <div class="input-icon">
+            <i class="fa fa-font"></i>
+            {{ form_widget(form.contactName) }}
+            <span class="help-block">
+                {{ form_errors(form.contactName) }}
+            </span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label visible-ie8 visible-ie9">{{ form_label(form.contactName) }}</label>
+        <div class="input-icon">
+            <i class="fa fa-font"></i>
+            {{ form_widget(form.contactName) }}
+            <span class="help-block">
+                {{ form_errors(form.contactName) }}
+            </span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label visible-ie8 visible-ie9">{{ form_label(form.types) }}</label>
+        <div class="input-icon">
+            <i class="fa fa-font"></i>
+            {% if (app.user.getVendorsWithMe|length > 0) %}
+                {{ form_widget(form.types, { 'attr':{'disabled':'disabled'}}) }}
+            {% else %}
+                {{ form_widget(form.types) }}
+            {% endif %}
+            <span class="help-block">
+            {{ form_errors(form.types) }}
+        </span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label visible-ie8 visible-ie9">{{ form_label(form.address) }}</label>
+
+        {{ form_widget(form.address) }}
+        <span class="help-block">
+            {{ form_errors(form.address) }}
+        </span>
+
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn green">Submit</button>
+        <button type="button" class="btn default">Cancel</button>
+    </div>
+    <div class="hidden">
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

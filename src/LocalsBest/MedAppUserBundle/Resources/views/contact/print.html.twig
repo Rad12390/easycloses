@@ -1,0 +1,69 @@
+{% extends "::empty.html.twig" %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <style>
+        body > div.col-md-12 {
+            margin-top: 15px !important;
+        }
+
+        .portlet.box > .portlet-body {
+            padding: 5px;
+        }
+
+        .portlet {
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <button style="margin-bottom: 15px;" class="btn btn-success" onclick="window.print();">Print</button>
+            <a style="margin-bottom: 15px;" class="btn btn-default" href="{{ path('contact_index') }}">Back</a>
+            {% for item in contacts %}
+                <div class="portlet box blue" style="border-top: 1px solid #7cacfa;">
+                    <div class="portlet-body">
+                        <h4>
+                            {{ item.fullName }}
+                            <small>
+                                {% if item.number != '' %}
+                                    <i class="fa fa-phone"></i> {{ item.number }}
+                                {% endif %}
+                                {% if item.email != '' %}
+                                    <i class="fa fa-envelope"></i> {{ item.email }}
+                                {% endif %}
+                            </small>
+                            <small class="pull-right">
+                                {% for tag in item.tags %}
+                                    <span class="label label-sm label-primary">{{ tag.tag }}</span>
+                                {% endfor %}
+                            </small>
+                        </h4>
+                        {% if item.notes is defined and item.notes is not null %}
+                            {% for note in item.notes %}
+                                <div class="portlet box blue" style="border-top: 1px solid #7cacfa;">
+                                    <div class="portlet-body">
+                                        <div class="item">
+                                            <div class="item-head">
+                                                <div class="item-details">
+                                                    <u class="item-name primary-link"> {% if note.createdBy.fullName is not null %}{{ note.createdBy.fullName }} {% endif %} </u>
+                                                    <span class="item-label"> at {{ note.created|date('M d, Y, H:i') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="item-body">
+                                                {{ note.note|raw }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div> 
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

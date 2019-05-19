@@ -1,0 +1,20 @@
+<div class="form-group">
+    <label class="col-md-3 control-label">
+        <i class="fa fa-asterisk required_icon_table" style="{% if answers[question.slug] is defined %} color: rgb(0, 128, 0); {% else %} color: red; {% endif %}" ></i>
+        {{ question.question }}
+    </label>
+    <div class="col-md-9">
+        <div class="mt-radio-inline">
+            <label class="mt-radio mt-radio-outline">
+                Yes
+                <input type="radio" name="question[{{ question.slug }}]" value="{{ question.slug }}" {% if answers[question.slug] is defined and answers[question.slug] == 'yes' %} checked {% endif %} class="required question" aria-required="true">
+                <span></span>
+            </label>
+            <label class="mt-radio mt-radio-outline">
+                No
+                <input type="radio" name="question[{{ question.slug }}]" value="" {% if answers[question.slug] is defined and answers[question.slug] == 'no' %} checked {% endif %} class="required question" aria-required="true">
+                <span></span>
+            </label>
+        </div>
+    </div>
+</div>

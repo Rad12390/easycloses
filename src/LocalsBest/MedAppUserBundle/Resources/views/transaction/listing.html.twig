@@ -1,0 +1,2763 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    Create Listing
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('transaction_index') }}">Transactions</a>
+    </li>
+    {% if listingId is not null %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Edit Listing "{{ transaction.fullAddress }}"
+        </li>
+    {% else %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Create Listing
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}">
+
+    <style type="text/css">
+        .tt-hint, .tt-input {
+            color: #000000;
+        }
+        .create_transaction .control-group.error input, .input-group.error input, .control-group.error select, .control-group.error textarea, .control-group.error radio {
+            border-color: red;
+            background: rgb(250, 255, 189);
+        }
+        .create_transaction .control-group.success input, .input-group.success input, .control-group.success select, .control-group.success textarea, .control-group.success radio {
+            border-color: #468847!important;
+        }
+        .control-group.success select{
+          background: #fff !important;
+        }
+        .custom_referral_value {
+            width: 127px;
+        }
+        .custom_referral_type {
+            width: 70px;
+        }
+        tr.contact_error .contact_status {
+            color: rgb(255, 0, 0);
+        }
+        tr.contact_success .contact_status {
+            color: rgb(0, 128, 0);
+        }
+        .error .fa.fa-asterisk.required_icon{
+            color: rgb(255, 0, 0) !important;
+        }
+
+        .success .fa.fa-asterisk.required_icon{
+            color: rgb(0, 128, 0) !important;
+        }
+        {% if referralBoxShow != true %}
+        .custom_box_referral {
+            display: none;
+        }
+        {% endif %}
+        .radio input[type=radio], .radio-inline input[type=radio], .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox] {
+            margin-left: -10px !important;
+        }
+        #transactionListing_listing_agentCommissions_0_value, #transactionListing_listing_totalCommissions_0_value ,#transactionListing_listing_buyerAgentCommissions_0_value{
+            color:#555 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-validation/js/jquery.validate.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/easycloses-scripts/autofill-mls.js', null, false, 2) }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/ui-toastr.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.js') }}"></script>
+  
+
+	{# Added for  transactions validation. #}
+
+	<script>
+         $(window).load(function() {   
+            $('#create_form').find('.control-group').find('.tt-input').addClass('distinct-input');
+            $('#create_form').find('.control-group').find('.tt-hint').removeClass('required validate-for-row');//^@
+            $('#create_form').find('.control-group').find('.tt-hint').addClass('donotvalidate'); //^@
+            //code so as to add required class to select dropdowns
+            $("#transactionListing_transactionProperty_property_type").addClass("required");
+            $("#transactionListing_listing_represent").addClass("required");
+            $("#transactionListing_listing_type").addClass("required");
+            $("#transactionClosing_closing_moneyBox_paymentType").addClass("required");
+            $("#trans_contacts_wrapper").find('input') .each(function() {
+                if($(this).closest('.control-group').hasClass("success") || $(this).closest('.control-group').hasClass("error")){
+                        if($(this).hasClass("tt-hint"))
+                            $(this).removeClass("required");
+                        else
+                            $(this).addClass("required");
+                    }
+            });
+            
+            if ($("#transactionListing_listing_represent").val() === 'Landlord'){
+                $("tr#contact_row_0 span.contact_type").text('Landlord');
+                $("tr#contact_row_00 span.contact_type").text('Landlord 2');
+                $("tr#contact_row_3").css("display","none");
+            }
+            
+            if ($("#transactionListing_listing_represent").val() === 'Seller'){
+                $("tr#contact_row_0 span.contact_type").text('Seller');
+                $("tr#contact_row_00 span.contact_type").text('Seller 2');
+            }
+            $('#transactionListing_listing_listingContacts_0_time').on('click',function(e){
+                setTimeout(function() {
+                    if($("#transactionListing_listing_listingContacts_0_time").closest('.input-group').hasClass("success")){
+                        $("#transactionListing_listing_listingContacts_0_time").css("background-color","#fff");
+                    }
+                }, 1000);
+            });
+            
+            $('#transactionListing_listing_listingContacts_1_time').on('click',function(e){
+                setTimeout(function() {
+                    if($("#transactionListing_listing_listingContacts_1_time").closest('.input-group').hasClass("success")){
+                        $("#transactionListing_listing_listingContacts_1_time").css("background-color","#fff");
+                    }
+                }, 1000);
+            });
+            
+            
+            {% if app.user.businesses[0].id == 50 %}
+            if($("#transactionListing_listing_represent").val()=='Seller' || $("#transactionListing_listing_represent").val()=='Landlord'){
+            //console.log("!@");
+            $("#transactionListing_listing_sellerContact_phone").removeClass("lisafield required validate-for-row");
+            $("#transactionListing_listing_sellerContact_email").removeClass("lisafield required validate-for-row");
+            $("#transactionListing_listing_sellerContact_phone").addClass("donotvalidate");
+            $("#transactionListing_listing_sellerContact_email").addClass("donotvalidate");
+            $("#remote-seller-phone").removeClass("lisa error");
+            $("#remote-seller-email").removeClass("lisa error");
+
+            $('#transactionListing_listing_sellerContact_phone').css('border-color','#ccc');
+            $('#transactionListing_listing_sellerContact_phone').css('background','#fff');
+            $('#transactionListing_listing_sellerContact_email').css('background','#fff');
+             $('#transactionListing_listing_sellerContact_email').css('border-color','#ccc');
+         }
+            {% endif %}
+            
+        });
+    jQuery(document).ready(function () {
+		//$("#transactionListing_listing_sellerContact_contactName").css('background-color','#faffbd');
+		//alert(abcdef);
+		/* added for  year fiels*/
+	    
+		$("#transactionListing_transactionProperty_property_address_zip").on("keypress keyup blur change",function (event) {    
+           $(this).val($(this).val().replace(/[^\d].+/, ""));
+		    var year = $(this).val();
+            if ((event.which < 48 || event.which > 57 || year.length > 4)) {
+                event.preventDefault();
+            }
+        });
+		$("#transactionListing_transactionProperty_yearBuilt").on("keypress keyup blur change",function (event) {    
+           $(this).val($(this).val().replace(/[^\d].+/, ""));
+		    var year = $(this).val();
+            if ((event.which < 48 || event.which > 57 || year.length > 3)) {
+                event.preventDefault();
+            }
+        });
+            $("#transactionListing_listing_totalCommissions_0_value,#transactionListing_listing_agentCommissions_0_value,#transactionListing_listing_buyerAgentCommissions_0_value").on("keypress keyup change",function (event) {    
+                {#      $(this).val($(this).val().replace(/[^\d].+/, ""));
+                         var value = $(this).val();
+                 if ((event.which < 48 || event.which > 57  || value.length > 6 )) {
+                     event.preventDefault();
+                 }#}    
+             }); 
+		$("#listing-submit").click(function () {
+			
+			var represent = $("#transactionListing_listing_represent").val();
+			var errormsg='';
+			var errormsg2='';
+			var errormsg3='';
+			/* Financial Information */
+			 {% if app.user.businesses[0].id == 50 %}
+				if($("#transactionListing_listing_buyerAgentCommissions_0_value").val() ==""){
+					errormsg2="Please Enter Buyer's Agent Commission";
+					/* $("#transactionListing_listing_buyerAgentCommissions_0_value").css('border-color','red');
+					$("#transactionListing_listing_buyerAgentCommissions_0_value").css('background-color','#faffbd'); */
+					$("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').addClass('error');
+				    $("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').removeClass('success');
+					$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+					$("#transactionListing_listing_buyerAgentCommissions_0_value").focus();
+				}else {
+					/* $("#transactionListing_listing_buyerAgentCommissions_0_value").css('border-color','#ccc');
+					$("#transactionListing_listing_buyerAgentCommissions_0_value").css('background-color','#fff'); */
+					$('#transactionListing_listing_buyerAgentCommissions_0_value').closest('.control-group').addClass('success');
+				} 
+				if($("#transactionListing_listing_agentCommissions_0_value").val() ==""){
+					errormsg2='Please Enter Listing Agent Commission ';
+					/* $("#transactionListing_listing_agentCommissions_0_value").css('border-color','red');
+					$("#transactionListing_listing_agentCommissions_0_value").css('background-color','#faffbd'); */
+					$("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').addClass('error');
+				    $("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').removeClass('success');
+					$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+					$("#transactionListing_listing_agentCommissions_0_value").focus();
+				}else{
+					/* $("#transactionListing_listing_agentCommissions_0_value").css('border-color','#ccc');
+					$("#transactionListing_listing_agentCommissions_0_value").css('background-color','#fff'); */
+					$('#transactionListing_listing_buyerAgentCommissions_0_value').closest('.control-group').addClass('success');
+				}  
+				if($("#transactionListing_listing_totalCommissions_0_value").val() ==""){
+					errormsg2='Please Enter Total Commission .';
+					/* $("#transactionListing_listing_totalCommissions_0_value").css('border-color','red');
+					$("#transactionListing_listing_totalCommissions_0_value").css('background-color','#faffbd'); */
+					$("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').addClass('error');
+				    $("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').removeClass('success');
+					$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+					$("#transactionListing_listing_totalCommissions_0_value").focus();
+				}else{
+					/* $("#transactionListing_listing_totalCommissions_0_value").css('border-color','#ccc');
+					$("#transactionListing_listing_totalCommissions_0_value").css('background-color','#fff'); */
+					$('#transactionListing_listing_buyerAgentCommissions_0_value').closest('.control-group').addClass('success');
+				} 
+			{% endif %}
+			
+			if($("#transactionListing_listing_moneyBox_contractPrice").val() ==""){
+				errormsg2='Please Enter Listing Price ';
+				/* $("#transactionListing_listing_moneyBox_contractPrice").css('border-color','red');
+				$("#transactionListing_listing_moneyBox_contractPrice").css('background-color','#faffbd'); */
+				$("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').addClass('error');
+				$("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').removeClass('success');
+				$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				$("#transactionListing_listing_moneyBox_contractPrice").focus();
+			}else {
+				/* $("#transactionListing_listing_moneyBox_contractPrice").css('border-color','#ccc');
+				$("#transactionListing_listing_moneyBox_contractPrice").css('background-color','#fff'); */
+				$('#transactionListing_listing_buyerAgentCommissions_0_value').closest('.control-group').addClass('success');
+			}  
+                        if($("#transactionListing_transactionProperty_yearBuilt").val().length!=4  && $("#transactionListing_transactionProperty_property_type").val()!='Vacant_Land') {
+                                errormsg2 = 'Year built can be 4 digits only';
+				 $("#transactionListing_transactionProperty_yearBuilt").css('border-color','red');
+				 $("#transactionListing_transactionProperty_yearBuilt").css('background-color','#faffbd');
+				 $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				 $("#transactionListing_transactionProperty_yearBuilt").focus();
+			 }
+                        
+			if(represent==='Landlord'){
+				$("#trans_contacts_wrapper").find('input') .each(function() {
+                                    
+                                    if($(this).closest('.required_party').css('display') != 'none'){
+				    var value= $(this).val();
+					var id = $(this).attr("id");
+					if (id == null){
+					   //do nothing
+					}else{
+						if ((id.indexOf('transactionListing_listing_titleCompany') >= 0) || (id.indexOf('_company') >= 0) || (id.indexOf('sellerContact2') >= 0)){ 
+                                                    if(value !=""){
+                                                    if (id.indexOf('zip') >= 0) {
+                                                        var numregex = /^[0-9]+$/;
+                                                        if (!value.match(numregex)){
+                                                                errormsg ="Numeric Data Only for  Zip";
+                                                                //$('#'+id).css('border-color','red');
+                                                                //$('#'+id).css('background-color','#faffbd');
+                                                                $('#'+id).focus();
+                                                                $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                                //return false;
+                                                        }else{
+                                                            if(value.length!=5){
+                                                                errormsg ="Zip code should be of 5 digits";
+                                                                $('#'+id).focus();
+                                                                $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    if (id.indexOf('email') >= 0) {
+                                                        var valemail = validateEmail(value);
+                                                        if(!valemail){
+                                                            errormsg ="Please Validate Email";
+                                                            $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                            $('#'+id).focus();
+                                                        }
+                                                    }
+                                                    
+                                                    if (id.indexOf('phone') >= 0) {
+                                                        var phonestr = value.replace ( /[^\d.]/g, '' ); 
+                                                        if(phonestr.length >= 7){
+                                                               
+                                                        }else{
+                                                            $('#'+id).focus();
+                                                            var idd =id.split('_');
+                                                            var msg =idd[2];
+                                                            errormsg ="Minimum Required digits 7 for phone no.";
+                                                            $('#'+id).focus();
+                                                            $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                            //return false;
+                                                        } 
+                                                    }
+                                                }
+                                                    
+						}else{
+							if(( value==="") || (value === null)){
+                                                           {% if app.user.businesses[0].id == 50 %}
+                                                       if(id=='transactionListing_listing_sellerContact_phone'|| id=='transactionListing_listing_sellerContact_email'){
+                                                           errormsg='';
+                                                       }
+                                                       else{
+						       //alert(id);
+							   /* $('#'+id).css('border-color','red');
+							   $('#'+id).css('background-color','#faffbd'); */
+							   $('#'+id).closest('.control-group').addClass('error');
+							   $('#'+id).closest('.control-group').removeClass('success');
+							   errormsg='Please Enter all the  Required Fields ';
+							   $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+							   $('#'+id).focus();
+                                                       }
+                                                       {% else %}
+                                                          $('#'+id).closest('.control-group').addClass('error');
+							   $('#'+id).closest('.control-group').removeClass('success');
+							   errormsg='Please Enter all the  Required Fields ';
+							   $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+							   $('#'+id).focus();   
+                                                       {% endif %}
+                                                           
+                                                           
+							  // return false;
+						    }else{
+							   //errormsg='';
+							   //$('#'+id).css('background-color','#fff');
+							   
+							   
+							   if (id.indexOf('email') >= 0) {
+									var valemail = validateEmail(value);
+									if(valemail==true){
+										/* $('#'+id).css('border-color','#ccc');
+										$('#'+id).css('background-color','#fff'); */
+										$('#'+id).closest('.control-group').addClass('success');
+									}else{
+										//$('#'+id).css('border-color','red');
+										//$('#'+id).css('background-color','#faffbd');
+										 $('#'+id).closest('.control-group').addClass('error');
+										$('#'+id).closest('.control-group').removeClass('success');
+										errormsg ="Please Validate Email";
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+										$('#'+id).focus();
+										//return false;
+									}
+								}
+								if (id.indexOf('zip') >= 0) {
+									var numregex = /^[0-9]+$/;
+									if (!value.match(numregex)){
+										errormsg ="Numeric Data Only for  Zip";
+										//$('#'+id).css('border-color','red');
+										//$('#'+id).css('background-color','#faffbd');
+										$('#'+id).closest('.control-group').addClass('error');
+                                                                                $('#'+id).closest('.control-group').removeClass('success');
+										$('#'+id).focus();
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+										//return false;
+									}else{
+                                                                            if(value.length!=5){
+                                                                                errormsg ="Zip code should be of 5 digits";
+                                                                                $('#'+id).closest('.control-group').addClass('error');
+                                                                                $('#'+id).closest('.control-group').removeClass('success');
+										$('#'+id).focus();
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                                            }
+                                                                            else{
+										/* $('#'+id).css('border-color','#ccc');
+										$('#'+id).css('background-color','#fff'); */
+										$('#'+id).closest('.control-group').addClass('success');
+                                                                            }
+									}
+								}
+								if (id.indexOf('phone') >= 0) {
+									var phonestr = value.replace ( /[^\d.]/g, '' ); 
+									if(phonestr.length >= 7){
+										/* $('#'+id).css('border-color','#ccc');
+										$('#'+id).css('background-color','#fff'); */
+										$('#'+id).closest('.control-group').addClass('success');
+									}else{
+										$('#'+id).focus();
+										//$('#'+id).css('border-color','red');
+										//$('#'+id).css('background-color','#faffbd');
+										$('#'+id).closest('.control-group').addClass('error');
+										$('#'+id).closest('.control-group').removeClass('success');
+										var idd =id.split('_');
+										var msg =idd[2];
+										errormsg ="Minimum Required digits 7 for phone no.";
+										$('#'+id).focus();
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+										//return false;
+									} 
+								}
+						    }
+						}
+					}
+                                    }
+				});
+			}else{
+				$("#trans_contacts_wrapper").find('input') .each(function() {
+				    if($(this).closest('.required_party').css('display') != 'none'){
+					var value= $(this).val();
+					var id = $(this).attr("id");
+					$('#'+id).closest('.control-group').removeClass('success');
+					if (id == null){
+						// id not defined or undefined
+						//do nothing
+					}else{
+						if((id.indexOf('_company') >= 0) || (id.indexOf('sellerContact2') >= 0) || (id.indexOf('titleCompanyContact') >= 0)){
+                                                    
+                                                    if(value !=""){
+                                                    if (id.indexOf('zip') >= 0) {
+                                                        var numregex = /^[0-9]+$/;
+                                                        if (!value.match(numregex)){
+                                                                errormsg ="Numeric Data Only for  Zip";
+                                                                //$('#'+id).css('border-color','red');
+                                                                //$('#'+id).css('background-color','#faffbd');
+                                                                $('#'+id).focus();
+                                                                $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                                //return false;
+                                                        }else{
+                                                            if(value.length!=5){
+                                                                errormsg ="Zip code should be of 5 digits";
+                                                                $('#'+id).focus();
+                                                                $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    if (id.indexOf('email') >= 0) {
+                                                        var valemail = validateEmail(value);
+                                                        if(!valemail){
+                                                            errormsg ="Please Validate Email";
+                                                            $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                            $('#'+id).focus();
+                                                        }
+                                                    }
+                                                    
+                                                    if (id.indexOf('phone') >= 0) {
+                                                        var phonestr = value.replace ( /[^\d.]/g, '' ); 
+                                                        if(phonestr.length >= 7){
+                                                               
+                                                        }else{
+                                                            $('#'+id).focus();
+                                                            var idd =id.split('_');
+                                                            var msg =idd[2];
+                                                            errormsg ="Minimum Required digits 7 for phone no";
+                                                            $('#'+id).focus();
+                                                            $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                            //return false;
+                                                        } 
+                                                    }
+                                                }
+						}else{
+						   
+						   if(( value==="") || (value === null)){
+                                                       {% if app.user.businesses[0].id == 50 %}
+                                                       if(id=='transactionListing_listing_sellerContact_phone'|| id=='transactionListing_listing_sellerContact_email'){
+                                                           errormsg='';
+                                                       }
+                                                       else{
+						       //alert(id);
+							   /* $('#'+id).css('border-color','red');
+							   $('#'+id).css('background-color','#faffbd'); */
+							   $('#'+id).closest('.control-group').addClass('error');
+							   $('#'+id).closest('.control-group').removeClass('success');
+							   errormsg='Please Enter all the  Required Fields ';
+							   $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+							   $('#'+id).focus();
+                                                       }
+                                                       {% else %}
+                                                          $('#'+id).closest('.control-group').addClass('error');
+							   $('#'+id).closest('.control-group').removeClass('success');
+							   errormsg='Please Enter all the  Required Fields ';
+							   $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+							   $('#'+id).focus();   
+                                                       {% endif %}
+							   //return false;
+						   }else{
+						       //errormsg='';
+							   //$('#'+id).css('background-color','#fff');
+							   if (id.indexOf('email') >= 0) {
+									var valemail = validateEmail(value);
+									if(valemail==true){
+										/* $('#'+id).css('border-color','#ccc');
+										$('#'+id).css('background-color','#fff'); */
+										$('#'+id).closest('.control-group').addClass('success');
+									}else{
+										/* $('#'+id).css('border-color','red');
+										$('#'+id).css('background-color','#faffbd'); */
+										$('#'+id).closest('.control-group').addClass('error');
+										$('#'+id).closest('.control-group').removeClass('success');
+										errormsg ="Please Validate Email";
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+										$('#'+id).focus();
+										//return false;
+									}
+								} 
+								if (id.indexOf('zip') >= 0) {
+									var numregex = /^[0-9]+$/;
+									if (!value.match(numregex)){
+										errormsg ="Numeric Data Only for  Zip";
+										/* $('#'+id).css('border-color','red');
+										$('#'+id).css('background-color','#faffbd'); */
+										$('#'+id).closest('.control-group').addClass('error');
+										$('#'+id).closest('.control-group').removeClass('success');
+										$('#'+id).focus();
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+										//return false;
+									}else{
+										if(value.length!=5){
+                                                                                errormsg ="Zip code should be of 5 digits";
+                                                                                $('#'+id).closest('.control-group').addClass('error');
+                                                                                $('#'+id).closest('.control-group').removeClass('success');
+										$('#'+id).focus();
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                                                                            }
+                                                                            else{
+										/* $('#'+id).css('border-color','#ccc');
+										$('#'+id).css('background-color','#fff'); */
+										$('#'+id).closest('.control-group').addClass('success');
+                                                                            }
+									}
+								}
+								if (id.indexOf('phone') >= 0) {
+									var phonestr = value.replace ( /[^\d.]/g, '' ); 
+									if(phonestr.length >= 7){
+										/* $('#'+id).css('border-color','#ccc');
+										$('#'+id).css('background-color','#fff'); */
+										$('#'+id).closest('.control-group').addClass('success');
+									}else{
+										$('#'+id).focus();
+										/* $('#'+id).css('border-color','red');
+										$('#'+id).css('background-color','#faffbd'); */
+										$('#'+id).closest('.control-group').addClass('error');
+										$('#'+id).closest('.control-group').removeClass('success');
+										var idd =id.split('_');
+										var msg =idd[2];
+										errormsg ="Minimum Required digits 7  for phone no.";
+                                                                                $('#'+id).focus();
+										$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+										//return false;
+									} 
+								}
+						   }
+					   }
+					}
+                                    }
+				});
+			} //  else selleror any  other  closed.
+			
+			
+			/*date field*/
+			 if($("#transactionListing_listing_listingContacts_1_time").val() ==""){
+				errormsg2='Please Enter Listing Expiration Date';
+				/* $("#transactionListing_listing_listingContacts_1_time").css('border-color','red');
+				$("#transactionListing_listing_listingContacts_1_time").css('background-color','#faffbd'); */
+				$("#transactionListing_listing_listingContacts_1_time").closest('.control-group').addClass('error');
+				$("#transactionListing_listing_listingContacts_1_time").closest('.control-group').removeClass('success');
+				$("#transactionListing_listing_listingContacts_1_time").focus();
+				$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				//return false;
+			}else{
+				//$("#transactionListing_listing_listingContacts_1_time").css('border-color','#ccc');
+				//$("#transactionListing_listing_listingContacts_1_time").css('background-color','#fff');
+				$('#transactionListing_listing_listingContacts_1_time').closest('.control-group').addClass('success');
+				
+			} 
+			if($("#transactionListing_listing_listingContacts_0_time").val() ==""){
+				errormsg2='Please Enter Listing  Date';
+				/* $("#transactionListing_listing_listingContacts_0_time").css('border-color','red');
+				$("#transactionListing_listing_listingContacts_0_time").css('background-color','#faffbd'); */
+				$("#transactionListing_listing_listingContacts_0_time").closest('.control-group').addClass('error');
+				$("#transactionListing_listing_listingContacts_0_time").closest('.control-group').removeClass('success');
+				$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				$("#transactionListing_listing_listingContacts_0_time").focus();
+			}else{
+				/* $("#transactionListing_listing_listingContacts_0_time").css('border-color','#ccc');
+				$("#transactionListing_listing_listingContacts_0_time").css('background-color','#fff'); */
+				$('#transactionListing_listing_listingContacts_0_time').closest('.control-group').addClass('success');
+			}  
+			
+		
+			/* Property Information */
+			 if($("#transactionListing_transactionProperty_property_address_city").val() ==""){
+				errormsg2='Please Enter City';
+				/* $("#transactionListing_transactionProperty_property_address_city").css('border-color','red');
+				$("#transactionListing_transactionProperty_property_address_city").css('background-color','#faffbd'); */
+				$("#transactionListing_transactionProperty_property_address_city").closest('.control-group').addClass('error');
+				$("#transactionListing_transactionProperty_property_address_city").closest('.control-group').removeClass('success');
+				$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				$("#transactionListing_transactionProperty_property_address_city").focus();
+			}else{
+				/* $("#transactionListing_transactionProperty_property_address_city").css('border-color','#ccc');
+				$("#transactionListing_transactionProperty_property_address_city").css('background-color','#fff'); */
+				$('#transactionListing_transactionProperty_property_address_city').closest('.control-group').addClass('success');
+			} 
+			
+			if($("#transactionListing_transactionProperty_property_address_street").val() ==""){
+				errormsg2='Please Enter Property Street Address';
+				/* $("#transactionListing_transactionProperty_property_address_street").css('border-color','red');
+				$("#transactionListing_transactionProperty_property_address_street").css('background-color','#faffbd'); */
+				$("#transactionListing_transactionProperty_property_address_street").closest('.control-group').addClass('error');
+				$("#transactionListing_transactionProperty_property_address_street").closest('.control-group').removeClass('success');
+				$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				$("#transactionListing_transactionProperty_property_address_street").focus();  
+			}else{
+				/* $("#transactionListing_transactionProperty_property_address_street").css('border-color','#ccc');
+				$("#transactionListing_transactionProperty_property_address_street").css('background-color','#fff'); */
+				$('#transactionListing_transactionProperty_property_address_street').closest('.control-group').addClass('success');
+			}
+			if($("#transactionListing_transactionProperty_property_type").val() ==""){
+				errormsg2='Please Enter Property Type';
+				/* $("#transactionListing_transactionProperty_property_type").css('border-color','red');
+				$("#transactionListing_transactionProperty_property_type").css('background-color','#faffbd'); */
+				$("#transactionListing_transactionProperty_property_type").closest('.control-group').addClass('error');
+				$("#transactionListing_transactionProperty_property_type").closest('.control-group').removeClass('success');
+				$('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+				$("#transactionListing_transactionProperty_property_type").focus();
+			}else{
+				/* $("#transactionListing_transactionProperty_property_type").css('border-color','#ccc');
+				$("#transactionListing_transactionProperty_property_type").css('background-color','#fff'); */
+				$('#transactionListing_transactionProperty_property_type').closest('.control-group').addClass('success');
+			} 
+			//alert("going for submit");
+			//alert(errormsg);
+                        
+			if($("#transactionListing_listing_totalCommissions_0_value").val()!=""){
+                            
+                            var value= $("#transactionListing_listing_totalCommissions_0_value").val();
+                            if(value!= undefined){
+                            var length= value.length;
+                            if($("#transactionListing_listing_totalCommissions_0_type").val()== "%"){
+                                if(value.indexOf(".") != -1){
+                                    // exists decimal point
+                                    var split_length= value.split(".");
+                                    var before_length= split_length[0].length;
+                                    var after_length= split_length[1].length;
+                                    
+                                    if(value>100 || value< 0){
+                                        errormsg2 = 'Enter correct % of commission, should not more than 100 or less than 0';
+                                    }
+                                    if(after_length>2){
+                                        errormsg2 = 'Commission only allowed up to 2 places of decimal';
+                                    }
+                                }
+                                else{
+                                     // not exists decimal point
+                                    if(value>100 || value< 0){
+                                       errormsg2 = 'Enter correct % of commission, should not more than 100 or less than 0';
+                                    }
+                                }
+                            }
+                            else{
+                                if(value.indexOf(".") != -1){
+                                    var split_length= value.split(".");
+                                    var after_length= split_length[1].length;
+                                    if(after_length>2){
+                                        errormsg2 = 'Commission only allowed up to 2 places of decimal';
+                                    }
+                                }
+                                if(value< 0){
+                                    errormsg2 = 'Enter correct $ of commission, should not less than 0';
+                                }
+                            }
+                            if(errormsg2!=''){
+                                setTimeout(function() {
+                                    $("#transactionListing_listing_totalCommissions_0_value").closest(".control-group").removeClass("success");
+                                    $("#transactionListing_listing_totalCommissions_0_value").closest(".control-group").addClass("error");
+                                    $("#transactionListing_listing_totalCommissions_0_value").css('border-color','red');
+                                    $("#transactionListing_listing_totalCommissions_0_value").css('background-color','#faffbd');
+                                }, 800);
+				$("#transactionListing_listing_totalCommissions_0_value").focus();
+                            }
+                        }
+                        }
+			
+                        if($("#transactionListing_listing_agentCommissions_0_value").val()!=""){
+                            var value= $("#transactionListing_listing_agentCommissions_0_value").val();
+                            if(value!= undefined){
+                            var length= value.length;
+                            if($("#transactionListing_listing_agentCommissions_0_type").val()== "%"){
+                                if(value.indexOf(".") != -1){
+                                    // exists decimal point
+                                    var split_length= value.split(".");
+                                    var before_length= split_length[0].length;
+                                    var after_length= split_length[1].length;
+                                    
+                                    if(value>100 || value< 0){
+                                        errormsg = 'Enter correct % of commission, should not more than 100 or less than 0';
+                                    }
+                                    if(after_length>2){
+                                        errormsg = 'Commission only allowed up to 2 places of decimal';
+                                    }
+                                }
+                                else{
+                                     // not exists decimal point
+                                    if(value>100 || value< 0){
+                                       errormsg = 'Enter correct % of commission, should not more than 100 or less than 0';
+                                    }
+                                }
+                            }
+                            else{
+                                if(value.indexOf(".") != -1){
+                                    var split_length= value.split(".");
+                                    var after_length= split_length[1].length;
+                                    if(after_length>2){
+                                        errormsg = 'Commission only allowed up to 2 places of decimal';
+                                    }
+                                }
+                                if(value< 0){
+                                    errormsg = 'Enter correct $ of commission, should not less than 0';
+                                }
+                            }
+                            if(errormsg!=''){
+                                setTimeout(function() {
+                                    $("#transactionListing_listing_agentCommissions_0_value").closest(".control-group").removeClass("success");
+                                    $("#transactionListing_listing_agentCommissions_0_value").closest(".control-group").addClass("error");
+                                    $("#transactionListing_listing_agentCommissions_0_value").css('border-color','red');
+                                    $("#transactionListing_listing_agentCommissions_0_value").css('background-color','#faffbd');
+                                }, 800);
+				$("#transactionListing_listing_agentCommissions_0_value").focus();
+                            }
+                        }
+                        }
+                        
+                        if($("#transactionListing_listing_buyerAgentCommissions_0_value").val()!=""){
+                            var value= $("#transactionListing_listing_buyerAgentCommissions_0_value").val();
+                            if(value!= undefined){
+                            var length= value.length;
+                            if($("#transactionListing_listing_buyerAgentCommissions_0_type").val()== "%"){
+                                if(value.indexOf(".") != -1){
+                                    // exists decimal point
+                                    var split_length= value.split(".");
+                                    var before_length= split_length[0].length;
+                                    var after_length= split_length[1].length;
+                                    
+                                    if(value>100 || value< 0){
+                                        errormsg3 = 'Enter correct % of commission, should not more than 100 or less than 0';
+                                    }
+                                    if(after_length>2){
+                                        errormsg3 = 'Commission only allowed up to 2 places of decimal';
+                                    }
+                                }
+                                else{
+                                     // not exists decimal point
+                                    if(value>100 || value< 0){
+                                       errormsg3 = 'Enter correct % of commission, should not more than 100 or less than 0';
+                                    }
+                                }
+                            }
+                            else{
+                                if(value.indexOf(".") != -1){
+                                    var split_length= value.split(".");
+                                    var after_length= split_length[1].length;
+                                    if(after_length>2){
+                                        errormsg3 = 'Commission only allowed up to 2 places of decimal';
+                                    }
+                                }
+                                if(value< 0){
+                                    errormsg3 = 'Enter correct $ of commission, should not less than 0';
+                                }
+                            }
+                            if(errormsg3!=''){
+                                setTimeout(function() {
+                                    $("#transactionListing_listing_buyerAgentCommissions_0_value").closest(".control-group").removeClass("success");
+                                    $("#transactionListing_listing_buyerAgentCommissions_0_value").closest(".control-group").addClass("error");
+                                    $("#transactionListing_listing_buyerAgentCommissions_0_value").css('border-color','red');
+                                    $("#transactionListing_listing_buyerAgentCommissions_0_value").css('background-color','#faffbd');
+                                }, 800);
+				$("#transactionListing_listing_buyerAgentCommissions_0_value").focus();
+                            }
+                        }
+                        }
+                        
+			 if((errormsg!=='') || (errormsg2!=='') || (errormsg3!=='')){
+				if(errormsg!==''){
+				    alert(errormsg);
+				}else{
+                                    if(errormsg2!==''){
+                                        alert(errormsg2);
+                                    }
+                                    else{
+                                        alert(errormsg3);
+                                    }
+					//alert("Please Enter all the  Required Fields");
+				}
+				return false;
+			} 
+		});
+		function validateEmail(Email) {
+			var pattern = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+			return $.trim(Email).match(pattern) ? true : false;
+		} 
+	});
+	</script>
+
+    {# Transaction validation code ends here #}
+
+    <script>
+        function checkContactRow(selector) {
+            var row = selector;
+            //var asterisk = selector.children().first();
+            
+                row.children().each(function (index, td) {
+                    td = $(td);
+                    if (td.find('input:enabled.validate-for-row').val() == '') {
+                        row.addClass('contact_error');
+                        row.removeClass('contact_success');
+                        return false;
+                    }
+                    row.removeClass('contact_error');
+                    row.addClass('contact_success');
+                });
+        }
+        $(document).ready(function () {
+        {% if app.user.role.level == 7 %}
+            $('#transactionListing_listing_listingAgentContact_contactName').removeClass('hidden');
+            $('.js-data-example-ajax').addClass('hidden');
+            $('.select2').addClass('hidden');
+        {% endif %}
+                var select2 = $(".js-data-example-ajax").select2({
+                    width: '100%',
+                    minimumInputLength: 1,
+                    placeholder: "Search Agents",
+                    ajax: {
+                        url: "/company-agents",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                query: params.term, // search term
+                                page: params.page
+                            };
+                        },
+                        processResults: function (data, params) {
+                            params.page = params.page || 1;
+                            return {
+                                results: data.items,
+                                pagination: {
+                                    more: (params.page * 30) < data.total_count
+                                }
+                            };
+                        },
+                        cache: true
+                    },
+                    escapeMarkup: function (markup) {
+                        return markup;
+                    },
+                    templateResult: function (data) {
+                    if (data.loading)
+                            return data.name;
+                        markup = "<div class='row' style='margin: 0;'>" +
+                                "<div class='col-sm-4'><img style='max-height:62px;' src='" + data.profilepic + "'></div>" +
+                                "<div class='col-sm-8'>" +
+                                "<h4 style='margin-top: 0;'>" + data.contactName + "</h4>" +
+                                "<p style='margin-bottom: 0;'>" +
+                                data.phone + "<br>" +
+                                data.email +
+                                "</p>" +
+                                "</div>" +
+                                "</div>";
+                        return markup;
+                    },
+                    templateSelection: function (data) {
+                        if (data.contactName == undefined) {
+                            return data.text;
+                        } else {
+                            return data.contactName;
+                        }
+                    }
+                })
+            .on("select2:select", function (e) {
+                var item = e.params.data;
+                $("#buyerAgentId").val(item.contactName);
+                $('#transactionListing_listing_listingAgentContact_contactName').val(item.contactName);
+                $('#transactionListing_listing_listingAgentContact_email').val(item.email);
+                $('#transactionListing_listing_listingAgentContact_phone').val(item.phone);
+                {% verbatim %}
+                            if (typeof agentBuyerJson != 'undefined' && agentBuyerJson instanceof  Bloodhound) {
+                                $('.seller .typeahead').typeahead('destroy');
+                       
+                            }
+                            agentBuyerJson = new Bloodhound({
+                                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                                remote: {
+                            url:"/agent-contacts?agent=" + item.id + "&query=%QUERY",
+                                    wildcard: '%QUERY'
+                                }
+                            });
+                            agentBuyerJson.initialize();
+                            $('.seller .typeahead').typeahead(null, {
+                                name: 'best-pictures',
+                                displayKey: 'contactName',
+                                source: agentBuyerJson.ttAdapter(),
+                                templates: {
+                                    suggestion: Handlebars.compile([
+                                        '<div class="media">',
+                                        '<div class="pull-left">',
+                                        '<div class="media-object">',
+                                        '<img src="{{ profilepic }}" width="50" height="50"/>',
+                                        '</div>',
+                                        '</div>',
+                                        '<div class="media-body">',
+                                        '<h4 class="media-heading">{{contactName}}</h4>',
+                                        '</div>',
+                                        '</div>'
+                                    ].join(''))
+                                }
+                            }).on('typeahead:selected', function (e, item) {
+                                $('.seller .typeahead').val(item.contactName);
+                                $('#transactionListing_listing_sellerContact_email').val(item.email);
+                                $('#transactionListing_listing_sellerContact_phone').val(item.phone);
+                            });
+                {% endverbatim %}
+                    $('#create_form').find('.control-group').find('.tt-hint').removeClass('required validate-for-row');//^@
+                    $('#create_form').find('.control-group').find('.tt-hint').addClass('donotvalidate'); //^@
+            });
+        {% if app.user.role.level == 7 %}
+            $('.select2').addClass('hidden');
+        {% endif %}
+                agentBuyerJson = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/agent-contacts?agent={{ app.user.id }}&query=%QUERY",
+                        wildcard: "%QUERY",
+                    }
+                });
+                agentBuyerJson.initialize();
+        {% verbatim %}
+            $('.seller .typeahead').typeahead(null, {
+                name: 'best-pictures',
+                displayKey: 'contactName',
+                source: agentBuyerJson.ttAdapter(),
+                templates: {
+                    suggestion: Handlebars.compile([
+                        '<div class="media">',
+                        '<div class="pull-left">',
+                        '<div class="media-object">',
+                        '<img src="{{ profilepic }}" width="50" height="50"/>',
+                        '</div>',
+                        '</div>',
+                        '<div class="media-body">',
+                        '<h4 class="media-heading">{{ contactName }}</h4>',
+                        '</div>',
+                        '</div>',
+                    ].join(''))
+                }
+            }).on('typeahead:selected', function (e, item) {
+                $('.buyer .typehead').val(item.contactName);
+                $('#transactionListing_listing_sellerContact_email').val(item.email);
+                $('#transactionListing_listing_sellerContact_phone').val(item.phone);
+            });
+        {% endverbatim %}
+            });
+            $(function () {
+                // Checks transaction contacts validity on page load
+                $(".trans_contacts tbody tr").each(function () {
+                    checkContactRow($(this));
+                });
+        {% if app.user.businesses[0].id == 15 %}
+            $(".phone").inputmask("999.999.9999");
+        {% else %}
+            $(".phone").inputmask("(999) 999-9999");
+            $("#transactionListing_listing_status option[value='Active_with_Contract']").hide();
+        {% endif %}
+                //Uppercase for state field
+                $('#transactionListing_transactionProperty_property_address_state').keyup(function () {
+                    $(this).val($(this).val().toUpperCase());
+                });
+        {% if app.user.businesses[0].id == 54 %}
+            $("#transactionListing_listing_represent option[value='Landlord']").hide();
+            $("#transactionListing_listing_type option[value='Lease']").hide();
+        {% endif %}
+                $(".question").on('click', function () {
+                    obj = $(this).parent().parent().parent().parent().parent().parent().find('i.fa');
+                    obj.css('color', 'green');
+                });
+                // Event handler for add button in the alerts row
+                $(".add-event-alert2").click(function () {
+                    $(this).closest("tr.event-alerts-row").prev().find('a.add-event-alert').click();
+                });
+                $(".trans_contacts input").on('keyup keypress blur change', function () {
+                    checkContactRow($(this).closest('tr'));
+                });
+        {% if advancedCommissionBox != true %}
+            $('.advanced_1').addClass('hidden');
+            $('.regular_commission').addClass('hidden');
+            $('.advancedBox_1').html('&');
+            $('#transactionListing_listing_totalCommissions_1_type').val('$');
+            $('#transactionListing_listing_buyerAgentCommissions_1_type').val('$');
+        {% endif %}
+                if ($('#transactionListing_listing_listingContacts_0_title').val() == '') {
+                    $('#transactionListing_listing_listingContacts_0_title').val('Listing Date');
+                }
+                if ($('#transactionListing_listing_listingContacts_1_title').val() == '') {
+                    $('#transactionListing_listing_listingContacts_1_title').val('Expiration Date');
+                }
+                if ($("#transactionListing_listing_moneyBox_referral_0").attr("checked") || $("#transactionListing_listing_moneyBox_referral_1").attr("checked")) {
+                    $('.referralQuestion').css('color', 'green');
+                } else {
+                    $('.referralQuestion').css('color', 'red');
+                }
+//            agentFieldCheck();
+            });
+            //        function agentFieldCheck() {
+            //            $("#transactionListing_listing_listingAgentContact_contactName").on('change', function(){
+            //                if(this.value == '') {
+            //                    toggleBuyerRow(true);
+            //                    $('#sellerAgentId').val('');
+            //                } else {
+            //                    toggleBuyerRow(false);
+            //                }
+            //            });
+            //        }
+            function toggleBuyerRow(status) {
+        {% if listingId %}
+            return false;
+        {% endif %}
+                $('#transactionListing_listing_sellerContact_contactName').prop('disabled', status);
+                $('#transactionListing_listing_sellerContact_phone').prop('disabled', status);
+                $('#transactionListing_listing_sellerContact_email').prop('disabled', status);
+                $('#transactionListing_listing_sellerContact_company').prop('disabled', status);
+            }
+            var contactsUrl = "{{ path('contact_json') }}?query=%QUERY";
+            var usersRestPath = "{{ path('rest_user_getall')}}?query=%QUERY";
+        {#var vendorsRestPath = "{{ path('rest_user_getall')}}?type=8&query=%QUERY";#}
+        {% if app.user.businesses[0].id == 50 %}
+        var vendorsRestPath = "/vendors/115.json?query=%QUERY";
+        {% else %}
+        var vendorsRestPath = "/vendors/4.json?query=%QUERY";
+        {% endif %}
+            jQuery(document).ready(function () {
+        {% if listingId is null %}
+            {% if app.user.role.level >= 1 %}
+                $('#transactionListing_listing_listingAgentContact_contactName').val("{{ app.user.firstname }} {{ app.user.lastname }}");
+                $('#transactionListing_listing_listingAgentContact_phone').val("{{ app.user.primaryPhone.number }}");
+                $('#transactionListing_listing_listingAgentContact_email').val("{{ app.user.primaryEmail.email }}");
+                getContacts({{ app.user.id }});
+                toggleBuyerRow(false);
+            {% endif %}
+                var companyName = '';
+                var companyPhone = '';
+                var companyEmail = '';
+                var companyContactName = '';
+            {% for business in app.user.businesses %}
+                    {% if business.id == app.session.get('current_business') %}
+            companyName = "{{ business.name }}".replace(/&amp;/g, '&');
+                        {% if business.contact.phones.first %}
+            companyPhone = "{{ business.contact.phones.first.number }}".replace(/&amp;/g, '&');
+                        {% endif %}
+                        {% if business.contact.emails.first %}
+            companyEmail = "{{ business.contact.emails.first.email }}".replace(/&amp;/g, '&');
+                        {% endif %}
+                        {% if business.contactName %}
+            companyContactName = "{{ business.contactName }}".replace(/&amp;/g, '&');
+                        {% endif %}
+                    {% endif %}
+            {% endfor %}
+                $('#transactionListing_listing_listingOfficeContact_contactName').val(companyContactName);
+                $('#transactionListing_listing_listingOfficeContact_phone').val(companyPhone);
+                $('#transactionListing_listing_listingOfficeContact_email').val(companyEmail);
+                $('#transactionListing_listing_listingOfficeContact_company').val(companyName);
+                $('#transactionListing_listing_listingAgentContact_company').val(companyName);
+        {% endif %}
+                if ($('#transactionListing_listing_listingAgentContact_contactName').val() != '') {
+                    $('#transactionListing_listing_listingAgentContact_contactName').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingAgentContact_contactName').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_listingAgentContact_contactName').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingAgentContact_phone').val() != '') {
+                    $('#transactionListing_listing_listingAgentContact_phone').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingAgentContact_phone').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_listingAgentContact_phone').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingAgentContact_email').val() != '') {
+                    $('#transactionListing_listing_listingAgentContact_email').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingAgentContact_email').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_listingAgentContact_email').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_sellerContact_contactName').val() != '') {
+                    $('#transactionListing_listing_sellerContact_contactName').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_sellerContact_contactName').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_sellerContact_contactName').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_sellerContact_phone').val() != '') {
+                    $('#transactionListing_listing_sellerContact_phone').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_sellerContact_phone').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_sellerContact_phone').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_sellerContact_email').val() != '') {
+                    $('#transactionListing_listing_sellerContact_email').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_sellerContact_email').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_sellerContact_email').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingOfficeContact_contactName').val() != '') {
+                    $('#transactionListing_listing_listingOfficeContact_contactName').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingOfficeContact_contactName').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_listingOfficeContact_contactName').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingOfficeContact_phone').val() != '') {
+                    $('#transactionListing_listing_listingOfficeContact_phone').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingOfficeContact_phone').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_listingOfficeContact_phone').closest('.control-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingOfficeContact_email').val() != '') {
+                    $('#transactionListing_listing_listingOfficeContact_email').closest('.control-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingOfficeContact_email').closest('.control-group').addClass('error');
+                    $('#transactionListing_listing_listingOfficeContact_email').closest('.control-group').removeClass('success');
+                }
+                // listing and expiration date required
+                $('#transactionListing_listing_listingContacts_0_title').prop('required', true);
+                $('#transactionListing_listing_listingContacts_0_time').prop('required', true);
+                $('#transactionListing_listing_listingContacts_1_title').prop('required', true);
+                $('#transactionListing_listing_listingContacts_1_time').prop('required', true);
+                if ($('#transactionListing_listing_listingContacts_0_title').val() != '') {
+                    $('#transactionListing_listing_listingContacts_0_title').closest('.input-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingContacts_0_title').closest('.input-group').addClass('error');
+                    $('#transactionListing_listing_listingContacts_0_title').closest('.input-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingContacts_0_time').val() != '') {
+                    $('#transactionListing_listing_listingContacts_0_time').closest('.input-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingContacts_0_time').closest('.input-group').addClass('error');
+                    $('#transactionListing_listing_listingContacts_0_time').closest('.input-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingContacts_1_title').val() != '') {
+                    $('#transactionListing_listing_listingContacts_1_title').closest('.input-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingContacts_1_title').closest('.input-group').addClass('error');
+                    $('#transactionListing_listing_listingContacts_1_title').closest('.input-group').removeClass('success');
+                }
+                if ($('#transactionListing_listing_listingContacts_1_time').val() != '') {
+                    $('#transactionListing_listing_listingContacts_1_time').closest('.input-group').addClass('success');
+                } else {
+                    $('#transactionListing_listing_listingContacts_1_time').closest('.input-group').addClass('error');
+                    $('#transactionListing_listing_listingContacts_1_time').closest('.input-group').removeClass('success');
+                }
+                if ($('#transactionListing_transactionProperty_property_type').val() === 'Vacant_Land') {
+                    $(".optional_year").addClass('hidden');
+                    $('#transactionListing_transactionProperty_yearBuilt').prop('required', false);
+                    $('#transactionListing_transactionProperty_yearBuilt').removeClass('required_field required');
+                }
+                else {
+                    $(".optional_year").removeClass('hidden');
+                    $('#transactionListing_transactionProperty_yearBuilt').prop('required', true);
+                    $('#transactionListing_transactionProperty_yearBuilt').addClass('required_field required');
+                }
+                $("#transactionListing_listing_listingContacts_0_time").on('change', function () {
+                    var value = $(this).val();
+                    if (value !== '') {
+                        $(this).closest('.input-group').addClass('success');
+                        $(this).closest('.input-group').removeClass('error');
+                    } else {
+                        $(this).closest('.input-group').addClass('error');
+                        $(this).closest('.input-group').removeClass('success');
+                    }
+                });
+                $("#transactionListing_listing_listingContacts_1_time").on('change', function () {
+                    var value = $(this).val();
+                    if (value !== '') {
+                        $(this).closest('.input-group').addClass('success');
+                        $(this).closest('.input-group').removeClass('error');
+                    } else {
+                        $(this).closest('.input-group').addClass('error');
+                        $(this).closest('.input-group').removeClass('success');
+                    }
+                });
+                // event alert box checked
+                $('.show-event-alert').each(function () {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('tr').next().find('.alert_event').removeClass('hidden');
+                    } else {
+                        $(this).closest('tr').next().find('.alert_event').addClass('hidden');
+                    }
+                });
+            
+                $(".currency").bind("change paste keyup", function () {
+                    $('.currency').val(formatCurrency(this.value.replace(/[^0-9\.]+/g, "")));
+                });
+          
+                function formatCurrency(number) {
+                    var n = number.split('').reverse().join("");
+                    var n2 = n.replace(/\d\d\d(?!$)/g, "$&,");
+
+                    var result = '$' + n2.split('').reverse().join('');
+
+                    if (number > 0) {
+                        return result;
+                    } else {
+                        return '';
+                    }
+                }
+                $('.btn-add').on('click', function (event) {
+                    var collectionHolder = $('#' + $(this).attr('data-target'));
+                    var prototype = collectionHolder.attr('data-prototype');
+                    var form = prototype.replace(/__name__/g, collectionHolder.children().length);
+                    collectionHolder.append(form);
+                    $(".form_meridian_datetime").datetimepicker({
+                        autoclose: true,
+                        isRTL: App.isRTL(),
+                        format: "mm/dd/yyyy - hh:ii",
+                        fontAwesome: true,
+                        todayHighlight: true,
+                        pickerPosition: (App.isRTL() ? "bottom-right" : "bottom-left")
+                    });
+                    $('.date-picker').datepicker({
+                        format: "mm/dd/yyyy",
+                        todayHighlight: true,
+                        orientation: "right",
+                        autoclose: true
+                    });
+                    var test = $("input[type=checkbox]:not(.toggle, .make-switch, .icheck), input[type=radio]:not(.toggle, .star, .make-switch, .icheck)");
+                    if (test.size() > 0) {
+                        test.each(function () {
+                            if ($(this).parents(".checker").size() === 0) {
+                                $(this).show();
+                            }
+                        });
+                    }
+                    return false;
+                });
+                $('.portlet-body').on('click', '.btn-remove', function (event) {
+                    var name = $(this).attr('data-related');
+                    $('*[data-content="' + name + '"]').remove();
+                    return false;
+                });
+                // Event alert
+                eventAlert = $('.add-event-alert');
+                eventAlert.on('click', function () {
+                    $(this).closest('tr').next().find('.alert_event').removeClass('hidden');
+                    if (!$(this).closest('tr').next().find('.alert_event').hasClass('hidden')) {
+                        var collectionHolder = $(this).closest('tr').next().find('tbody');
+                        var row = $(this).closest('tr.event-row');
+                        var newRowHtml = row.data('prototype').replace(/__name__/g, collectionHolder.children().length);
+                        collectionHolder.append(newRowHtml);
+                        $(".form_meridian_datetime").datetimepicker({
+                            autoclose: true,
+                            isRTL: App.isRTL(),
+                            format: "mm/dd/yyyy - hh:ii",
+                            fontAwesome: true,
+                            todayHighlight: true,
+                            pickerPosition: (App.isRTL() ? "bottom-right" : "bottom-left")
+                        });
+                        $('.date-picker').datepicker({
+                            format: "mm/dd/yyyy",
+                            todayHighlight: true,
+                            orientation: "right",
+                            autoclose: true
+                        });
+                        var test = $("input[type=checkbox]:not(.toggle, .make-switch, .icheck), input[type=radio]:not(.toggle, .star, .make-switch, .icheck)");
+                        if (test.size() > 0) {
+                            test.each(function () {
+                                if ($(this).parents(".checker").size() === 0) {
+                                    $(this).show();
+                                }
+                            });
+                        }
+                    }
+                    return false;
+                });
+                $("#transactionListing_listing_moneyBox_referral_0").click(function () {
+                    if ($(this).val() == true) {
+                        $(".custom_box_referral").show();
+                    }
+                });
+                $("#transactionListing_listing_moneyBox_referral_1").click(function () {
+                    if ($(this).val() == false) {
+                        $(".custom_box_referral").hide();
+                    }
+                });
+                $('.date-picker').datepicker({
+                    format: "mm/dd/yyyy",
+                    todayHighlight: true,
+                    orientation: "right",
+                    autoclose: true
+                });
+                $(".form_meridian_datetime").datetimepicker({
+                    autoclose: true,
+                    isRTL: App.isRTL(),
+                    format: "mm/dd/yyyy - hh:ii",
+                    fontAwesome: true,
+                    todayHighlight: true,
+                    pickerPosition: (App.isRTL() ? "bottom-right" : "bottom-left")
+                });
+        {% verbatim %}
+                var agentBuyerJson;
+                var companyAgentsJson = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/company-agents?query=%QUERY",
+                        wildcard: '%QUERY'
+                    }
+                });
+                companyAgentsJson.initialize();
+                $('.listingAgent .typeahead').typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'contactName',
+                    source: companyAgentsJson.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{contactName}}</h4>',
+                            '</div>',
+                            '</div>',
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    $('.listingAgent .typehead').val(item.contactName);
+                    $('#sellerAgentId').val(item.id);
+                    $('#transactionListing_listing_listingAgentContact_email').val(item.email);
+                    $('#transactionListing_listing_listingAgentContact_phone').val(item.phone);
+                    // Agent Buyer
+                    getContacts(item.id);
+        {% endverbatim %}
+                });
+                function getContacts(itemId) {
+                }
+        {% verbatim %}
+                var bestPictures = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: vendorsRestPath,
+                        wildcard: '%QUERY'
+                    }
+                });
+                bestPictures.initialize();
+                $('.titleCompany .typeahead').typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'contactName',
+                    source: bestPictures.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{type}}</h4>',
+                            '<p>{{ businessName }}</p>',
+                            '<p>{{ contactName }}</p>',
+                            '</div>',
+                            '</div>',
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    $('.titleCompany .typehead').val(item.contactName);
+                    $('#transactionListing_listing_titleCompanyContact_email').val(item.email);
+                    $('#transactionListing_listing_titleCompanyContact_phone').val(item.phone);
+                    $('#transactionListing_listing_titleCompanyContact_company').val(item.businessName);
+        {% endverbatim %}
+                });
+                $('.advanced_commission').click(function () {
+                    $('.regular_commission').removeClass('hidden');
+                    $('.advanced_commission').addClass('hidden');
+                    $('.advanced_1').removeClass('hidden');
+                    $('.advancedBox_1').html('&');
+                    $('.transactionListing_listing_advancedCommissionBox').val(true);
+                });
+                $('.regular_commission').click(function () {
+                    $('.regular_commission').addClass('hidden');
+                    $('.advanced_commission').removeClass('hidden');
+                    $('.advanced_1').addClass('hidden');
+                    $('.advancedBox_1').html('');
+                    $('.transactionListing_listing_advancedCommissionBox').val(false);
+                });
+                $('#transactionListing_transactionProperty_property_type').change(function () {
+                    var property = $(this).val();
+                    if (property === 'Vacant_Land') {
+                        $(".optional_year").addClass('hidden');
+                        $('#transactionListing_transactionProperty_yearBuilt').prop('required', false);
+                        $('#transactionListing_transactionProperty_yearBuilt').removeClass('required_field required');
+                    }
+                    else {
+                        $(".optional_year").removeClass('hidden');
+                        $('#transactionListing_transactionProperty_yearBuilt').prop('required', true);
+                        $('#transactionListing_transactionProperty_yearBuilt').addClass('required_field required');
+                    }
+                });
+
+
+
+            // contact Role's label change according to client type's selected choice
+                $('#transactionListing_listing_represent').change(function () {
+                $("#trans_contacts_wrapper").find('input') .each(function() {
+                    if($(this).closest('.control-group').hasClass("success") || $(this).closest('.control-group').hasClass("error")){
+                        if($(this).hasClass("tt-hint"))
+                            $(this).removeClass("required");
+                        else
+                            $(this).addClass("required");
+                    }
+                });
+                if($("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').hasClass("success") || $("#transactionListing_listing_buyerAgentCommissions_0_value").closest('.control-group').hasClass("error")){
+                   $("#transactionListing_listing_buyerAgentCommissions_0_value").addClass("required"); 
+                }
+                
+                if($("#transactionListing_listing_agentCommissions_0_value").closest('.control-group').hasClass("success") || $("#transactionListing_listing_agentCommissions_0_value").closest('.control-group').hasClass("error")){
+                    $("#transactionListing_listing_agentCommissions_0_value").addClass("required");
+                }
+                
+                if($("#transactionListing_listing_totalCommissions_0_value").closest('.control-group').hasClass("success") || $("#transactionListing_listing_totalCommissions_0_value").closest('.control-group').hasClass("error")){
+                    $("#transactionListing_listing_totalCommissions_0_value").addClass("required");
+                }
+              
+                    var i_represent = $(this).val();
+                    if (i_represent === 'Seller') {
+                        $("#transactionListing_listing_listingAgentContact_email").removeAttr('required').closest('.control-group').removeClass('error');
+                        $("#transactionListing_listing_listingOfficeContact_email").removeAttr('required').closest('.control-group').removeClass('error');
+                    {% if app.user.businesses[0].id == 50 %}
+                            //console.log("!@");
+                        $("#transactionListing_listing_sellerContact_phone").removeClass("lisafield required validate-for-row");
+                        $("#transactionListing_listing_sellerContact_email").removeClass("lisafield required validate-for-row");
+                        $("#transactionListing_listing_sellerContact_phone").addClass("donotvalidate");
+                        $("#transactionListing_listing_sellerContact_email").addClass("donotvalidate");
+                        $("#remote-seller-phone").removeClass("lisa error");
+                        $("#remote-seller-email").removeClass("lisa error");
+                       
+                        $('#transactionListing_listing_sellerContact_phone').css('border-color','#ccc');
+                        $('#transactionListing_listing_sellerContact_phone').css('background','#fff');
+                        $('#transactionListing_listing_sellerContact_email').css('background','#fff');
+                         $('#transactionListing_listing_sellerContact_email').css('border-color','#ccc');
+                    {% endif %}
+                    }
+                    if (i_represent === 'Landlord') {
+                        $('#transactionListing_listing_type').val('Lease');
+                        $("tr#contact_row_0 span.contact_type").text('Landlord');
+                    $("tr#contact_row_00 span.contact_type").text('Landlord 2');
+                        $("tr#contact_row_3").hide();
+                   {% if app.user.businesses[0].id == 50 %}
+                           // console.log("!@");
+                        $("#transactionListing_listing_sellerContact_phone").removeClass("lisafield required validate-for-row");
+                        $("#transactionListing_listing_sellerContact_email").removeClass("lisafield required validate-for-row");
+                        $("#transactionListing_listing_sellerContact_phone").addClass("donotvalidate");
+                        $("#transactionListing_listing_sellerContact_email").addClass("donotvalidate");
+                        $("#remote-seller-phone").removeClass("lisa error");
+                        $("#remote-seller-email").removeClass("lisa error");
+                       
+                        $('#transactionListing_listing_sellerContact_phone').css('border-color','#ccc');
+                        $('#transactionListing_listing_sellerContact_email').css('background','#fff');
+                    {% endif %}
+                    {#{% if app.user.businesses[0].id == 50 %}
+                        $("#transactionListing_listing_sellerContact_address_street").addClass("required");
+                        $("#transactionListing_listing_buyerAgentCommissions_0_value").addClass("required");
+                        $("#transactionListing_listing_agentCommissions_0_value").addClass("required");
+                        $("#transactionListing_listing_totalCommissions_0_value").addClass("required");
+                    {% endif %}#}
+                    } else {
+                        $('#transactionListing_listing_type').val($('#transactionListing_listing_type option:first').val());
+                        $("tr#contact_row_0 span.contact_type").text('Seller');
+                    $("tr#contact_row_00 span.contact_type").text('Seller 2');
+                        $("tr#contact_row_3").show();
+                    }
+                });
+
+
+
+
+
+                $('#transactionListing_listing_type').change(function () {
+                    var type = $(this).val();
+                    var i_represent = $('#transactionListing_listing_represent').val();
+                    if (type === 'Lease') {
+                        $('#transactionListing_listing_represent').val('Landlord');
+                        $("tr#contact_row_0 span.contact_type").text('Landlord');
+                        $("tr#contact_row_3").hide();
+                    } else if (type !== 'Lease' && i_represent === 'Landlord') {
+                        $('#transactionListing_listing_represent').val($('#transactionListing_listing_represent option:first').val());
+                        $("tr#contact_row_0 span.contact_type").text('Seller');
+                        $("tr#contact_row_3").show();
+                    }
+                });
+                $("#transactionListing_listing_moneyBox_referral_0").click(function () {
+                    if ($(this).val() == true) {
+                        $(".referralQuestion").css("color", "green");
+                    }
+                });
+                $("#transactionListing_listing_moneyBox_referral_1").click(function () {
+                    if ($(this).val() == false) {
+                        $(".referralQuestion").css("color", "green");
+                    }
+                });
+                $("#transactionListing_transactionProperty_property_address_state").val("{{ app.user.businesses[0].address.state }}");
+        {% if app.user.businesses[0].id == 2 %}
+                $("#transactionListing_transactionProperty_property_type").append($("<option></option>").attr("value", 'Farm & Ranch').text('Farm & Ranch'));
+        {% endif %}
+        {% if app.user.businesses[0].id != 50 %}
+//                $("#transactionListing_transactionProperty_property_type").append($("<option></option>").attr("value", 'Apartment').text('Apartment'));
+            $("#transactionListing_transactionProperty_property_type option[value='Apartment']").remove();
+        {% endif %}
+            });
+    </script>
+
+    {% if app.user.businesses[0].id == 50 %}
+        <script>
+            $(document).ready(function () {
+                $('#transactionListing_listing_sellerContact_email').closest('.control-group').removeClass('error');
+                $('#transactionListing_listing_sellerContact_email').removeClass('required validate-for-row');
+                $('#transactionListing_listing_listingAgentContact_email').closest('.control-group').removeClass('error');
+                $('#transactionListing_listing_listingAgentContact_email').removeClass('required validate-for-row');
+                $('#transactionListing_listing_listingAgentContact_phone').closest('.control-group').removeClass('error');
+                $('#transactionListing_listing_listingAgentContact_phone').removeClass('required validate-for-row');
+            });
+        </script>
+    {% endif %}
+
+    <script type="text/javascript">
+        $(function () {
+            $("#transactionListing_transactionProperty_property_address_zip").on('keyup blur change', function () {
+                var zip = $(this).val();
+                var zip_regex = /^[0-9]+$/;
+                if (!zip.match(zip_regex) || (zip.length) < 1 || (zip.length) > 5) {
+                    $('#transactionListing_transactionProperty_property_address_zip')
+                        .closest('.control-group').removeClass('success');
+                    $('#transactionListing_transactionProperty_property_address_zip')
+                        .closest('.control-group').addClass('error');
+                    $('#zip-error').html('Enter 5 Numbers');
+                    $("#transactionListing_transactionProperty_property_address_zip").focus();
+                    return false;
+                }
+                else {
+                    $('#transactionListing_transactionProperty_property_address_zip')
+                        .closest('.control-group').removeClass('error');
+                    $('#transactionListing_transactionProperty_property_address_zip')
+                        .closest('.control-group').addClass('success');
+                    $('#zip-error').addClass('hidden');
+                    return true;
+                }
+            });
+            $("#transactionListing_transactionProperty_property_address_state").on('keyup blur change', function () {
+                var state = $(this).val();
+                var state_regex = /^[a-zA-Z]+$/;
+                if (!state.match(state_regex) || (state.length) < 1 || (state.length) > 2) {
+                    $('#transactionListing_transactionProperty_property_address_state')
+                        .closest('.control-group').removeClass('success');
+                    $('#transactionListing_transactionProperty_property_address_state')
+                        .closest('.control-group').addClass('error');
+                    $('#state-error').html('Enter 2 Letters');
+                    $("#transactionListing_transactionProperty_property_address_state").focus();
+                    return false;
+                }
+                else {
+                    $('#transactionListing_transactionProperty_property_address_state')
+                        .closest('.control-group').removeClass('error');
+                    $('#transactionListing_transactionProperty_property_address_state')
+                        .closest('.control-group').addClass('success');
+                    $('#state-error').addClass('hidden');
+                    return true;
+                }
+            });
+         $('#create_form').submit(function () {
+                validate();
+
+            });
+            function validate() {
+                var form_field = [
+                    'transactionListing_listing_sellerContact_contactName',
+                    'transactionListing_listing_sellerContact_phone',
+                    'transactionListing_listing_listingAgentContact_phone',
+                    'transactionListing_listing_listingOfficeContact_phone',
+                    'transactionListing_listing_listingAgentContact_email',
+                    'transactionListing_listing_listingOfficeContact_email',
+                    'transactionListing_listing_listingContacts_0_time',
+                    'transactionListing_listing_listingContacts_1_time',
+                ];
+
+                var length = form_field.length;
+                for (var i = 0; i < length; i++) {
+
+                    if ($("#" + form_field[i]).val() == '') {
+                        $("#" + form_field[i]).closest('.control-group').addClass('error');
+                        $("#" + form_field[i]).closest('.control-group').removeClass('success');
+                    }
+
+                }
+
+            }
+
+            var form1 = $('#create_form');
+            var error1 = $('.alert-error', form1);
+            var success1 = $('.alert-success', form1);
+            //console.log('validating');
+            $(form1).validate({
+                onkeyup: function (element) {
+                    $(element).valid();
+                },
+                onfocusout: function (element) {
+                    $(element).valid();
+                },
+                errorElement: 'span',
+                errorClass: 'help-inline',
+                focusInvalid: false,
+                ignore: "",
+                invalidHandler: function (event, validator) { //display error alert on form submit
+                     $(validator.errorList[0].element).focus();
+                    success1.hide();
+                    error1.show();
+                    $('html, body').animate({scrollTop: $('#create_form').offset().top}, 'fast');
+                    alert('You have missed one or more required fields. Enter the missing information highlighted in red and try to save the transaction again.');
+                    return true;
+                },
+                highlight: function (element) {
+                   // console.log("high");
+                    var row = $(element).closest("tr").attr("id");
+                    var check = $('#' + row).find(".required").each(function () {
+                        //console.log($(this));
+                        var input = $(this).val();
+                        if (input == '') {
+                            $('#' + row).find(".required_icon_table").css("color", "red");
+                            $('#' + row).find(".get_quote").removeClass('hide');
+                        }
+                    });
+                      $(element).closest('.control-group').removeClass('success');
+                    $(element).closest('.input-group').removeClass('success');
+                    $(element).closest('.control-group').addClass('error');
+                    $(element).closest('.input-group').addClass('error');
+                    $(element).siblings(".required_icon").css("color", "red");
+                     $(element).css('background-color' , 'rgb(250, 255, 189)');
+                },
+                unhighlight: function (element) {
+                  // console.log("un-high");
+                    if($(".distinct-input").closest('.control-group').hasClass('success') || $(element).closest('.control-group').hasClass('success')){
+                        
+                        $(element).css('background-color' , '#fff');
+                    }
+                    $(element).closest('.control-group').removeClass('error');
+                    $(element).closest('.input-group').removeClass('error');
+                    $(element).closest('.control-group').removeClass('optional');
+                    $(element).closest('.control-group').addClass('success');
+                    $(element).closest('.input-group').addClass('success');
+                    $(element).find(".required_icon").css("color", "green");
+                    $(element).siblings(".required_icon").css("color", "green");
+                    var row = $(element).closest("tr").attr("id");
+                    var check = $('#' + row).find(".required").each(function () {
+                        var input = $(this).val();
+                        if (input == '') {
+                            $('#' + row).find(".required_icon_table").css("color", "red");
+                            $('#' + row).find(".get_quote").removeClass('hide');
+                        } else {
+                            $('#' + row).find(".required_icon_table").css("color", "green");
+                            $('#' + row).find(".get_quote").addClass('hide');
+                        }
+                    });
+                },
+                success: function (label) {
+                    label.addClass('valid');
+                    //console.log('success!');
+                    //$(element).siblings(".required_icon").css("color", "green");
+                },
+                errorPlacement: function (error, element) {
+                },
+                ignore: ".donotvalidate",
+                        submitHandler: function (form) {
+                            success1.show();
+                            error1.hide();
+                            $('button:submit').attr("disabled", true);
+                            form.submit();
+                        }
+            });
+            $(".trans_contacts tbody tr").each(function () {
+                checkContactRow($(this));
+            });
+            
+            // ^% code to resolve issue 3
+            if($("#transactionListing_listing_represent").val()=='Seller'){
+                
+                $("#transactionListing_listing_sellerContact_email").addClass("required");
+                if($("#transactionListing_listing_titleCompanyContact_phone").val()){
+                    $("#transactionListing_listing_titleCompanyContact_phone").closest(".control-group").addClass("success");
+                }
+                if($("#transactionListing_listing_titleCompanyContact_email").val()){
+                    $("#transactionListing_listing_titleCompanyContact_email").closest(".control-group").addClass("success");
+                }
+                if($("#transactionListing_listing_titleCompanyContact_company").val()){
+                    $("#transactionListing_listing_titleCompanyContact_company").closest(".control-group").addClass("success");
+                }
+            }
+            // end of code to resolve issue 3
+            
+        });
+    </script>
+
+
+    <!--  execute this code only when the user is part of CRR busness   -->
+    {% if app.user.businesses[0].id == 50 %}
+        <script>
+            $(document).ready(function () {
+
+                $('#transactionListing_listing_listingAgentContact_email').closest('.control-group').removeClass('error');
+                $('#transactionListing_listing_listingAgentContact_email').removeClass('required validate-for-row');
+                $('#transactionListing_listing_listingAgentContact_phone').closest('.control-group').removeClass('error');
+                $('#transactionListing_listing_listingAgentContact_phone').removeClass('required validate-for-row');
+                $('#remote-seller-email').addClass('error');
+               //  $('#remote-seller-company').addClass('error');
+                $('#transactionListing_listing_titleCompanyContact_contactName').focus(function() {
+                    $('#transactionListing_listing_titleCompanyContact_contactName').css("background-color", "#fff");
+                });
+                setTimeout(function() {
+                    $('#transactionListing_listing_sellerContact_email').addClass('required validate-for-row');
+                    $('#contact_row_3').removeClass('contact_success');
+                    $('#contact_row_3').addClass('contact_error');
+                    $('#remote-seller-email').addClass('error');
+
+                //    $('#remote-seller-company').addClass('error');
+
+                    if($('#transactionListing_listing_titleCompanyContact_contactName').val()){
+                        $('#transactionListing_listing_titleCompanyContact_contactName').css("background-color", "#fff");
+                        $('#transactionListing_listing_titleCompanyContact_contactName').css("border-color", "#468847");
+                    }else{
+                        //$('#transactionListing_listing_titleCompanyContact_contactName').css("background-color", "rgb(250, 255, 189)");
+
+                    }
+                    $('#transactionListing_listing_sellerContact_contactName').css("background-color", "");
+                    $('.lisa').each(function( index ) {
+
+                        if ($( this ).find('input:first').val()){
+                            $( this ).removeClass('error');
+                            $( this ).addClass('success');
+                        }else{
+                            $( this ).removeClass('success');
+                            $( this ).addClass('error');
+
+                        }
+
+                    });
+
+                }, 500);
+
+
+
+
+
+                //   when form submitted, check mondatory fields for CRR busness
+                $('#listing-submit').click(function () {
+
+                    setTimeout(function() {
+                       // if($('#transactionListing_listing_titleCompanyContact_contactName').val()){
+                           // $('#transactionListing_listing_titleCompanyContact_contactName').css("background-color", "#fff");
+                           // $('#transactionListing_listing_titleCompanyContact_contactName').css("border-color", "#468847");
+                        //}
+                        //$('#remote-seller-email').addClass('error');
+                      //  $('#remote-seller-company').addClass('error');
+                        $('.lisa').each(function( index ) {
+
+                            if ($( this ).find('input:first').val()){
+                                $( this ).removeClass('error');
+                                $( this ).addClass('success');
+                            }else{
+                                $( this ).removeClass('success');
+                                $( this ).addClass('error');
+                            }
+
+                        });
+
+                    }, 500);
+
+                })
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% import _self as forms %}
+    {% macro event_widget_prototype(widget, remove_text) %}
+        {% import _self as forms %}
+        {% if widget.vars.prototype is defined %}
+            {% set form = widget.vars.prototype %}
+            {% set name = widget.vars.prototype.vars.name %}
+        {% else %}
+            {% set form = widget %}
+            {% set name = widget.vars.full_name %}
+        {% endif %}
+
+        {% set randomId = random() %}
+
+        <tr class="event-row" data-id="{{ widget.vars.id }}" data-content="{{ widget.vars.id }}_{{ name }}"
+            data-target="post_event_alert_{{ randomId }}"
+            data-prototype="{{ forms.event_alert_prototype(form.alerts.vars.prototype)|e }}">
+            <td>
+                <div class="input-group">
+                    {{ form_widget(form.title) }}
+                </div>
+            </td>
+            <td>
+                <div class="input-group date date-picker" data-date-format="yyyy-mm-dd">
+                    {{ form_widget(form.time) }}
+                    <span class="input-group-btn">
+                        <button class="btn default" type="button"><i class="fa fa-calendar"></i></button>
+                    </span>
+                    <span id="name-error" class="help-block help-block-error" style="display: none;">
+                        This field is required.
+                    </span>
+                </div>
+            </td>
+            <td>
+                <div style="display: none;" class="checkbox">
+                    <span class="">
+                        {{ form_widget(form.alert) }}
+                    </span>
+                </div>
+
+                <a href="#" class="add-event-alert"><i class="icon-plus"></i> Add</a>
+            </td>
+        </tr>
+
+        <tr class="event-alerts-row">
+            <td colspan="3">
+                <table class="table table-striped alert_event hidden">
+                    <thead>
+                        <tr>
+                            <th width="45%"></th>
+                            <th width="55%"></th>
+                            <th width="5%"></th>
+                            <th width="15%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="post_event_alert_{{ randomId }}">
+                        {% for widget in form.alerts.children %}
+                            {{ forms.event_alert_prototype(widget, 'Remove alert') }}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+
+    {% endmacro %}
+
+    {% macro event_alert_prototype(widget, remove_text) %}
+        {% if widget.vars.prototype is defined %}
+            {% set form = widget.vars.prototype %}
+            {% set name = widget.vars.prototype.vars.name %}
+        {% else %}
+            {% set form = widget %}
+            {% set name = widget.vars.full_name %}
+        {% endif %}
+
+        <tr data-content="{{ widget.vars.id }}_{{ name }}">
+            <td width="35%">
+                <div class="checkbox-inline">
+                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                        email
+                        {{ form_widget(form.email) }}
+                        <span></span>
+                    </label>
+                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                        text
+                        {{ form_widget(form.phone) }}
+                        <span></span>
+                    </label>
+                </div>
+            </td>
+            <td width="45%">
+                <div class="input-group date form_meridian_datetime form_datetime bs-datetime">
+                    {{ form_widget(form.date) }}
+                    <span class="input-group-addon">
+                        <button style="margin-right: 0;" class="btn default date-reset" type="button"><i class="fa fa-times"></i></button>
+                    </span>
+                    <span class="input-group-addon">
+                        <button style="margin-right: 0;" class="btn default date-set" type="button"><i class="fa fa-calendar"></i></button>
+                    </span>
+                </div>
+            </td>
+            <td width="5%"></td>
+            <td width="15%">
+                <div class="btn-group" role="group">
+                    <a data-related="{{ widget.vars.id }}_{{ name }}" class="btn btn-danger btn-remove">
+                        <i class="fa fa-trash-o"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+    {% endmacro %}
+
+    {% if listingId is not null %}
+        <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-9">
+                <a class="btn yellow " href="{{ path('transaction_view', {'id': transactionId}) }}">
+                    <i class="icon-action-undo"></i> Back to transaction
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="form create_transaction">
+        {{ form_start(form, { 'attr': {'novalidate': 'novalidate','class': 'form-bordered form-horizontal create_form', 'id': 'create_form', 'data-type': 'listing', 'onkeypress': 'return event.keyCode != 13;'} }) }}
+        <div class="row">
+            <div class="col-md-9">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="icon-home"></i> Property Information</div>
+                    </div>
+                    <div class="portlet-body gradient-bg property-information">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% if (app.user.businesses[0].id in [19]) %}
+                                    <div class="control-group error">
+                                        {{ form_widget(form.transactionProperty.mlsNumber, {'attr': {'required': 'required', 'class': 'form-control placeholder-no-fix required_field required'}}) }}
+                                    </div>
+                                {% else %}
+                                    <div class="form-group">
+                                        {{ form_widget(form.transactionProperty.mlsNumber) }}
+                                    </div>
+                                {% endif %}
+                                <span class="help-block">
+                                    {{ form_errors(form.transactionProperty.mlsNumber) }}
+                                </span>
+                            </div>
+
+                            {% if checker.forAddon('auto fill', app.user) %}
+                                <div class="col-md-4">
+                                    <a href="#" class="btn blue" data-user="{{ app.user.id }}" id="fetch_mls"
+                                       name="fetch_mls"><i class="icon-share-alt"></i> Autofill MLS</a>
+                                </div>
+                            {% endif %}
+
+                            <div class="col-md-2">
+                                {% if transaction.transactionProperty is not null and transaction.transactionProperty.primaryMlsNumber is not null and transaction.transactionProperty.pMlsNumber is not null %}
+                                    <h4>{{ transaction.transactionProperty.pMlsNumber }}</h4>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="control-group {% if form.vars.value.transactionProperty.property.address.street is defined %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.transactionProperty.property.address.street is defined %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.transactionProperty.property.address.street , {'attr': {'required': 'required', 'class': 'form-control placeholder-no-fix required_field required'}}) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.transactionProperty.property.address.street) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_widget(form.transactionProperty.mlsBoard) }}
+                                <span class="help-block">
+                                    {{ form_errors(form.transactionProperty.mlsBoard) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="control-group {% if form.vars.value.transactionProperty.property.address.city is defined %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.transactionProperty.property.address.city is defined %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.transactionProperty.property.address.city , {'attr': {'required': 'required', 'class': 'form-control placeholder-no-fix required_field required'}}) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.transactionProperty.property.address.city) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="control-group {% if form.vars.value.transactionProperty.property.address.state is defined %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.transactionProperty.property.address.state is defined %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.transactionProperty.property.address.state) }}
+                                        <span class="help-block" id="state-error">
+                                            {{ form_errors(form.transactionProperty.property.address.state) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="control-group {% if form.vars.value.transactionProperty.property.address.zip is defined %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.transactionProperty.property.address.zip is defined %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.transactionProperty.property.address.zip) }}
+                                        <span class="help-block" id="zip-error">
+                                            {{ form_errors(form.transactionProperty.property.address.zip) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="control-group {% if form.vars.value.transactionProperty.property.type is defined %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.transactionProperty.property.type is defined %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.transactionProperty.property.type) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.transactionProperty.property.type) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 optional_year">
+                                <div class="control-group {% if form.vars.value.transactionProperty.yearBuilt is defined and form.vars.value.transactionProperty.yearBuilt is not empty %}success{% else %}error{% endif %} {% if form.transactionProperty.yearBuilt.vars.errors|length %}has-error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.transactionProperty.yearBuilt is defined and form.vars.value.transactionProperty.yearBuilt is not empty %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.transactionProperty.yearBuilt) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.transactionProperty.yearBuilt) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="icon-info"></i> Listing Information
+                        </div>
+                    </div>
+                    <div class="portlet-body gradient-bg">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="control-group {% if form.vars.value.listing.represent is defined and form.vars.value.listing.represent is not empty %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.listing.represent is defined and form.vars.value.listing.represent is not empty %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.listing.represent) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.listing.represent) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="control-group {% if form.vars.value.listing.type is defined and form.vars.value.listing.type is not empty %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="{% if form.vars.value.listing.type is defined and form.vars.value.listing.type is not empty %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.listing.type) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.listing.type) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-12">
+                                <div class="control-group success">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon"
+                                           style="color:rgb(0, 128, 0);margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.listing.status) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.listing.status) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-navicon"></i> Listing Contacts
+                        </div>
+                    </div>
+                    <div class="portlet-body no-more-tables ">
+                        <div id="trans_contacts_wrapper" class="dataTables_wrapper form-inline no-footer">
+                            <table class="display table table-hover table-bordered table-condensed cf trans_contacts dataTable no-footer"
+                                   cellspacing="0" width="100%" style="margin-bottom: 0 !important;">
+                                <thead class="cf">
+                                    <tr role="row">
+                                        <th style="width: 160px;" class="sorting_asc" rowspan="1" colspan="1"
+                                            aria-label=" Contact Role"><i class="icon-key table_form_icon"></i> Contact Role
+                                        </th>
+                                        <th style="width: 250px;" class="sorting" rowspan="1" colspan="1"
+                                            aria-label=" Contact"><i class="icon-user table_form_icon"></i> Contact
+                                        </th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1"
+                                            aria-label=" Phone #"><i class="icon-phone table_form_icon"></i> Phone #
+                                        </th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1"
+                                            aria-label=" Email"><i class="icon-envelope-alt table_form_icon"></i> Email
+                                        </th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1"
+                                            aria-label=" Email"><i class="icon-envelope-alt table_form_icon"></i> Company
+                                        </th>
+
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr class="required_party toggle_control odd" id="contact_row_0" role="row">
+                                        <td data-title="Role" id="0">
+                                            <i class="fa fa-asterisk contact_status seller"
+                                               style="font-size: 9px; z-index: 3;position: absolute; margin-top: -10px; margin-left: -10px;"></i>
+
+                                            <span class="contact_type">Seller</span>
+                                        </td>
+                                        <td data-title="Contact">
+                                        <div class="control-group remote ">
+                                                <div class="controls seller">
+                                                {{ form_widget(form.listing.sellerContact.contactName, { 'attr': {'class': 'form-control placeholder-no-fix typeahead required validate-for-row  ', 'placeholder': app.user.role.level <7 ? 'Set agent first to autofill contact' : 'Name', 'style': 'width:100%;'} }) }}
+                                            </div>
+                                        </div>
+                                        {% if app.user.businesses[0].id == 50 %}
+                                            <div class="control-group remote lisa">
+                                                <div class="controls seller">
+                                                    {{ form_widget(form.listing.sellerContact.address.street, { 'attr': { 'style': 'width:100%;margin-top:4%' } }) }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+
+                                        <span class="help-block">
+                                                    {{ form_errors(form.listing.sellerContact.contactName) }} </span>
+                                        {{ form_errors(form.listing.sellerContact.address.street) }} </span>
+
+                                    </td>
+                                    <td data-title="Phone Number">
+                                        <div id="remote-seller-phone" class="control-group ">
+                                            <div class="controls">
+                                                {{ form_widget(form.listing.sellerContact.phone, { 'attr': {'class': 'form-control placeholder-no-fix ajax-phone required validate-for-row phone', 'style': 'width:100%;'} }) }}
+                                            </div>
+                                        </div>
+
+                                        <!--  we show only the fields requested by CRR -->
+                                        {% if app.user.businesses[0].id == 50 %}
+                                            <div class="control-group remote lisa">
+                                                <div class="controls seller">
+                                                    {{ form_widget(form.listing.sellerContact.address.city, { 'attr': { 'style': 'width:100%;margin-top:4%' , 'class': 'form-control required validate-for-row ' } }) }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+
+                                        <span class="help-block">
+                                                    {{ form_errors(form.listing.sellerContact.phone) }} </span>
+                                        {{ form_errors(form.listing.sellerContact.address.city) }} </span>
+
+                                    </td>
+                                    <td data-title="Email">
+                                        <div id="remote-seller-email" class="control-group lisa">
+                                            <div class="controls">
+                                                {{ form_widget(form.listing.sellerContact.email, { 'attr': {'class': 'form-control placeholder-no-fix ajax-email ', 'style': 'width:100%;'} }) }}
+
+                                               
+                                                <span class="help-block">
+                                                        {{ form_errors(form.listing.sellerContact.email) }}
+                                                    {{ form_errors(form.listing.sellerContact.address.state) }}
+                                                    </span>
+                                            </div>
+                                        </div>
+                                         <div class="control-group lisa">
+                                              <div class="controls">
+                                                             <!--  we show only the fields requested by CRR -->
+                                                {% if app.user.businesses[0].id == 50 %}
+                                                    {{ form_widget(form.listing.sellerContact.address.state, { 'attr': { 'style': 'width:100%;margin-top:2%','class': 'form-control required validate-for-row  ' } }) }}
+                                                {% endif %} 
+                                                 <span class="help-block">
+                                                       
+                                                    {{ form_errors(form.listing.sellerContact.address.state) }}
+                                                    </span>
+                                                         </div></div>
+                                    </td>
+                                    <td data-title="Company">
+                                        <div id="remote-seller-company" class="control-group ">
+                                            <div class="controls">
+                                                {{ form_widget(form.listing.sellerContact.company, { 'attr': { 'style': 'width:100%;' } }) }}
+
+                                            </div>
+                                        </div>
+
+                                        <!--  we show only the fields requested by CRR -->
+                                        {% if app.user.businesses[0].id == 50 %}
+                                            <div class="control-group remote lisa">
+                                                <div class="controls seller">
+                                                    {{ form_widget(form.listing.sellerContact.address.zip, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row','required':'','style': 'width:100%;margin-top:4%' } }) }}
+                                                </div>
+                                            </div>
+
+                                        {% endif %}
+                                        <span class="help-block">
+                                                {{ form_errors(form.listing.sellerContact.company) }}
+                                            {{ form_errors(form.listing.sellerContact.address.zip) }}
+                                            </span>
+
+
+                                    </td>
+
+                                </tr>
+
+                                {% if app.user.businesses[0].id == 50 %}
+                                    <tr class="required_party toggle_control odd" id="contact_row_00" role="row">
+                                        <td data-title="Role" id="0">
+
+
+                                            <span class="contact_type">Seller 2</span>
+                                        </td>
+                                        <td data-title="Contact">
+                                            <div class="control-group remote ">
+                                                <div class="controls seller">
+                                                    {{ form_widget(form.listing.sellerContact2.contactName, { 'attr': {'class': 'form-control placeholder-no-fix typeahead', 'placeholder': app.user.role.level <7 ? 'Set agent first to autofill contact' : 'Name', 'style': 'width:100%;'} }) }}
+                                                    {{ form_widget(form.listing.sellerContact2.address.street, { 'attr': { 'style': 'width:100%;margin-top:4%' } }) }}
+                                                    <span class="help-block">
+                                                    {{ form_errors(form.listing.sellerContact2.contactName) }}
+                                                        {{ form_errors(form.listing.sellerContact2.address.street) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Phone Number">
+                                            <div id="remote-seller-phone2" class="control-group ">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.sellerContact2.phone, { 'attr': {'class': 'form-control placeholder-no-fix ajax-phone phone', 'style': 'width:100%;'} }) }}
+                                                    {{ form_widget(form.listing.sellerContact2.address.city, { 'attr': { 'style': 'width:100%;margin-top:4%' } }) }}
+                                                    <span class="help-block">
+                                                    {{ form_errors(form.listing.sellerContact2.phone) }}
+                                                        {{ form_errors(form.listing.sellerContact2.address.city) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Email">
+                                            <div id="remote-seller-email2" class="">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.sellerContact2.email, { 'attr': {'class': 'form-control placeholder-no-fix ajax-email ', 'style': 'width:100%;'} }) }}
+                                                    {{ form_widget(form.listing.sellerContact2.address.state, { 'attr': { 'style': 'width:100%;margin-top:4%' } }) }}
+                                                    <span class="help-block">
+                                                    {{ form_errors(form.listing.sellerContact2.email) }}
+                                                        {{ form_errors(form.listing.sellerContact2.address.state) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Company">
+                                            {{ form_widget(form.listing.sellerContact2.company, { 'attr': { 'style': 'width:100%;' } }) }}
+                                            {{ form_widget(form.listing.sellerContact2.address.zip, { 'attr': { 'style': 'width:100%;margin-top:4%' } }) }}
+                                            <span class="help-block">
+                                            {{ form_errors(form.listing.sellerContact2.company) }}
+                                                {{ form_errors(form.listing.sellerContact2.address.zip) }}
+                                            </span>
+                                        </td>
+
+                                    </tr>
+                                {% endif %}
+
+                                    <tr class="required_party toggle_control even" id="contact_row_1" role="row">
+                                        <td data-title="Role" id="1">
+                                            <i class="fa fa-asterisk contact_status agent"
+                                               style="font-size: 9px; z-index: 3;position: absolute; margin-top: -10px; margin-left: -10px;"></i>
+
+                                            <span class="contact_type">Listing Agent</span>
+                                        </td>
+                                        <td data-title="Contact">
+                                            <div class="control-group ">
+                                                <div class="controls listingAgent">
+                                                    {% if creatorAgent is not null %}
+                                                        {% set firstValue = creatorAgent.firstname~' '~creatorAgent.lastname %}
+                                                    {% else %}
+                                                        {% set firstValue = app.user.firstname~' '~app.user.lastname %}
+                                                    {% endif %}
+
+                                                    <select name="selectedAgentId" class="js-data-example-ajax select2 form-control">
+                                                    <option value="{% if creatorAgent is not null %}{{ creatorAgent.id }}{% else %}{{ app.user.id }}{% endif %}" selected="selected">
+                                                        {{ firstValue }}
+                                                    </option>
+                                                    </select>
+                                                    {{ form_widget(form.listing.listingAgentContact.contactName, { 'value': firstValue, 'attr': {'class': 'hidden form-control placeholder-no-fix', 'style': 'width:100%;'} }) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(form.listing.listingAgentContact.contactName) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Phone Number">
+                                        <div  class="control-group lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.listingAgentContact.phone, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row phone', 'style': 'width:100%;'} }) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(form.listing.listingAgentContact.phone) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Email">
+                                        <div class="control-group lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.listingAgentContact.email, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row', 'style': 'width:100%;'} }) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(form.listing.listingAgentContact.email) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Company">
+                                        <div class="control-group lisa">
+                                            <div class="controls">
+                                        {{ form_widget(form.listing.listingAgentContact.company, { 'attr': { 'style': 'width:100%;' } }) }}
+                                        <span class="help-block">
+                                                {{ form_errors(form.listing.listingAgentContact.company) }}
+                                            </span>
+                                            </div>
+                                        </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr class="required_party toggle_control odd" id="contact_row_2" role="row">
+                                        <td data-title="Role" id="2">
+                                            <i class="fa fa-asterisk contact_status office"
+                                               style="font-size: 9px; z-index: 3;position: absolute; margin-top: -10px; margin-left: -10px;"></i>
+
+                                            <span class="contact_type">Listing Office</span>
+                                        </td>
+
+                                        <td data-title="Contact">
+                                            <div class="control-group ">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.listingOfficeContact.contactName, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row', 'style': 'width:100%;'} }) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(form.listing.listingOfficeContact.contactName) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Phone Number">
+                                        <div class="control-group lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.listingOfficeContact.phone, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row phone', 'style': 'width:100%;'} }) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(form.listing.listingOfficeContact.phone) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Email">
+                                        <div class="control-group lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(form.listing.listingOfficeContact.email, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row', 'style': 'width:100%;'} }) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(form.listing.listingOfficeContact.email) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="Company">
+                                        <div class="control-group lisa">
+                                            <div class="controls">
+                                        {{ form_widget(form.listing.listingOfficeContact.company, { 'attr': { 'style': 'width:100%;' } }) }}
+                                        <span class="help-block">
+                                                {{ form_errors(form.listing.listingOfficeContact.company) }}
+                                            </span>
+                                            </div>
+                                        </div>
+
+                                        </td>
+                                    </tr>
+
+
+                                <tr class="required_party toggle_control  even " id="contact_row_3" data-id="5" role="row">
+                                        <td data-title="Role" id="3">
+                                       
+                                            {% if (app.user.businesses[0].id == 50) %}
+                                                <span class="contact_type">Sellers Attorney</span>
+                                            {% else %}
+                                                <span class="contact_type">Title Company</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td data-title="Contact">
+                                        <div class="control-group titleCompany">
+                                            <div class="controls">
+                                                {{ form_widget(form.listing.titleCompanyContact.contactName, { 'attr': {'style': 'width:100%;'} }) }}
+                                                <span id="name-error" class="help-block help-block-error" style="display: none;">
+                                                    This field is required.
+                                                </span>
+                                            </div>
+
+                                            </div>
+                                        </td>
+                                        <td data-title="Phone Number">
+                                        <div class="control-group titleCompany ">
+                                            <div class="controls">
+                                        {{ form_widget(form.listing.titleCompanyContact.phone, { 'attr': { 'style': 'width:100%;' } }) }}
+                                        <span id="name-error" class="help-block help-block-error"
+                                              style="display: none;">
+                                                This field is required.
+                                            </span>
+                                            </div>
+                                        </div>
+
+                                        </td>
+                                        <td data-title="Email">
+                                        <div class="control-group titleCompany ">
+                                            <div class="controls">
+                                        {{ form_widget(form.listing.titleCompanyContact.email, { 'attr': { 'style': 'width:100%;' } }) }}
+                                        <span class="help-block">
+                                                {{ form_errors(form.listing.titleCompanyContact.email) }}
+                                            </span>
+                                            </div>
+                                        </div>
+
+                                        </td>
+                                        <td data-title="Company">
+                                        <div class="control-group titleCompany ">
+                                            <div class="controls">
+                                        {{ form_widget(form.listing.titleCompanyContact.company, { 'attr': { 'style': 'width:100%;' } }) }}
+                                        <span class="help-block">
+                                                {{ form_errors(form.listing.titleCompanyContact.company) }}
+                                            </span>
+                                            </div>
+                                        </div>
+
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="portlet box blue tabbable " id="note_box">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-comments"></i> Notes
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div class="tabbable portlet-tabs">
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#portlet_tab_1" data-toggle="tab"><label
+                                            class="control-label">Transaction</label></a></li>
+                                <li><a href="#portlet_tab_2" data-toggle="tab"><label
+                                            class="control-label">Showing</label></a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="portlet_tab_1">
+                                    <div class="control-group">
+                                        <div class="controls">
+                                            {{ form_widget(form.listing.transactionNote.note) }}
+                                            <span class="help-block">
+                                                {{ form_errors(form.listing.transactionNote.note) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-checkbox-list">
+                                        <label class="mt-checkbox mt-checkbox-outline">
+                                            {{ form_label(form.listing.transactionNote.important) }}
+                                            {{ form_widget(form.listing.transactionNote.important) }}
+                                            <span></span>
+                                        </label>
+                                        <label class="mt-checkbox mt-checkbox-outline">
+                                            {{ form_label(form.listing.transactionNote.private) }}
+                                            {{ form_widget(form.listing.transactionNote.private) }}
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="portlet_tab_2">
+                                    <div class="control-group">
+                                        <div class="controls">
+                                            {{ form_widget(form.listing.transactionShowing.note) }}
+                                            <span class="help-block">
+                                                {{ form_errors(form.listing.transactionShowing.note) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-checkbox-list">
+                                        <label class="mt-checkbox mt-checkbox-outline">
+                                            {{ form_label(form.listing.transactionShowing.important) }}
+                                            {{ form_widget(form.listing.transactionShowing.important) }}
+                                            <span></span>
+                                        </label>
+                                        <label class="mt-checkbox mt-checkbox-outline">
+                                            {{ form_label(form.listing.transactionShowing.private) }}
+                                            {{ form_widget(form.listing.transactionShowing.private) }}
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-calendar"></i>Events</div>
+                        <div class="actions">
+                            <div class="btn-group">
+                                <a class="btn btn-danger  btn-add" data-target="post_event">
+                                    <i class="icon-plus"></i> Add
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="portlet-body gradient-bg">
+                        <div class="form-group">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="45%">Event Name</th>
+                                        <th width="40%">Date</th>
+                                        <th width="20%">Alert</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="post_event" data-prototype="{{ forms.event_widget_prototype(form.listing.listingContacts, 'Remove event')|escape }}">
+                                {% for widget in form.listing.listingContacts.children %}
+                                    {{ forms.event_widget_prototype(widget, 'Remove event') }}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                {% if otherQuestions|length > 0 %}
+                    <div class="portlet box blue">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                <i class="icon-edit"></i> Questions
+                            </div>
+                        </div>
+                        <div class="portlet-body gradient-bg">
+                            {% for question in otherQuestions %}
+                                {% include('@LocalsBestUser/transaction/_question-block.html.twig') %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-money"></i> Financial Information
+                        </div>
+                    </div>
+                    <div class="portlet-body gradient-bg">
+
+                        <div class="input-group control-group {% if form.vars.value.listing.moneyBox.contractPrice is defined and form.vars.value.listing.moneyBox.contractPrice is not null %}success{% else %}error{% endif %}">
+                            <span class="input-group-addon">Listing Price</span>
+                            <i class="fa fa-asterisk required_icon"
+                               style="{% if form.vars.value.listing.moneyBox.contractPrice is defined and form.vars.value.listing.moneyBox.contractPrice is not null %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                            {{ form_widget(form.listing.moneyBox.contractPrice) }}
+                            <span class="help-block">
+                                {{ form_errors(form.listing.moneyBox.contractPrice) }}
+                            </span>
+                        </div>
+                        <div class="form-group required_question">
+                            <label class="control-label col-md-3">
+                                {{ referralQuestion.question }}
+                            </label>
+                            <div class="col-md-4">
+                                <div class="mt-radio-inline">
+                                    <label class="mt-radio mt-radio-outline">
+                                        {{ form_label(form.listing.moneyBox.referral[0]) }}
+                                        {{ form_widget(form.listing.moneyBox.referral[0]) }}
+                                        <span></span>
+                                    </label>
+                                    <label class="mt-radio mt-radio-outline">
+                                        {{ form_label(form.listing.moneyBox.referral[1]) }}
+                                        {{ form_widget(form.listing.moneyBox.referral[1]) }}
+                                        <span></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row custom_box_referral">
+                            <label class="control-label col-md-3">Referral fee</label>
+
+                            <div class="col-md-8">
+                                {% for widget in form.listing.referrals %}
+                                    <div class="col-md-3">
+                                        {{ form_widget(widget.type) }}
+                                        <span class="help-block">
+                                            {{ form_errors(widget.type) }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form_widget(widget.value) }}
+                                        <span class="help-block">
+                                            {{ form_errors(widget.value) }}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Total Commission &nbsp; <a
+                                        class="advanced_commission">advanced</a><a
+                                        class="regular_commission">regular</a></label>
+
+                            <div class="col-md-9">
+                                <div class="control-group titleCompany lisa">
+                                    <div class="controls">
+                                        {{ form_widget(form.listing.advancedCommissionBox) }}
+                                    </div>
+                                </div>
+
+                                {% set advancedCommission = 0 %}
+                                {% for widget in form.listing.totalCommissions %}
+                                    <div class="advanced_{{ advancedCommission }}">
+                                        {% if advancedCommission == 1 %}
+                                            <div class="col-md-1">
+                                                <label class="advancedBox_{{ advancedCommission }}"></label>
+                                            </div>
+                                        {% endif %}
+                                        <div class="col-md-3">
+                                            {{ form_widget(widget.type) }}
+                                            <span class="help-block">
+                                                {{ form_errors(widget.type) }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="control-group titleCompany lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(widget.value) }}
+                                                    <span class="help-block">
+                                                {{ form_errors(widget.value) }}
+                                            </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {% set advancedCommission = advancedCommission + 1 %}
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Listing Agent Commission</label>
+
+                            <div class="col-md-9">
+                                {% set advancedCommission = 0 %}
+                                {% for widget in form.listing.agentCommissions %}
+                                    <div class="advanced_{{ advancedCommission }}">
+                                        {% if advancedCommission == 1 %}
+                                            <div class="col-md-1">
+                                                <label class="advancedBox_{{ advancedCommission }}"></label>
+                                            </div>
+                                        {% endif %}
+                                        <div class="col-md-3">
+                                            {{ form_widget(widget.type) }}
+                                            <span class="help-block">
+                                                {{ form_errors(widget.type) }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="control-group titleCompany lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(widget.value) }}
+                                                    <span class="help-block">
+                                                {{ form_errors(widget.value) }}
+                                            </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {% set advancedCommission = advancedCommission + 1 %}
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Buyers Agent Commission</label>
+
+                            <div class="col-md-9">
+                                {% set advancedCommission = 0 %}
+                                {% for widget in form.listing.buyerAgentCommissions %}
+                                    <div class="advanced_{{ advancedCommission }}">
+                                        {% if advancedCommission == 1 %}
+                                            <div class="col-md-1">
+                                                <label class="advancedBox_{{ advancedCommission }}"></label>
+                                            </div>
+                                        {% endif %}
+                                        <div class="col-md-3">
+                                            {{ form_widget(widget.type) }}
+                                            <span class="help-block">
+                                                {{ form_errors(widget.type) }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="control-group titleCompany lisa">
+                                                <div class="controls">
+                                                    {{ form_widget(widget.value) }}
+                                                    <span class="help-block">
+                                                {{ form_errors(widget.value) }}
+                                            </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% set advancedCommission = advancedCommission + 1 %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-actions" style="text-align:center;">
+                    <button type="submit" class="btn btn-success" id="listing-submit">
+                        <i class="fa fa-check"></i> Save Listings
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="hidden">
+            {{ form_widget(form._token) }}
+            {{ form_end(form, {'render_rest': false}) }}
+        </div>
+    </div>
+
+{% endblock %}

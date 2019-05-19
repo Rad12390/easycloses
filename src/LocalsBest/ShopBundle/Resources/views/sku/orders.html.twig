@@ -1,0 +1,68 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    Orders
+{% endblock %}
+
+
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <aside class="sidebar-left">
+                    <ul class="nav nav-pills nav-stacked nav-arrow">
+                        <li class="active">
+                            <a>Orders History</a>
+                        </li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-9">
+                        <table class="table table-order">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Price</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if paymentSets|length > 0 %}
+                                    {% for item in paymentSets %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path('order_details', {'id': item.id}) }}">
+                                                    Order #{{ item.id }}
+                                                </a>
+                                            </td>
+                                            <td>${{ item.amount|number_format }}</td>
+                                            <td>{{ item.createdAt|date("m-d-Y") }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">
+                                            There is no Orders yet.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="gap"></div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

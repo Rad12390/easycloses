@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+
+<script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+
+<div class="modal-content">
+    <form action="{{ path('contact_document_add', {'id': id })}}" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+            <h4 class="modal-title">Upload and Save a Document or Image</h4>
+        </div>
+        <div class="modal-body">
+            <div class="fileinput fileinput-new" data-provides="fileinput">
+                <div class="fileinput-preview thumbnail" data-trigger="fileinput" style="width: 200px; height: 150px; line-height: 150px;"></div>
+                <div>
+                    <span class="btn default btn-file">
+                        <span class="fileinput-new">Select File </span>
+                        <span class="fileinput-exists">Change </span>
+                        {{ form_widget( documentForm.file) }}
+                    </span>
+                    <a href="#" class="btn default fileinput-exists" data-dismiss="fileinput"> Remove </a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn green col-xs-3 pull-right"><i class="fa fa-check"></i> Save</button>
+        </div>
+    {{ form_end(documentForm) }}
+</div>

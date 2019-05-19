@@ -1,0 +1,1234 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme edit_form 'bootstrap_3_layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/easycloses-styles/package.css') }}"/>
+
+    <!-- Google fonts -->
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400,600,700,300' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300' rel='stylesheet' type='text/css'>
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="{{ asset('shop/css/boostrap.css') }}">
+    <!-- Font Awesome styles (icons) -->
+    <link rel="stylesheet" href="{{ asset('shop/css/font_awesome.css') }}">
+    <!-- Main Template styles -->
+    <link rel="stylesheet" href="{{ asset('shop/css/styles.css') }}">
+    <!-- IE 8 Fallback -->
+    <!--[if lt IE 9]>
+    <link rel="stylesheet" type="text/css" href="{{ asset('shop/css/ie.css') }}"/>
+    <![endif]-->
+
+    <!-- Your custom styles (blank file) -->
+    {#<link rel="stylesheet" href="/shop/css/mystyles.css">#}
+
+    <link rel="stylesheet" type="text/css" href="{{ asset('shop/css/schemes/victoria.css') }}">
+    <style>
+        #publish_warning_div{
+            height:150px;
+            width:350px;
+            border:1em;
+        }
+
+        .item-select{
+            width: 126px !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-select2.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/ui-sweetalert.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-repeater/jquery.repeater.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/form-repeater.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script src="{{ asset('shop/js/fotorama.js', null, false, 3) }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+            $(".select2").select2();
+            $(".mt-repeater-delete1").parents(".main-form").find(".mt-repeater-item:first-child").find(".mt-repeater-delete1").hide();
+            //  $(".product-info").find("title").append($("#localsbest_shopbundle_package_title").val());
+           
+            $(".price-type").find(".radio").addClass("radio-inline");
+            $(".price-type").find(".radio").removeClass("radio");
+            if ($('.fileinput-new').children(".thumbnail").children().length > 0) {
+              $("#localsbest_shopbundle_package_file_file").attr('required', false)
+            }
+           // $("label[for='localsbest_shopbundle_package_title']").closest(".form-group").html('<label class="control-label required" for="localsbest_shopbundle_package_title">Title</label><div class="form-control semi-editable-input"><span>{{vendor}}</span><input type="text" id="localsbest_shopbundle_package_title" name="localsbest_shopbundle_package[title]" required="required" maxlength="255" class="form-control" value="{{actual_title}}"></div>');
+        
+        });
+
+        jQuery(document).ready(function () {
+
+            var handleWysihtml5 = function () {
+                if (!jQuery().wysihtml5) {
+                    return;
+                }
+            };
+            handleWysihtml5();
+            $("#localsbest_shopbundle_package_sku_prices_0_retailPrice").attr("type", "text").attr("pattern", "[$0-9.]+");
+            
+            $("#localsbest_shopbundle_package_sku_categories").select2({
+                maximumSelectionLength: 1
+            });
+        });
+
+        var $collectionItemsHolder;
+        var $collectionPricesHolder;
+        var $collectionOptionsHolder;
+
+        jQuery(document).ready(function () {
+
+            // TODO: use item markup
+            $('.retail').on('keyup', function (e) {
+                var rebatevalue = $("#localsbest_shopbundle_package_sku_prices_0_rebate").val();
+                var retailvalue = $(this).val();
+                var retailvalue= retailvalue.split('$');
+                retailvalue= retailvalue['1'];
+                if(typeof retailvalue!= 'undefined'){
+                    var parent = $(this).parents('.prices_section');
+
+                    if (rebatevalue == "") {
+                        rebatevalue = 10;
+                    }
+                    retailvalue= retailvalue.replace(/,/g, '');
+                    var perc = ((retailvalue * rebatevalue) / 100).toFixed(2);
+                    var per = retailvalue - perc;
+
+                    parent.find('.wholesale').val(Number(per));
+                    $(".product-info-price").html("");
+                    $(".product-info-price").append("$" + Number(retailvalue));
+                }
+            });
+
+            $('.rebate').on('keyup mouseup ', function (e) {
+                var rebatevalue = $(this).val();
+                var parent = $(this).parents('.prices_section');
+                var retailvalue = $("#localsbest_shopbundle_package_sku_prices_0_retailPrice").val();
+                var retailvalue= retailvalue.split('$');
+                retailvalue= retailvalue['1'];
+                if(typeof retailvalue!= 'undefined'){
+                    if (rebatevalue == "") {
+                        rebatevalue = 10;
+                    }
+
+                    var perc = ((retailvalue * rebatevalue) / 100).toFixed(2);
+                    var per = retailvalue - perc;
+
+                    parent.find('.wholesale').val(Number(per));
+                    $(".product-info-price").html("");
+                    $(".product-info-price").append("$" + Number(retailvalue));
+                }
+            });
+
+
+
+            // Get the ul that holds the collection of tags
+            $collectionItemsHolder = $('ul.item-sets');
+            $collectionPricesHolder = $('ul.sku-prices');
+            $collectionOptionsHolder = $('ul.sku-options');
+
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $collectionItemsHolder.data('index', $collectionItemsHolder.find(':input').length);
+            $collectionPricesHolder.data('index', $collectionPricesHolder.find(':input').length);
+            $collectionOptionsHolder.data('index', $collectionOptionsHolder.find(':input').length);
+
+            // To open the price tab by default on page load
+            //addItemForm($collectionPricesHolder);
+
+           
+             var $subscription_period = $("#localsbest_shopbundle_package_sku_prices_0_subscriptionType").parents(".form-group");
+
+            var $radio_btn_name = $("[name='localsbest_shopbundle_package[sku][prices][0][type]']");
+            $radio_btn_name.on("change", function () {
+
+                if ($(this).val() == "subscription") {
+                    $subscription_period.show();
+                    $("#localsbest_shopbundle_package_sku_prices_0_type_1").attr("checked", "checked");
+                    $("#localsbest_shopbundle_package_sku_prices_0_type_0").removeAttr("checked", "checked");
+                } else {
+                    $subscription_period.hide();
+                    $("#localsbest_shopbundle_package_sku_prices_0_type_0").attr("checked", "checked");
+                    $("#localsbest_shopbundle_package_sku_prices_0_type_1").removeAttr("checked", "checked");
+                }
+            });
+
+            $('.add_itemset_link').on('click', function (e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addItemForm($collectionItemsHolder);
+
+            });
+
+
+
+            $('.add_option_link').on('click', function (e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addItemForm($collectionOptionsHolder);
+
+            });
+            
+             //add tags on package web page
+            $(".saveTags").click(function(){
+                var tag_name= $(".addtags").val();
+               // var package_id= {{entity.id}}
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('tags_add_package') }}",
+                    data: {
+                        tag: tag_name
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    if(response.success){
+                        var data = {
+                        id: response.id,
+                        text: tag_name
+                        };
+
+                       var newOption = new Option(data.text, data.id, true, true);
+                        // Append it to the select
+                        $('#localsbest_shopbundle_package_sku_tags').append(newOption).trigger('change');
+                    }
+                })
+            });
+            
+            //get quantity for already selected items on load
+            var length = $('.main-form').find('div.mt-repeater-item').length;
+            var package_quantity= $("#localsbest_shopbundle_package_quantity").val();
+            $('.loadPackageQuantity').val(package_quantity);
+            package_quantity= $('.loadPackageQuantity').val();
+            var quantity;
+            for(var i=0;i<length;i++){
+                var j=i;
+                var item= $('.main-form .mt-repeater-item:eq('+i+')').find("#localsbest_shopbundle_package_sets_"+i+"_item").val();
+                var quantity= $('.main-form .mt-repeater-item:eq('+i+')').find("#localsbest_shopbundle_package_sets_"+i+"_quantity").val(); 
+                $('.main-form .mt-repeater-item:eq('+i+')').find(".loadItem").val(item); 
+                $('.main-form .mt-repeater-item:eq('+i+')').find('.loadItemQuantity').val(quantity);
+                
+                
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_single_item') }}",
+                    data: {
+                        item: item
+                    },
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+                        $('.main-form .mt-repeater-item:eq('+i+')').find(".quantity-limit").val(parseInt(quantity * package_quantity) + parseInt(data['quantity']));
+                    }
+                });
+            }
+            
+            $("#localsbest_shopbundle_package_type").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+            
+        $('.main-form').on('change',function(){
+            var length= $(this).find('.mt-repeater-item').length;
+            manageSlider(length);
+        });
+        
+        function manageSlider(length){
+            
+           var result=[];
+           for(var i=0;i<length;i++){
+               var item= $('.main-form').find('.mt-repeater-item').eq(i).find('select').val(); //selected item id
+                $.ajax({
+                     method: "POST",
+                     url: "{{ path('get_single_item') }}",
+                     data: {
+                         item: item
+                     },
+                     dataType: "json",
+                     async: false,
+                     success: function(data) {
+                       for(var j=0;j<data['result'].length;j++){
+                           result.push(data['result'][j]);
+                       }
+                        
+                     }
+                 });
+           }
+          
+           var slider='';
+           var result1= [];
+           var fotorama = $('.fotorama').data('fotorama');
+           for(var i=0;i<result.length;i++){
+              result1.push({
+                img: result[i],
+                thumb: result[i]
+              });
+           }
+           fotorama.load(result1);
+    }
+    
+        function manageSlider1(length,uploded_image){
+            
+           var result=[];
+           for(var i=0;i<length;i++){
+               var item= $('.main-form').find('.mt-repeater-item').eq(i).find('select').val(); //selected item id
+                $.ajax({
+                     method: "POST",
+                     url: "{{ path('get_single_item') }}",
+                     data: {
+                         item: item
+                     },
+                     dataType: "json",
+                     async: false,
+                     success: function(data) {
+                       for(var j=0;j<data['result'].length;j++){
+                           result.push(data['result'][j]);
+                       }
+                        
+                     }
+                 });
+           }
+          
+           var slider='';
+           var result1= [];
+           
+           var fotorama = $('.fotorama').data('fotorama');
+           var fotorama1 = $('.fotorama');
+           fotorama.destroy();
+           result1.push({
+                    img: uploded_image,
+                    thumb: uploded_image
+            });
+           for(var i=0;i<result.length;i++){
+              result1.push({
+                img: result[i],
+                thumb: result[i]
+              });
+           }
+           fotorama.load(result1);
+    }
+            
+        });
+
+        
+
+        function addItemForm($collectionHolder) {
+            // Get the data-prototype explained earlier
+            var prototype = $collectionHolder.data('prototype');
+
+            // get the new index
+            var index = $collectionHolder.data('index');
+
+            var newForm = prototype;
+            // You need this only if you didn't set 'label' => false in your tags field in TaskType
+            // Replace '__name__label__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            // newForm = newForm.replace(/__name__label__/g, index);
+
+            // Replace '__name__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            newForm = newForm.replace(/__name__/g, index);
+
+            // increase the index with one for the next item
+            $collectionHolder.data('index', index + 1);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+            var $newFormLi = $('<li></li>').append(newForm);
+            $collectionHolder.append($newFormLi);
+
+            // add a delete link to the new form
+            addFormDeleteLink($newFormLi);
+
+            $('.price-type').trigger('change');
+        }
+
+        function addFormDeleteLink($objectFormLi) {
+            var $removeFormA = $('<a class="btn btn-sm btn-danger" href="#">delete</a>');
+            $objectFormLi.append($removeFormA);
+
+            $removeFormA.on('click', function (e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // remove the li for the tag form
+                $objectFormLi.remove();
+            });
+        }
+
+        function removeParentObject(object) {
+            $(object).parent().remove();
+        }
+        
+        $("#localsbest_shopbundle_package_sku_prices_0_retailPrice").keyup(function(){
+            if(this.value!='')
+                $('#localsbest_shopbundle_package_sku_prices_0_retailPrice').val(formatCurrency(this.value.replace(/[^0-9\.]+/g, "")));
+        });
+       
+        function formatCurrency(number) {
+            var n = number.split('').reverse().join("");
+            var n2 = n.replace(/\d\d\d(?!$)/g, "$&,");
+
+            var result = '$' + n2.split('').reverse().join('');
+
+            if (number >= 0) {
+                return result;
+            } else {
+                return '';
+            }
+        }
+        
+        $( "#localsbest_shopbundle_package_sku_prices_0_retailPrice" ).blur(function() {
+            if(this.value!=''){
+                var n = this.value.split('').reverse().join("");
+                var n2 = n.replace(/\d\d\d(?!$)/g, "$&,");
+                var n2= n2.split('').reverse().join('');
+                n2= n2.replace(/[$,]/g, "");
+                if(typeof n2!= 'undefined'){
+                    this.value = '$' + parseFloat(n2).toFixed(2);
+                    $(".product-info-price").html(this.value);
+                }
+            }
+        });
+        
+        $('#localsbest_shopbundle_package_sku_tags').on('change', function(event) {
+             var text='';
+             var value_array= $("#localsbest_shopbundle_package_sku_tags").val();
+             var length= $('#localsbest_shopbundle_package_sku_tags option:selected').length;
+             for(var i=0;i<length;i++){
+                 var value= value_array[i];
+                 text+= $("#localsbest_shopbundle_package_sku_tags option[value='"+value+"']").text();
+                 if(i<length-1){
+                     text+=',';
+                 }
+             }
+             $(".tags-preview a").html('<i class="fa fa-tag"></i> '+text);
+        });
+    </script>
+    <script>
+
+
+
+// items is the array for package_type's id which is static created in form 
+
+        var items = ['1', '4'];
+
+        var stripe_status = '{{stripe_status}}';
+        $(".activate-wrong-pacakage, .activate-stripe-status ").hide();
+       {# $("#localsbest_shopbundle_package_status").on('change', function () {
+            if (this.value == 4 && stripe_status === '0') {
+                swal({
+                    title: 'Your package will be published in the shop once you activate your stripe <a href="{{ path('users_profile') }}"> account</a>.You may save this as draft or archive this package for now',
+                    html: true,
+                    type: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            }
+
+        });#}
+        // disable the submitting of form if stripe is not activated
+
+// check if selected package type's id is in package type's array or not
+        function checkValue(value, arr) {
+            var status = 'Not exist';
+
+            for (var i = 0; i < arr.length; i++) {
+                var name = arr[i];
+                if (name == value) {
+                    status = 'Exist';
+                    break;
+                }
+            }
+
+            return status;
+        }
+          //code execute while browsing image for package
+        $('#localsbest_shopbundle_package_file_file').on("change", function (){
+            setTimeout(function(){ 
+                var uploded_image= $('.thumbnail').find('img').attr("src");
+                var length= $('.main-form').find('.mt-repeater-item').length;
+                manageSlider1(length,uploded_image);
+            }, 100);
+        });
+        //end of code execute while browsing image for package
+        $('.main-form').on('change', '.item-select', function () {
+            var item = $(this).val();
+            var _this= $(this);
+            var prev_value = $(_this).parent().parent().parent().find(".loadItem").val();
+            var prev_quantity= $(_this).parent().parent().parent().find(".loadItemQuantity").val();
+            var package_quantity= $(".loadPackageQuantity").val();
+            if(prev_value!=item){
+                //not same item as previous
+                $(_this).parent().parent().parent().find(".hidden_validate").val('1');
+                var quantity=0;
+            }
+            else{
+                //same item as previous
+                var quantity= prev_quantity * package_quantity;
+                $(_this).parent().parent().parent().find(".hidden_validate").val('0');
+            }
+            $.ajax({
+                method: "POST",
+                url: "{{ path('get_single_item') }}",
+                data: {
+                    item: item
+                },
+                dataType: "json"
+            })
+                    .done(function (respons) {
+
+                        $(_this).parent().parent().parent().find(".quantity-limit").val(parseInt(respons['quantity']) + parseInt(quantity));
+                        var length = $('.main-form').find('div.mt-repeater-item').length;
+                        if (length == 1) {
+                            //when only one item is selected package
+                             var aws_s3 = '{{temp_download_aws_folder}}';
+                            $("#localsbest_shopbundle_package_title").val(respons['title']);
+                            $("#localsbest_shopbundle_package_shortDescription").val(respons['short_description']);
+                            $("#localsbest_shopbundle_package_description").val(respons['description']);
+                            $("#localsbest_shopbundle_package_imagename").val(respons['images'][0]['title']);
+                            $image_path = aws_s3 + respons['images'][0]['title'];
+                            $(".package-form").find(".fileinput-preview").html("");
+                            $(".package-form").find(".fileinput-preview").append("<img src='" + $image_path + "'>");
+                            $('[type="file"]').val(respons['images'][0]['title']);
+
+
+
+                        }
+                        else {
+                            //more than one item selected for package
+                            //empty all the fields
+                            $("#localsbest_shopbundle_package_title").val("");
+                            $("#localsbest_shopbundle_package_shortDescription").val("");
+                            $("#localsbest_shopbundle_package_description").val("");
+                            $(".fileinput-preview").html("");
+                            //set the placeholders for adding custom details
+                            $("#localsbest_shopbundle_package_title").attr("placeholder", "Add Custom Item title");
+                            $("#localsbest_shopbundle_package_shortDescription").attr("placeholder", "Add Custom Item Short Description");
+                            $("#localsbest_shopbundle_package_description").attr("placeholder", "Add Custom Item Description");
+                            $(".fileinput-preview").html('<img src="/shop/img/800x600.png" alt="" title="">');
+                        }
+                        $(".package-form").trigger('keyup');
+
+                    })
+
+        });
+        // This function is to fill item info similar to left section to right section
+        $(".package-form").on('keyup', function () {
+            $(".product-info").find('h3').html($("#localsbest_shopbundle_package_title").val());
+            $("p.text-smaller").html($("#localsbest_shopbundle_package_shortDescription").val());
+            $('#tab-1').find('li').html('<b>Item</b> - ' + $("#localsbest_shopbundle_package_description").val());
+        });
+        
+        $('.quantityClass').on('change input',function(){
+            var _this= $(this);
+            var hidden_validate = $(_this).parent().parent().parent().find(".hidden_validate").val();
+            if(hidden_validate=='0' || hidden_validate==''){
+                var prev_quantity = $(_this).parent().parent().parent().find(".loadItemQuantity").val();
+                var current = $(this).val();
+                
+                var item = $(_this).parent().parent().parent().find("select").val();
+                var package_quantity= $("#localsbest_shopbundle_package_quantity").val();
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_single_item') }}",
+                    data: {
+                        item: item
+                    },
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+                        $(_this).parent().parent().parent().find(".quantity-limit").val(parseInt(prev_quantity * package_quantity) + parseInt(data['quantity']));
+                    }
+                });
+            }
+        });
+        
+        
+        $("#localsbest_shopbundle_package_quantity").on('change input',function(){
+            
+                var length = $('.main-form').find('div.mt-repeater-item').length;
+                var prev_quantity = $(".loadPackageQuantity").val();
+               // var package_quantity= $("#localsbest_shopbundle_package_quantity").val();
+                var quantity;
+                for(var i=0;i<length;i++){
+                    var j=i;
+                    var item= $('.main-form .mt-repeater-item:eq('+i+')').find("#localsbest_shopbundle_package_sets_"+i+"_item").val();
+                    var hidden_validate= $('.main-form .mt-repeater-item:eq('+i+')').find(".hidden_validate").val(); 
+                    var quantity = $('.main-form .mt-repeater-item:eq('+i+')').find(".loadItemQuantity").val();
+                    if(hidden_validate=='0' || hidden_validate==''){
+                        $.ajax({
+                            method: "POST",
+                            url: "{{ path('get_single_item') }}",
+                            data: {
+                                item: item
+                            },
+                            dataType: "json",
+                            async: false,
+                            success: function(data) {
+                                $('.main-form .mt-repeater-item:eq('+i+')').find(".quantity-limit").val(parseInt(quantity * prev_quantity) + parseInt(data['quantity']));
+                            }
+                        });
+                    }
+                }
+        });
+       
+        //This function calls while adding the items to the package ie, repeating forms in order to remove item which is already selected
+        $(".mt-repeater-add").click(function () {
+            setTimeout(function () {
+                var items_array = [];
+                $(".mt-repeater-item").each(function () {
+                    var value = $(this).find('select.item-select').val();
+                    items_array.push(value);
+                });
+                items_array = $.unique(items_array);
+                for (var i = 0; i < items_array.length; i++) {
+                    if (items_array[i] != '')
+                        $(".item-select option[value='" + items_array[i] + "']").last().remove();
+                }
+                
+                var $packages = ['2'];
+                if($.inArray($("#localsbest_shopbundle_package_type").find('input[name="localsbest_shopbundle_package[type]"]:checked').val(), $packages) != -1){
+                        $(".useslimit").css("display","block");
+                }
+                else{
+                    $(".useslimit").css("display","none");
+                }
+            }, 1000);
+        });
+
+        //This function calls while deleting the items to the package ie, repeating forms in order to add items in dropdown which is selected to deleted
+        $('.main-form').on('click', '.mt-repeater-delete1', function () {
+            //code to add the custom delete on form repeater
+            var a = confirm("Are You Sure you want to delete?");
+            if(a){
+                $(event.target).closest('.mt-repeater-item').remove();
+            }
+            //end of code to add the custom delete on form repeater
+            var deleted_value = $(this).closest('.mt-repeater-item').find('.item-select').val();
+            var deleted_text = $(this).closest('.mt-repeater-item').find('.item-select option:selected').text();
+            setTimeout(function () {
+                var items_array = [];
+                $(".mt-repeater-item").each(function () {
+                    if ($(this).find("select.item-select option[value='" + deleted_value + "']").length == 0)
+                        $(this).find('select.item-select').append("<option value='" + deleted_value + "'>" + deleted_text + "</option>");
+                });
+            }, 1000);
+            //manage slider
+            var length= $('.main-form').find('.mt-repeater-item').length;
+            manageSlider(length);
+        });
+    </script>
+    <script>
+        var $packages_id = ['1', '4', '2'];
+        var $packages=['2'];
+        jQuery(document).ready(function () {
+
+            var $all_price_fields = $(".product-info-price,.price_under_preview");
+            var $price_box = $(".top_prices_section").parents(".blue");
+            $hiddenvalue = 0;
+            $(".prices_section").find(".btn-danger").hide();
+            if ($.inArray($("#localsbest_shopbundle_package_type").find('.radio-inline input[name="localsbest_shopbundle_package[type]"]:checked').val(), $packages_id) != -1)
+            {
+                $all_price_fields.show();
+                $price_box.show();
+               
+            } else {
+                $all_price_fields.hide();
+                $price_box.hide();
+                $("#localsbest_shopbundle_package_sku_prices_0_retailPrice").val('');
+                $("#localsbest_shopbundle_package_sku_prices_0_rebate").val('');
+                $("#localsbest_shopbundle_package_sku_prices_0_amount").val('');
+            }
+
+            if($.inArray($("#localsbest_shopbundle_package_type").find('input[name="localsbest_shopbundle_package[type]"]:checked').val(), $packages) != -1){
+                    $(".useslimit").css("display","block");
+            }
+            else{
+                $(".useslimit").css("display","none");
+            }
+            $("#localsbest_shopbundle_package_type").on('click', function () {
+                if ($.inArray($(this).find('input[name="localsbest_shopbundle_package[type]"]:checked').val(), $packages_id) != -1)
+                {
+                    $all_price_fields.show();
+                    $price_box.show();
+                    $(".prices_section").find(".wholesale").attr("required", true);
+                    $(".prices_section").find(".retail").attr("required", true);
+                    $(".prices_section").find(".rebate").attr("required", true);
+                } else {
+                    $all_price_fields.hide();
+                    $price_box.hide();
+                    $(".prices_section").find(".wholesale").attr("required", false);
+                    $(".prices_section").find(".retail").attr("required", false);
+                    $(".prices_section").find(".rebate").attr("required", false);
+                    $("#localsbest_shopbundle_package_sku_prices_0_rebate").val('');
+                    $("#localsbest_shopbundle_package_sku_prices_0_amount").val('');
+ 
+                }
+                
+                if($.inArray($("#localsbest_shopbundle_package_type").find('input[name="localsbest_shopbundle_package[type]"]:checked').val(), $packages) != -1){
+                    $(".useslimit").css("display","block");
+                }
+                else{
+                    $(".useslimit").css("display","none");
+                }
+
+            });
+            
+            //code to check quantiy
+            $(".checkQuantity").click(function(){
+                
+                var items_selected = $("#localsbest_shopbundle_package_type").find('.radio-inline input[name="localsbest_shopbundle_package[type]"]:checked').val();
+                if ((checkValue(items_selected, items) == "Exist") && stripe_status == '0' && $(this).attr("id")=='localsbest_shopbundle_package_approval' && items_selected!=6 && {{user.role.name}}!='Admin') {
+                    swal({
+                        title: 'Your package will be published in the shop once you activate your stripe <a href="{{ path('users_profile') }}"> account</a>.You may save this as draft or archive this package for now',
+                        html: true,
+                        type: 'warning',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                } 
+                else{
+                    if(items_selected==6 && !{{external_link_status}} && $(this).attr("id")=='localsbest_shopbundle_package_approval'){
+                        swal({
+                            title: 'You can create info link packages only if purchased info link extension. <a href="{{ button_text.getLink('5')|raw }}" target="_blank">Buy Info Link</a>',
+                            html: true,
+                            type: 'warning',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
+                        return false;
+                    }
+                    else{
+                
+                        if($(".package-form").find(".fileinput-preview").find('img').attr("src")=="" || $(".package-form").find(".fileinput-preview").find('img').attr("src")=="/shop/img/800x600.png"){
+                            alert("Please fill the package Image");
+                            return false;
+                        }
+                        else if($(".package-form").find(".fileinput-preview").find('img').attr("src")!="" && $("#localsbest_shopbundle_package_imagename").val()==""){
+                           return true;
+                        }
+
+                        var package_quantity= $("#localsbest_shopbundle_package_quantity").val();
+                        //form the array of actual inventory of items
+                        var length = $('.main-form').find('div.mt-repeater-item').length;
+                        var actual_inventory=[];
+                        for(var i=0;i<length;i++){
+                            var item_inventory= $('.main-form .mt-repeater-item:eq('+i+')').find(".quantity-limit").val();
+                            actual_inventory.push(item_inventory);
+                        }
+                        // form the array of filled item quantity
+                        var filled_inventory=[];
+                        for(var i=0;i<length;i++){
+                            var filled_item_inventory= $('.main-form .mt-repeater-item:eq('+i+')').find("#localsbest_shopbundle_package_sets_0_quantity").val();
+                            filled_inventory.push(filled_item_inventory);
+                        }
+                        // form the array of name of item
+                        var item_names=[];
+                        for(var i=0;i<length;i++){
+                            var name= $('.main-form .mt-repeater-item:eq('+i+')').find("#localsbest_shopbundle_package_sets_0_item option:selected").html();
+                            item_names.push(name);
+                        }
+
+                        var result= checkQuantityStatus(actual_inventory,filled_inventory,package_quantity);
+
+                        if(result.length>0){
+                           //error quantity
+                           var msg='';
+                           for(var i=0;i<result.length;i++){
+                               var error_index= result[i]['error_index'];
+                               var item_name= item_names[error_index];
+                               var item_inventory= result[i]['minimum_inventory'];
+                               if(result.length!=1){
+                                   msg+= 'Quantity of '+item_name+' is not sufficient, Minimum Inventory as per package quantity is '+item_inventory+'.  ';
+                               }
+                               else{
+                                   msg+= 'Quantity of '+item_name+' is not sufficient, Minimum Inventory as per package quantity is '+item_inventory+'.';
+                               }
+                               $('.main-form .mt-repeater-item:eq('+error_index+')').find("#localsbest_shopbundle_package_sets_0_quantity").val(item_inventory);
+                           }
+                           alert(msg);
+                           return false;
+                        }
+                        else{
+                            // no error of quantity
+                            return true;
+                        }
+                    }
+                }  
+            });
+            
+            function checkQuantityStatus(actual_inventory,filled_inventory,package_quantity){
+                var item_length= actual_inventory.length;
+                var result=[];
+                for(var i=0;i<item_length;i++){
+                    var calculated_quantity= (filled_inventory[i] * package_quantity);
+                    if(calculated_quantity>actual_inventory[i]){
+                        //error of exceed quantity
+                        var error_index= i;
+                        var minimum_inventory;
+                        minimum_inventory= getMinimumItemInventory(package_quantity,actual_inventory[i],filled_inventory[i]);
+                        result.push({
+                            error_index: error_index, 
+                            minimum_inventory:  minimum_inventory
+                        });
+                    }
+                }
+                return result;
+            }
+            
+            function getMinimumItemInventory(package_quantity,actual_inventory,filled_inventory){
+                var i= (filled_inventory-1);
+                for(var i;i>=0;i--){
+                    var j=(i * package_quantity);
+                    if(j <= actual_inventory){
+                        return i;
+                    }
+                }
+            }
+            
+            $(".delete-package_image").click(function(){
+                $(".package-form").find(".fileinput-preview").find('img').attr("src","");
+                $(".fileinput").addClass("fileinput-new");
+                $(".fileinput").removeClass("fileinput-exists");
+                $("#localsbest_shopbundle_package_imagename").val("");
+               // $(".fotorama").find('img').attr("src","/shop/img/800x600.png");
+            });
+            var tooltip_quantity= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Qunantity for Sale')|raw }}</span>';
+            $(tooltip_quantity).insertAfter("label[for='localsbest_shopbundle_package_quantity']");
+            
+            var tooltip_service= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Service Type')|raw }}</span>';
+            $(tooltip_service).insertAfter("label[for='localsbest_shopbundle_package_industryType']");
+            
+            var tooltip_shop= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Shop Display Tab')|raw }}</span>';
+            $(tooltip_shop).insertAfter("label[for='localsbest_shopbundle_package_sku_categories']");
+            
+            var tooltip_tags= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Tags')|raw }}</span>';
+            $(tooltip_tags).insertAfter("label[for='localsbest_shopbundle_package_sku_tags']");
+            
+            {#var tooltip_type= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Payment Type')|raw }}</span>';
+            $("#localsbest_shopbundle_package_sku_prices_0_type").append(tooltip_type);
+            
+            var tooltip_rebate= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Rebate')|raw }}</span>';
+            $(tooltip_rebate).insertAfter("label[for='localsbest_shopbundle_package_sku_prices_0_rebate']");
+            
+            var tooltip_retail= '<span style="padding-left: 4px;">{{ tooltip_text.getText('Retail Price')|raw }}</span>';
+            $(tooltip_retail).insertAfter("label[for='localsbest_shopbundle_package_sku_prices_0_retailPrice']");#}
+            var tooltip_file= '<span style="margin-left:10px;">{{ tooltip_text.getText('Image (Select File)')|raw }}</span>';
+            $(".fileinput-new").closest(".form-group").append(tooltip_file);
+        });
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('packages') }}">Packages</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        {% if isCopy is defined and isCopy == true %}
+            Copy Package
+        {% else %}
+            Edit
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block content -%}
+    {{ form_start(edit_form) }}
+    <div class="row">
+        <div class="col-md-5">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        Packages Information
+                        <span>{{ tooltip_text.getText('Packages Information','header')|raw }}</span>
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse" data-original-title="" title="">
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    {{ form_errors(edit_form) }}
+
+                    {{ form_row(edit_form.type) }}
+                    
+
+                    <div class="portlet box blue">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                Add Items to Package
+                                <span>{{ tooltip_text.getText('Add Items to a Package','header')|raw }}</span>
+                            </div>
+                            <div class="tools">
+                                <a href="javascript:;" class="collapse" data-original-title="" title="">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body mt-repeater portlet-form">
+                            <div data-repeater-list="localsbest_shopbundle_package[sets]" class="main-form">
+                                {% for set in edit_form.sets %}
+
+
+                                    <div data-repeater-item class="mt-repeater-item clearfix">
+                                        <!-- jQuery Repeater Container -->
+                                        <div class="mt-repeater-input">
+
+                                            {{ form_row(set.item) }} </div>
+                                        <div class="mt-repeater-input">
+
+                                            {{ form_row(set.quantity) }} 
+                                        </div>
+                                        <div class="mt-repeater-input useslimit">
+                                            {{ form_row(set.usesLimit) }} 
+                                        </div>
+
+                                        <div class="mt-repeater-input">
+                                            <a href="javascript:;" class="btn btn-danger mt-repeater-delete1" style="margin-top: 22px;">
+                                                <i class="fa fa-close"></i> Delete</a>
+
+                                        </div>
+                                        <div class="mt-repeater-input">
+                                            <input type="hidden" name="quantity-limit" class="quantity-limit"/>
+                                        </div>
+                                        <div class="mt-repeater-input">
+                                            <input type="hidden" class="hidden_validate"/>
+                                        </div>
+                                        
+                                        <div class="mt-repeater-input">
+                                            <input type="hidden" class="loadItem"/>
+                                        </div>
+                                        
+                                        <div class="mt-repeater-input">
+                                            <input type="hidden" class="loadItemQuantity"/>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                             <div class="add-btn">
+                            <a href="javascript:;" data-repeater-create class="btn btn-success mt-repeater-add">
+                                <i class="fa fa-plus"></i> Add</a>
+                                </div>
+                            
+
+                        </div>
+                    </div>
+                    <input type="hidden" class="loadPackageQuantity"/>   
+                    <div class="portlet box blue">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                Package Display Options
+                                <span>{{ tooltip_text.getText('Package Display Options','header')|raw }}</span>
+                            </div>
+                            <div class="tools">
+                                <a href="javascript:;" class="collapse" data-original-title="" title="">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body package-form">
+                            {{ form_row(edit_form.title) }}
+                            {{ form_row(edit_form.shortDescription) }}
+                            {{ form_row(edit_form.description) }}
+                            {{ form_row(edit_form.file) }}
+                            {{ form_row(edit_form.imagename) }}
+                            <a class="btn btn-sm btn-danger delete-package_image" href="#">Delete</a>
+                        </div>
+                    </div>
+                    {{ form_row(edit_form.quantity) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(edit_form.industryType) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(edit_form.sku.categories) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9">
+                             {{ form_row(edit_form.sku.tags) }}
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn-success btn" data-toggle="modal" data-target="#addTags" style="margin-left:-22px;margin-top:25px;"><i class="fa fa-plus"></i>Add Tags</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="portlet box blue">
+                <div class="portlet-title top_prices_section">
+                    <div class="caption">
+                        Prices
+                        <span>{{ tooltip_text.getText('Prices','header')|raw }}</span>
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse" data-original-title="" title="">
+                        </a>
+                    </div>
+
+                </div>
+
+                <div class="portlet-body">
+                    <div class="row">
+                        {% set display_amount  = '' %}
+                        {% for price in edit_form.sku.prices %}
+                            <div class="col-md-12"> {{ form_row(price.type) }}
+
+                                {#  {{ form_row(price.subscriptionInterval) }} #}
+                            </div>
+                            <div class="col-md-6 prices_section">  
+                                {{ form_row(price.retailPrice) }}
+                                {{ form_row(price.rebate) }}
+                                {% set display_amount  = price.vars.value.retailPrice %}
+
+                                {{ form_row(price.amount) }}</div>
+                            <div class="col-md-6"> {{ form_row(price.subscriptionType) }}</div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+                        
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        Order Questions
+                        <span>{{ tooltip_text.getText('Order Questions','header')|raw }}</span>
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse" data-original-title="" title="">
+                        </a>
+                    </div>
+                   
+                </div>
+                
+                <div class="portlet-body">
+                    {% set ask= 0 %}
+                    {% set require= 0 %}
+                    {% set counter= 0 %}
+                    {% if question is defined and question is not empty %}
+                        {% for questions in question %}
+                            {% set counter= loop.index0 %}
+                            {% for selected_ask1 in selected_ask %}
+                                {% if counter == loop.index0 %}
+                                    {% set ask =  selected_ask1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for selected_require1 in selected_require %}
+                                {% if counter == loop.index0 %}
+                                    {% set require =  selected_require1 %}
+                                {% endif %}
+                            {% endfor %}
+                            <div class="row">
+                                <label class="control-label">{{questions}}</label>
+                                <div class="col-md-12">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" name="localsbest_shopbundle_package[question][{{ loop.index }}][status][]" value="ask" {% if ask == 1 %}checked{% endif %}>Ask
+                                    </label>
+                                    <label class="checkbox-inline">
+                                      <input type="checkbox" name="localsbest_shopbundle_package[question][{{ loop.index }}][status][]" value="require" {% if require == 1 %}checked{% endif %}>Require
+                                    </label>
+                                </div>
+                            </div>
+                            
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                        
+            </div>
+
+            {#<div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-info-circle"></i> Options
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse" data-original-title="" title="">
+                        </a>
+                    </div>
+                    <div class="actions">
+                        <a href="#" class="btn btn-danger add_option_link">Add an Option</a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <ul class="sku-options list-unstyled" data-prototype="{{ form_widget(form.options.vars.prototype)|e('html_attr') }}">
+                        {% for option in form.options %}
+                            <li>
+                                {{ form_row(option.title) }}
+                                {{ form_row(option.optionsValues) }}
+                                <a class="btn btn-sm btn-danger" href="#" onclick="removeParentObject(this)">delete</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>#}
+             <a class="btn btn-default pull-right" href="{{ path('packages') }}">
+                Back to the list
+            </a>
+
+            {{ form_widget(edit_form.draft) }}
+            {{ form_widget(edit_form.archive) }}
+            {{ form_widget(edit_form.approval) }}
+          
+            {% if isPublished is defined and isPublished == true %}
+                  {{ form_widget(edit_form.republish) }}
+                 {% endif %}
+            
+        </div>
+
+        <div class="col-md-7">
+
+            <div class="portlet box purple sticky">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-eye"></i> Preview
+                    </div>
+                </div>
+                <div class="portlet-body">
+
+
+                    <div class="box" style="border: 5px solid #7f898b;">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="fotorama fileinput-preview"
+                                     data-width="700"
+                                     data-maxwidth="100%"
+                                     data-ratio="16/9"
+                                     data-allowfullscreen="true"
+                                     data-nav="thumbs"
+                                     >                                    
+                                    {% for image in result %}
+                                        {% if image is not empty %}
+                                            <img src="{{image}}"/>
+                                        {% else %}
+                                            <img src="/shop/img/800x600.png"/>
+                                        {% endif %}
+                                    {% endfor %}                           
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="product-info box">
+                                    <ul class="icon-group icon-list-rating text-color" title="{{ 0|round(1) }}/5 rating">
+                                        {{ 0|round(1)|rating|raw }}
+                                    </ul>
+                                    <small><a href="#" class="text-muted">based on 0 reviews</a></small>
+                                    <h3>{{edit_form.vars.value.title }}</h3>
+                                    <h5>By {{vendor_name}}</h5>
+                                    <p class="product-info-price">
+                                        {% if display_amount is defined and display_amount != '' %}
+                                           ${{ display_amount }}
+                                        {% else %}
+                                          $Price
+                                        {% endif %}
+                                    </p>
+                                    <p style="border-bottom: 1px solid #d9d9d9; color: #2a8fbd; margin-bottom: 10px; padding-bottom: 10px;" class="tags-preview">
+                                        <a href="#"><i class="fa fa-tag"></i> Tag</a>
+                                    </p>
+                                    <p class="text-smaller text-muted" style="word-wrap: break-word;">
+                                        {{edit_form.vars.value.shortDescription }}
+                                    </p>
+
+                                    <ul class="price_under_preview" style="list-style-type:none">
+                                        <li>
+                                            <label>
+                                                <input value="1" checked="" class="payment-type" type="radio" name="payment">
+                                                $Price
+                                            </label>
+                                        </li>
+                                    </ul>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gap"></div>
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs" id="myTab">
+                                <li class="active">
+                                    <a href="#tab-1" data-toggle="tab">
+                                        <i class="fa fa-pencil"></i> Description
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="#tab-4" data-toggle="tab">
+                                        <i class="fa fa-comments"></i> Reviews
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade in active" id="tab-1">
+                                    <p>
+                                        Description
+                                    </p>
+
+                                    <ul>
+                                        <li style="word-wrap: break-word;">
+                                            <b>Item</b> - {{edit_form.vars.value.description }}
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="tab-pane fade" id="tab-4">
+                                    <a class="popup-text btn btn-primary" style="margin-bottom: 15px;" href="#review-dialog" data-effect="mfp-zoom-out">
+                                        <i class="fa fa-pencil"></i> Add a review
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {{ form_end(edit_form) }}
+
+
+    <button class="btn btn-warning mt-sweetalert activate-wrong-pacakage" data-title="Please select the correct package type" data-message="" data-type="warning" data-allow-outside-click="true" data-confirm-button-class="btn-warning"></button>
+<div id="addTags" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add Tags</h4>
+      </div>
+      <div class="modal-body">
+          <p>
+              <input class="form-control form-control-solid placeholder-no-fix addtags" type="text" placeholder="Add tag name">
+          </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default blue saveTags" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

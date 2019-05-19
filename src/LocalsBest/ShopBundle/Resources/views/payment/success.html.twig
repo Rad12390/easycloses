@@ -1,0 +1,53 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    Checkout
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        jQuery(document).ready(function() {
+            $(".term").on('click', function(){ 
+                $('#terms').modal({'remote': '{{ path('termsAndconditions',{'mode':'shop'}) }}'});
+            });
+         });
+        
+    </script>
+{% endblock %}
+
+{% block content -%}
+  
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <aside class="sidebar-left">
+                    <div class="box clearfix">
+                        <h2 class="text-center text-success">Purchase Successful!</h2>
+                        <br>
+                        <div class="text-center">
+                            <a href="{{ path('ec_shop_main_page') }}" class="btn btn-default center">Go back to Shop</a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+        <div class="gap"></div>
+    </div>
+                        
+    {% if term_status== 0 and user.role.id== 4 and status== 1 %}
+        <h4 class='terms'>Here are the <a data-toggle="modal" data-target="#myModal" class='term'><b>Shop Terms and Conditions</b> </a>Read and sign this now to start selling!!!</h4>
+    {% else %}
+        
+    {% endif %}
+    {% if term_status== 0 and user.role.id== 4 and status== 1 %}
+{#      {% if checker.forAddon('packages', user) and user.role.id== 4 %}#}
+        <!-- Modal -->
+          <div class="modal fade" id="terms" role="dialog">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                  
+              </div>
+            </div>
+          </div>
+    {% endif %}
+{% endblock %}

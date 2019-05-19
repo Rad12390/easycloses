@@ -1,0 +1,53 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}
+    Checkout
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4" style="margin-bottom: 15px;">
+                <div class="box clearfix">
+                    <b>Order Status:</b> {{ order.status|capitalize }}
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <aside class="sidebar-left">
+                    <div class="box clearfix">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Options</th>
+                                    <th>Price</th>
+                                    <th>QTY</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.shopItems %}
+                                    <tr>
+                                        <td>{{ item.title }}</td>
+                                        <td>
+                                            {% for key, option in item.options %}
+                                                <b>{{ key }}:</b> {{ option }}
+                                            {% else %}
+                                                -
+                                            {% endfor %}
+                                        </td>
+                                        <td>${{ item.price|number_format }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ item.total|number_format }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </aside>
+            </div>
+        </div>
+        <div class="gap"></div>
+    </div>
+{% endblock %}

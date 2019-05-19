@@ -1,0 +1,45 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/formbuilder.css">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="/scripts/vendor.js"></script>
+    <script src="/scripts/formbuilder.js"></script>
+    <script>
+        $(function(){
+            fb = new Formbuilder({
+                selector: '#formbuilder',
+                bootstrapData: {{ form | json_encode | raw }}
+
+            });
+
+            fb.on('save', function(payload){
+                console.log(JSON.parse(payload));
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('form_builder_save') }}",
+                    data: JSON.parse(payload),
+                    dataType: 'json',
+                    success: function(data) {
+                    }
+                });
+            })
+        });
+
+    </script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id='formbuilder'></div>
+        </div>
+    </div>
+
+{% endblock %}

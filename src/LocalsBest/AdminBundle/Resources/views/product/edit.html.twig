@@ -1,0 +1,204 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme edit_form 'bootstrap_3_layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.js') }}"></script>
+
+    <script>
+        $(function () {
+            $('.select2').select2();
+
+            $('#tags').tagsInput({
+                width: 'auto',
+                defaultText: 'Add Tags',
+                interactive: true,
+                onAddTag: function(tag) {
+                    $.post('{{ path('tag_add_v2', {type: 'Product', id: entity.id}) }}', {'tag': tag} )
+                    .done(function( data ) {
+                        if(data.result == 'fail') {
+                            swal({
+                                title: "WARNING",
+                                text: "This tag was not added to this contact.",
+                                type: "warning"
+                            });
+                        } else {
+                            if(data.tag == 'closed') {
+                                var statusSelect = $("#change-is_active");
+                                statusSelect.val(0);
+                                statusSelect.trigger('change');
+                            }
+                        }
+                    });
+                },
+                onRemoveTag: function(tag) {
+                    $.post('{{ path('tag_remove_v2', {type: 'Product', id: entity.id}) }}', {'tag': tag} );
+                    if(tag.toLowerCase() == 'closed') {
+                        var statusSelect = $("#change-is_active");
+                        statusSelect.val(1);
+                        statusSelect.trigger('change');
+                    }
+                }
+            });
+
+            $("textarea").wysihtml5({
+                "stylesheets": ["/system/global/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+            });
+
+            $("#remove-image").on('click', function(e){
+                e.preventDefault();
+                var url = $(this).attr('href');
+
+                $.ajax({
+                    url: url,
+                    method: "GET",
+                    dataType: 'json'
+                })
+                .success(function(data){
+                    if(data.error == 1) {
+                        swal({
+                            title: "DANGER",
+                            text: data.message,
+                            type: "danger"
+                        });
+                    } else {
+                        swal({
+                            title: "SUCCESS",
+                            text: data.message,
+                            type: "success"
+                        });
+
+                        $("#image-block").html('');
+                    }
+                })
+            });
+
+            var $collectionHolder;
+
+            // setup an "add a tag" link
+            var $addImageLink = $('<a href="#" class="btn btn-sm btn-primary add_image_link">Add a Image</a>');
+            var $newLinkLi = $('<li></li>').append($addImageLink);
+
+            jQuery(document).ready(function() {
+                // Get the ul that holds the collection of tags
+                $collectionHolder = $('ul.images');
+
+                // add the "add a tag" anchor and li to the tags ul
+                $collectionHolder.append($newLinkLi);
+
+                // count the current form inputs we have (e.g. 2), use that as the new
+                // index when inserting a new item (e.g. 2)
+                $collectionHolder.data('index', $collectionHolder.find(':input').length);
+
+                $addImageLink.on('click', function(e) {
+                    // prevent the link from creating a "#" on the URL
+                    e.preventDefault();
+
+                    // add a new tag form (see next code block)
+                    addImageForm($collectionHolder, $newLinkLi);
+                });
+            });
+
+            function addImageForm($collectionHolder, $newLinkLi) {
+                // Get the data-prototype explained earlier
+                var prototype = $collectionHolder.data('prototype');
+
+                // get the new index
+                var index = $collectionHolder.data('index');
+
+                // Replace '__name__' in the prototype's HTML to
+                // instead be a number based on how many items we have
+                var newForm = prototype.replace(/__name__/g, index);
+
+                // increase the index with one for the next item
+                $collectionHolder.data('index', index + 1);
+
+                // Display the form in the page in an li, before the "Add a tag" link li
+                var $newFormLi = $('<li></li>').append(newForm);
+                $newLinkLi.before($newFormLi);
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <h1>Product #{{ entity.id }} Edit</h1>
+
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+            {{ form_start(edit_form) }}
+                {{ form_row(edit_form.title) }}
+                {{ form_row(edit_form.short_description) }}
+                {{ form_row(edit_form.description) }}
+                {{ form_row(edit_form.parent) }}
+                {{ form_row(edit_form.categories) }}
+
+                <h3>Images</h3>
+                <ul class="images" style="list-style: none" data-prototype="{{ form_widget(edit_form.images.vars.prototype)|e('html_attr') }}">
+                    {# iterate over each existing tag and render its only field: name #}
+                    {% for image in edit_form.images %}
+                        <li>
+                            {{ form_widget(image) }}
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                {{ form_row(edit_form.linkTo) }}
+                {{ form_row(edit_form.addon_part) }}
+                {{ form_row(edit_form.addon_type) }}
+                {{ form_row(edit_form.isAbleForShop) }}
+                {{ form_row(edit_form.isAbleForSlider) }}
+                {{ form_row(edit_form.forBusiness) }}
+                {{ form_row(edit_form.forPage) }}
+                {{ form_row(edit_form.forStatus) }}
+                {{ form_row(edit_form.forRoles) }}
+                {{ form_row(edit_form.forState) }}
+                {{ form_row(edit_form.forIndustry) }}
+
+                <div class="form-group">
+                    <label class="control-label" for="tags">
+                        <i class="fa fa-tag"></i> Tags
+                    </label>
+                    <input id="tags" value="{{ tags }}" class="form-control">
+                </div>
+
+
+                {{ form_widget(edit_form.submit) }}
+
+                <a class="btn btn-default" href="{{ path('admin_products') }}">
+                    Back to the list
+                </a>
+            {{ form_end(edit_form) }}
+
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-sm-6">
+                    {{ form(delete_form) }}
+                </div>
+            </div>
+        </div>
+
+        {% for image in entity.images %}
+            <div class="col-sm-6 col-md-6" id="image-block">
+                {#<a class="btn btn-sm btn-danger" id="remove-image" href="{{ path('product_image_delete', {'id': image.id}) }}"> Remove Image</a>#}
+                <form action="{{ path('product_image_delete', {'id': image.id}) }}">
+                    <button type="submit" class="btn btn-danger">Remove Image</button>
+                </form>
+                <div class="thumbnail">
+                    <img class="img" src="{{ vich_uploader_asset(image, 'imageFile') }}" alt="">
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

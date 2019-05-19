@@ -1,0 +1,1723 @@
+{% extends "::base.html.twig" %}
+
+{% form_theme clientBusiness 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Profile
+    </li>
+{% endblock %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+{% form_theme changePasswordForm 'bootstrap_3_layout.html.twig' %}
+{% form_theme contactForm 'bootstrap_3_layout.html.twig' %}
+{% form_theme accountProfileForm 'bootstrap_3_layout.html.twig' %}
+{% form_theme newFieldsForm 'bootstrap_3_horizontal_layout.html.twig' %}
+{% form_theme businessForm 'bootstrap_3_layout.html.twig' %}
+{% form_theme paymentSplitSettings 'bootstrap_3_layout.html.twig' %}
+
+{% set page_class = 'profile' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/pages/css/profile.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css') }}" />
+
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('system/global/plugins/formbuilder/formbuilder.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}"/>
+
+    <link href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+
+    <style>
+        table#doc_rule_editable input{
+            border: 3px solid #ddd;
+        }
+
+        table#doc_rule_editable select{
+            border: 3px solid #ddd;
+        }
+        #localsbest_shopbundle_paymentsplitsettings_target{
+            margin-left:15px;
+        }
+        #localsbest_shopbundle_paymentsplitsettings_targettwo{
+            
+        margin-left:15px;
+        }
+	table#example_purchase{width:99.8% !important}
+        table#example_purchase.dataTable thead>tr>th.sorting_asc, 
+        table#example_purchase.dataTable thead>tr>th.sorting_desc, 
+        table#example_purchase.dataTable thead>tr>th.sorting, 
+        table#example_purchase.dataTable thead>tr>td.sorting_asc, 
+        table#example_purchase.dataTable thead>tr>td.sorting_desc, 
+        table#example_purchase.dataTable thead>tr>td.sorting{padding: 0 18px 0 10px !important;vertical-align: middle !important;}
+        a.test:hover {text-decoration: none !important;}
+        a.test:visited { text-decoration: none!important; }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/fuelux/js/spinner.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-touchspin/bootstrap.touchspin.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-select2.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/table-datatables-editable.js', null, false, 2) }}"></script>
+
+    <script>
+        jQuery(document).ready(function() {
+
+// show hide charity field in case of "use the charity picked by"
+       
+        $("#localsbest_shopbundle_paymentsplitsettings_charities").select2({
+            maximumSelectionLength: 3
+        });
+       $("#localsbest_shopbundle_paymentsplitsettings_targettwo_1").click(function() {
+    
+      $("#localsbest_shopbundle_paymentsplitsettings_managerCharities").parent(".form-group").hide();
+    
+});
+  $("#localsbest_shopbundle_paymentsplitsettings_targettwo_0").click(function() {
+    
+      $("#localsbest_shopbundle_paymentsplitsettings_managerCharities").parent(".form-group").show();
+    
+});
+
+            $(".add_email").change(function() {
+                $(".add").val($(this).val());
+            });
+//                ComponentsFormTools.init();
+            $('.btn-add').click(function(event) {
+                var collectionHolder = $('#' + $(this).attr('data-target'));
+                var prototype = collectionHolder.attr('data-prototype');
+                var form = prototype.replace(/__name__/g, collectionHolder.children().length);
+
+                collectionHolder.append(form);
+                textarea = $(collectionHolder).find(".wysihtml5:last");
+                
+                textarea.wysihtml5({
+                    "stylesheets": ["system/global/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+                });
+
+                return false;
+            });
+            $('.form-group').on('click', '.btn-remove', function(event) {
+                var name = $(this).attr('data-related');
+                $('*[data-content="' + name + '"]').remove();
+
+                return false;
+            });
+
+            function formatRepo (repo) {
+                if (repo.loading) return repo.text;
+
+                var markup = '<div class="clearfix">' +
+                    repo.name +
+                    '</div>';
+
+                return markup;
+            }
+
+            function formatRepoSelection (repo) {
+                return repo.name || repo.text;
+            }
+
+            $(".select2_remote").select2({
+                width: "100%",
+                placeholder: "Select Items",
+                ajax: {
+                    url: "{{ path('find_city') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term, // search term
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        // parse the results into the format expected by Select2
+                        // since we are using custom formatting functions we do not need to
+                        // alter the remote JSON data, except to indicate that infinite
+                        // scrolling can be used
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.items,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+                minimumInputLength: 2,
+                templateResult: formatRepo, // omitted for brevity, see the source of this page
+                templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+            });
+
+            $('.date-picker').datepicker({
+                format: "mm/dd/yyyy",
+                orientation: "right",
+                autoclose: true
+            });
+
+            {% if error is defined and error is not empty %}
+                swal({
+                    title: "WARNING!",
+                    text: "{{ error }}",
+                    type: "warning"
+                });
+            {% endif %}
+            
+            $('.dropdown-submenu a.test').on("click", function(e){
+                $(this).next('ul').toggle();
+                e.stopPropagation();
+                e.preventDefault();
+            });
+        });
+
+        jQuery(document).ready(function () {
+            jQuery('#example').DataTable({
+                responsive: true
+            });
+
+            var handleWysihtml5 = function() {
+                if (!jQuery().wysihtml5) {
+                    return;
+                }
+
+                if ($('.wysihtml5').size() > 0) {
+                    var wysihtml5 = $('.wysihtml5').wysihtml5({
+                        "stylesheets": ["system/global/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+                    });
+                    var content = wysihtml5.data("wysihtml5").editor.getValue();
+
+                    if(content.slice(-1) == '.') {
+                        wysihtml5.data("wysihtml5").editor.setValue(content.slice(0, -1));
+                    } else {
+                        wysihtml5.data("wysihtml5").editor.setValue(content + '.');
+                    }
+                }
+            };
+            handleWysihtml5();
+            
+            //code to add validation so that sum of charity,employee,business will be exactly equal to 100
+            var role_array=["ROLE_ASSIST_MANAGER","ROLE_AGENT","ROLE_CLIENT"];
+            if(jQuery.inArray("{{userProfile.role.role}}", role_array) == -1){
+                $("#localsbest_shopbundle_paymentsplitsettings_submit").click(function(){
+                    var charity= parseInt($("#localsbest_shopbundle_paymentsplitsettings_charityPercentage").val());
+                    var employee= parseInt($("#localsbest_shopbundle_paymentsplitsettings_managerEmployeePercentage").val());
+                    var businees= parseInt($("#localsbest_shopbundle_paymentsplitsettings_businessPercentage").val());
+                    var total= parseInt(charity+employee+businees);
+                    if(total!=100){
+                        alert("The total of Charity, Employee and Business should be 100% only");
+                        return false;
+                    }
+                });
+            }
+            //end of code to add validation so that sum of charity,employee,business will be exactly equal to 100
+            
+            //code to set default charity selected
+            {#var charitytext= "{{charitytext}}";
+            var charityId= {{charityid}};
+            if(charityId){
+                var data = {
+                            id: charityId,
+                            text: charitytext
+                            };
+                $('#localsbest_shopbundle_paymentsplitsettings_charities').val(data.id).trigger('change');
+            }#}
+            //end of code to set default charity selected
+            $("#localsbest_shopbundle_paymentsplitsettings_charities").on("change", function () { 
+                $("#localsbest_shopbundle_paymentsplitsettings_charities").select2({
+                    maximumSelectionLength: 3
+                });
+            });
+            var charityId= {{charityid|json_encode|raw}};
+            var charitytext= {{charitytext|json_encode|raw}};
+            var final= [];
+            if(charityId.length>0){
+                for(var i=0;i<charityId.length;i++){
+                    final.push(charityId[i]);
+                }
+                if(!{{payment_status}}){
+                    if({{display}}){
+                        $('#localsbest_shopbundle_paymentsplitsettings_charities').empty();
+                            for(var i=0;i<final.length;i++){
+                            var data = {
+                                id: final[i],
+                                text: charitytext[i]
+                            };
+                            var newOption = new Option(data.text, data.id, true, true);
+                            $('#localsbest_shopbundle_paymentsplitsettings_charities').append(newOption).trigger('change');
+                        }
+                    }
+                    else{
+                        $('#localsbest_shopbundle_paymentsplitsettings_charities').val(final).trigger('change');
+                    }
+                }
+            }
+            
+            if({{isempty}})
+                $("#localsbest_shopbundle_paymentsplitsettings_rebateStatus_1").prop("checked", true);
+        });
+    </script>
+
+    {% if userProfile.businesses|length and userProfile.businesses[0].types.first.id != 23 %}
+        <script src="{{ asset('system/easycloses-scripts/vendor.js') }}"></script>
+        <script src="{{ asset('system/easycloses-scripts/formbuilder.js') }}"></script>
+        <script>
+            jQuery(document).ready(function() {
+                fb = new Formbuilder({
+                    selector: '#formbuilder',
+                    bootstrapData: {{ formBuilder | json_encode | raw }}
+                });
+ 
+                fb.on('save', function(payload){
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ path('form_builder_save') }}",
+                        data: JSON.parse(payload),
+                        dataType: 'json',
+                        success: function(data) {
+                        }
+                    });
+                });
+
+                var url = document.location.toString();
+
+                if (url.match('#')) {
+                    tabs = $('#personal_tabs');
+                    tabs.find('li').removeClass('active');
+                    tabs.find('a[href="#' + url.split('#')[1] + '"]').parent().addClass('active');
+
+                    $('div.tab-content div#personal div.tab-content div').removeClass('active');
+                    $('div#' + url.split('#')[1]).addClass('active');
+                }
+        });
+        </script>
+        {% endif %}
+        <script>
+            //datatable for better package filteration
+            $(document).ready(function(){
+                
+            var dTable = $('#example_shop').dataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                columns: [
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                ],
+                "order": [[ 6, "desc" ]],
+                ajax: {
+                    url: "{{path('sku_business_able_ajax')}}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        windowForLogout(data)
+                    },  
+                },
+                dom: 'lfBtrip',
+                buttons: [
+                   
+                ]
+            });
+           
+            $('#example_shop').on('change','.disableProduct', function(){
+                var productId = $(this).data('product');
+                $.ajax({
+                    url: '{{ path('sku_toggle_business_able') }}',
+                    method: 'post',
+                    data: {
+                        skuId: productId
+                    }
+                })
+                .success(function(data){
+                });
+            });
+            
+            
+
+            {#$(".dataTables_filter input")
+                .unbind() // Unbind previous default bindings
+                .bind("input", function (e) { // Bind for field changes
+                    // Search if enough characters, or search cleared with backspace
+                    if (this.value.length >= 4 || this.value == "") {
+                        // Call the API search function
+                        dTable.api().search(this.value).draw();
+                    }
+                })
+                .bind("keydown", function (e) { // Bind for enter key press
+                    // Search when user presses Enter
+                    if (e.keyCode == 13)
+                        dTable.api().search(this.value).draw();
+                });#}
+        });
+        </script>
+        <script>
+        $(document).ready(function(){
+        var dTable = $('#example_purchase').dataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                columns: [
+                    {},
+                    {
+                        className: "text-center",
+                        name: "buyer"
+                    },
+                    {
+                        name: 'date',
+                    },
+                    {
+                        name: 'item'
+                    },
+                    {
+                        name: 'amount',
+                        render: function(item) {
+                            return '$' + item
+                        }
+                    },
+                    {
+                        name: 'rebate',
+                        render: function(item) {
+                            return item + '%'
+                        }
+                    },
+                    {
+                        name: 'rebateAmount',
+                        render: function(item) {
+                            return '$' + item
+                        }
+                    },
+                    {
+                        name: 'biz',
+                        render: function(item) {
+                            return '$' + item
+                        }
+                    },
+                    {
+                        name: 'business',
+                        render: function(item) {
+                            return '$' + item
+                        }
+                    },
+                    {
+                        name: 'charity',
+                        render: function(item) {
+                            return '$' + item
+                        }
+                    },
+                    {
+                        name: 'employee',
+                        render: function(item) {
+                            return '$' + item
+                        }
+                    },
+                    
+                ],
+                order: [],
+                ajax: {
+                    url: "{{path('datatable_manager_list')}}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        windowForLogout(data)
+                    },
+                },
+                dom: 'lBtrip',
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5',
+                    {
+                        text: 'Advanced Search',
+                        className: 'btn btn-primary advance-search'
+                    }
+                ]
+            });
+            
+            $('#example_purchase').on('xhr.dt',function (e, settings, data, xhr) {
+                  $('#totalPrice').html(data['totalPrice']);
+                  $('#totalRebatePrice').html(data['totalRebateAmount']);
+                  $('#bizShare').html(data['totalBizShare']);
+                  $('#business_purchase').html(data['totalCharityAmount']);
+                  $('#charity').html(data['totalManagerAmount']);
+                  $('#employee').html(data['totalEmployeeAmount']);
+            });
+            
+            $("a.advance-search").on('click', function(){
+                $('#ajax').modal({'remote': '{{ path('datatable_manager_list_advance_search') }}'});
+            });
+
+            $('table#example_purchase').on('click', 'td', function(e) {
+                $('table#example_purchase tr.success').removeClass('success');
+                $(this).parent().addClass('success');
+            });
+        });
+        </script>
+{% endblock %}
+
+{% block title %}
+    {% if accessToAdmin is defined and accessToAdmin != true %}
+        Profile
+    {% else %}
+        {{ userProfile.firstName}} {{ userProfile.lastName }}
+    {% endif %}
+{% endblock %}
+
+{% block page_title %}
+    {{ userProfile.firstName}} {{ userProfile.lastName }}
+{% endblock %}
+
+{% block page_title_small %}
+    ( {{ userProfile.role.name }} )
+{% endblock %}
+
+{% if accessToAdmin is defined and accessToAdmin != true %}
+    {% set class = 'hidden' %}
+{% else %}
+    {% set class = 'form-group' %}
+{% endif %}
+
+{% block content %}
+    {% import _self as forms %}
+    {% if error is defined and error is not empty %}
+        <div class="Metronic-alerts alert alert-danger fade in">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+            <i class="fa-lg fa fa-warning"></i>  {{ error }}
+        </div>
+    {% endif %}
+    <div class="tabbable tabbable-custom tabbable-full-width">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="#personal" data-toggle="tab"> Personal {{ tooltip_text.getText('Profile personal','header')|raw }}</a>
+            </li>
+            <li>
+                <a href="#business_user" data-toggle="tab"> Business User {{ tooltip_text.getText('profile business user','header')|raw }}</a>
+            </li>
+            <li>
+                <a href="#business" data-toggle="tab"> Business {{ tooltip_text.getText('profile business','header')|raw }}</a>
+            </li>
+            {% if(userProfile.role.role == 'ROLE_CLIENT' and userProfile.createdBy != null and userProfile.createdBy.role.level > 2) %}
+                <li>
+                    <a href="#createdBy" data-toggle="tab"> {{ userProfile.createdBy.firstname }} {{ userProfile.createdBy.lastname }} </a>
+                </li>
+            {% endif %}
+        </ul>
+       
+        <div class="tab-content">
+            <div class="tab-pane active" id="personal">
+                <div class="row profile-account">
+                    <div class="col-md-3">
+                        <ul class="ver-inline-menu tabbable margin-bottom-10" id="personal_tabs">
+                            <li class="active">
+                                <a data-toggle="tab" href="#personal_account">
+                                    <i class="fa fa-user"></i> Account Profile
+                                </a>
+                            </li>
+
+                            <li>
+                                <a data-toggle="tab" href="#personal_property">
+                                    <i class="fa fa-home"></i> Address
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content">
+                            <div id="personal_account" class="tab-pane active">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-user"></i> Account Profile
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        {{ form_start(accountProfileForm, {action: path('users_profile', {'username': routeusername})~'#personal_account', enctype:"multipart/form-data"}) }}
+                                            {{ form_widget(accountProfileForm._token) }}
+                                            {{ form_row(accountProfileForm.username) }}
+                                            {{ form_row(accountProfileForm.languages) }}
+                                           {# {{ form_row(accountProfileForm.workingCities) }}#}
+                                            {{ form_row(accountProfileForm.dba) }}
+                                            {{ form_row(accountProfileForm.aboutMe) }}
+                                            <div class="form-group">
+                                                {{ form_label(accountProfileForm.birthday) }}
+                                                <div class="input-group date date-picker" data-date-format="yyyy-mm-dd">
+                                                    {{ form_widget(accountProfileForm.birthday) }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="display: block;" for="accountProfile_file_file">Photo </label>
+                                                {{ form_widget(accountProfileForm.file) }}
+                                                <div class="clearfix margin-top-10">
+                                                    <span class="label label-danger">NOTE! </span>&nbsp;
+                                                    Ideal logo size is 200px X 400px
+                                                </div>
+                                            </div>
+                                            <div class="form-group margin-top-10">
+                                                <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save</button>
+                                                <input type="reset" class="btn btn-default" name="Reset" >
+                                            </div>
+                                        {{ form_end(accountProfileForm, {'render_rest': false}) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="personal_property" class="tab-pane">
+                                <div class="portlet box blue">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-home"></i> Address
+                                        </div>
+                                        <div class="actions">
+                                            <a class="btn btn-danger" style="color: white;" href="{{ path('account_property_add', {'username': routeusername }) }}">
+                                                Add Address
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <table {% if properties|length >= 1 %}id="example"{% endif %} class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th class="sorting">Title</th>
+                                                    <th class="sorting">Address</th>
+                                                    <th class="sorting">Type</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% if properties|length >= 1 %}
+                                                    {% for property in properties %}
+                                                        <tr>
+                                                            <td>{{ property.title }}</td>
+                                                            <td>
+                                                                <a  href="{{ path('account_property_edit', {'id': property.id, 'username': routeusername }) }}" >
+                                                                    {{ property.address.full }}
+                                                                </a>
+                                                            </td>
+                                                            <td>{{ property.type|replace({"_": " "}) }}</td>
+                                                            <td >
+                                                                <a class="btn btn-sm btn-danger" href="{{ path('account_property_delete', {'id': property.id, 'username': routeusername }) }}" >
+                                                                    Delete
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% else%}
+                                                    <tr>
+                                                        <td colspan="4" align="middle">
+                                                            <span class="small">No record found</span>
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <!--end col-md-9-->
+                </div>
+            </div>
+            <!--end tab-pane-->
+
+            <div class="tab-pane" id="business_user">
+                <div class="row profile-account">
+                    <div class="col-md-3">
+                        <ul class="ver-inline-menu tabbable margin-bottom-10" id="personal_tabs">
+                            <li class="active">
+                                <a data-toggle="tab" href="#business_user_Overview">
+                                    <i class="fa fa-globe"></i> Overview
+                                </a>
+                            </li>
+                            <li>
+                                <a data-toggle="tab" href="#business_user_password">
+                                    <i class="fa fa-lock"></i> Password Update
+                                </a>
+                            </li>
+                            <li>
+                                <a data-toggle="tab" href="#business_user_notification">
+                                    <i class="fa fa-comment"></i> Notification Settings
+                                </a>
+                            </li>
+                            <li>
+                                <a data-toggle="tab" href="#business_user_contact">
+                                    <i class="fa fa-envelope"></i> Contact Information
+                                </a>
+                            </li>
+
+                            <li>
+                                <a data-toggle="tab" href="#business_user_fields">
+                                    <i class="fa fa-calendar"></i> Licenses/Dates
+                                </a>
+                            </li>
+                            
+                            {% if userProfile.role.role == 'ROLE_MANAGER' %}
+                                <li>
+                                    <a data-toggle="tab" href="#stripe_property">
+                                        <i class="fa fa-home"></i> Stripe Settings
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if app.user.role.level in [4, 8] and app.user.businesses.0.id == 173 %}
+                                <li>
+                                    <a data-toggle="tab" href="#client_business">
+                                        <i class="fa fa-bank"></i> Business Information
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content">
+                            <div id="business_user_Overview" class="tab-pane active">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-globe"></i> Overview
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        {{ form_start(form, {action: path('users_profile', {'username': routeusername})}) }}
+                                        {{ form_widget(form._token) }}
+                                        {{ form_row(form.firstName) }}
+                                        {{ form_row(form.lastName) }}
+                                        {{ form_row(form.primaryEmail) }}
+                                        {{ form_row(form.primaryPhone) }}
+
+                                        {% if checker.forAddon('wp posting', app.user) %}
+                                            {{ form_row(form.wp_website_url) }}
+                                            <br>
+                                            {{ form_row(form.wp_username) }}
+                                            {{ form_row(form.wp_password) }}
+                                        {% endif %}
+                                        {{ form_row(form.workingCities) }}
+                                        <div class="form-group margin-top-10">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save</button>
+                                            <input type="reset" class="btn btn-default" name="Reset" >
+                                        </div>
+                                        {{ form_end(form, {'render_rest': false}) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="business_user_password" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-lock"></i> Password Update
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        {{ form_start(changePasswordForm, {action: path('users_profile', {'username': routeusername})~'#business_user_password'}) }}
+                                        {{ form_row(changePasswordForm.currentpassword) }}
+                                        {{ form_row(changePasswordForm.password.first) }}
+                                        {{ form_row(changePasswordForm.password.second) }}
+
+                                        <div class="form-group margin-top-10">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save</button>
+                                            <input type="reset" class="btn btn-default" name="Reset" >
+                                        </div>
+                                        {{ form_end (changePasswordForm) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="business_user_notification" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-comment"></i> Notification Settings <span>{{ tooltip_text.getText('Text Upgrade','header')|raw }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        {{ form_start(preferenceForm, {action: path('users_profile', {'username': routeusername})~'#personal_notification'}) }}
+                                        <table class="table table-responsive">
+                                            <tbody>
+                                            <tr>
+                                                <td> Email </td>
+                                                <td>
+                                                    <div class="mt-radio-inline">
+                                                        <label class="mt-radio mt-radio-outline">
+                                                            {{ form_label(preferenceForm.mail[0]) }}
+                                                            {{ form_widget(preferenceForm.mail[0]) }}
+                                                            <span></span>
+                                                        </label>
+                                                        <label class="mt-radio mt-radio-outline">
+                                                            {{ form_label(preferenceForm.mail[1]) }}
+                                                            {{ form_widget(preferenceForm.mail[1]) }}
+                                                            <span></span>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% if preferenceForm.sms is defined %}
+                                                <tr>
+                                                    <td> Text </td>
+                                                    <td>
+                                                        <div class="mt-radio-inline">
+                                                            <label class="mt-radio mt-radio-outline">
+                                                                {{ form_label(preferenceForm.sms[0]) }}
+                                                                {{ form_widget(preferenceForm.sms[0]) }}
+                                                                <span></span>
+                                                            </label>
+                                                            <label class="mt-radio mt-radio-outline">
+                                                                {{ form_label(preferenceForm.sms[1]) }}
+                                                                {{ form_widget(preferenceForm.sms[1]) }}
+                                                                <span></span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="2">
+                                                        {{ button_text.getText('6')|raw }}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                            </tbody>
+                                        </table>
+                                        <!--end profile-settings-->
+                                        <div class="margin-top-10">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save Changes</button>
+                                            <a href="#" class="btn btn-default"> Cancel </a>
+                                        </div>
+                                        {{ form_end (preferenceForm) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="business_user_contact" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-envelope"></i> Contact Information
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        {{ form_start(contactForm, {action: path('users_profile', {'username': routeusername})~'#personal_contact'}) }}
+                                        <div class="form-group">
+                                            <a class="btn btn-primary btn-add" data-target="post_email">
+                                                <i class="icon-plus"></i> Add email
+                                            </a><br />
+                                            <div id="post_email" data-prototype="{{ forms.widget_prototype(contactForm.emails, 'Remove Email', -15)|escape }}">
+                                                {% for widget in contactForm.emails.children %}
+                                                    {{ forms.widget_primary_prototype(widget, widget.vars.value.id, 'Remove Email', -15) }}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <a class="btn btn-primary btn-add" data-target="post_phone">
+                                                <i class="icon-plus"></i> Add phone
+                                            </a><br />
+                                            <div id="post_phone" data-prototype="{{ forms.widget_prototype(contactForm.phones, 'Remove Phone', -15)|escape }}">
+                                                {% for widget in contactForm.phones.children %}
+                                                    {{ forms.widget_primary_prototype(widget, widget.vars.value.id, 'Remove Phone', -15) }}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group margin-top-10">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save</button>
+                                            <input type="reset" class="btn btn-default" name="Reset" >
+                                        </div>
+                                        {{ form_end(contactForm) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="business_user_fields" class="tab-pane">
+                                {% if userProfile.businesses[0] is defined and userProfile.businesses[0].types.first.id == 23 %}
+                                    {{ render(controller('LocalsBestUserBundle:AssociationRow:index',{ 'type': 'user', 'username': userProfile.username })) }}
+                                {% endif %}
+
+                                <div class="portlet box blue">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-calendar"></i> Licenses/Dates
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        {{ form_start(newFieldsForm, {action: path('users_profile', {'username': routeusername})~'#new_fields'}) }}
+                                        <div class="form-body">
+                                            {{ form_row(newFieldsForm.stateLicenseId) }}
+                                            <div class="form-group">
+                                                {{ form_label(newFieldsForm.licenseExpirationDate) }}
+                                                <div class="col-sm-10">
+                                                    <div class="input-group date date-picker" data-date-format="yyyy-mm-dd">
+                                                        {{ form_widget(newFieldsForm.licenseExpirationDate) }}
+                                                        <span class="input-group-btn">
+                                                                <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                                                            </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                {{ form_label(newFieldsForm.joinedCompanyDate) }}
+                                                <div class="col-sm-10">
+                                                    <div class="input-group date date-picker" data-date-format="yyyy-mm-dd">
+                                                        {{ form_widget(newFieldsForm.joinedCompanyDate) }}
+                                                        <span class="input-group-btn">
+                                                                <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                                                            </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {{ form_row(newFieldsForm.website) }}
+
+                                            <div class="form-group">
+                                                <div class="col-sm-12">
+                                                    <button type="submit" class="btn btn-success">Submit</button>
+                                                    <button type="reset" class="btn btn-default">Cancel</button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        {{ form_end(newFieldsForm) }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if userProfile.role.role == 'ROLE_MANAGER' %}
+                                <div id="stripe_property" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-user"></i> Stripe Settings
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <div class="form-group">
+                                            {% if userProfile.stripeAccountId == '' or userProfile.stripeAccountId is null %}
+                                                <div class="col-md-12"> Connect your Stripe Account With LocalsBest </div>
+                                                <div class="clearfix" style="margin-bottom: 15px;"></div>
+                                                <div class="col-md-12">
+                                                    <a class="btn btn-info" href="https://connect.stripe.com/oauth/authorize?response_type=code&client_id={{ stripeClientId }}&scope=read_write&state={{ userProfile.id }}-vendor">Connect With Stripe</a>
+                                                    <i style="margin: 0 15px;">Or</i>
+                                                    <a href="{{ path('users_stripe_account', {'userId': userProfile.id}) }}" class="btn btn-info" >Create New Account on Stripe</a>
+                                                </div>
+                                                <div style="margin-bottom: 15px;" class="clearfix"></div>
+                                            {% else  %}
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <th>Stripe Account Key</th>
+                                                                <th>Stripe Account Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>{{ userProfile.stripeAccountId }}</td>
+                                                                <td>
+                                                                    {% if userProfile.stripeAccountActivated == false or userProfile.stripeAccountActivated is null %}
+                                                                        <label class="label label-warning">
+                                                                            <i class="fa fa-exclamation"></i> Not Activated
+                                                                        </label>
+                                                                    {% else %}
+                                                                        <label class="label label-success">
+                                                                            <i class="fa fa-check"></i> Activated
+                                                                        </label>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td>
+                                                                    {% if userProfile.stripeAccountActivated == false or userProfile.stripeAccountActivated is null %}
+                                                                        <a class="btn btn-success" href="{{ path('users_stripe_account_activation') }}"> Activate</a>
+                                                                    {% endif %}
+                                                                    {#<a class="btn btn-danger" href="{{ path('users_stripe_account_revoke') }}"> Revoking Access</a>#}
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            {%  endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if app.user.role.level in [4, 8] and app.user.businesses.0.id == 173 %}
+                                <div id="client_business" class="tab-pane">
+                                    <div class="portlet blue box">
+                                        <div class="portlet-title">
+                                            <div class="caption">
+                                                <i class="fa fa-bank"></i> Business Information
+                                            </div>
+                                        </div>
+                                        <div class="portlet-body">
+                                            {{ form(clientBusiness) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!--end col-md-9-->
+                </div>
+            </div>
+            <!--end tab-pane-->
+
+            <div class="tab-pane" id="business">
+                <div class="row profile-account">
+                    <div class="col-md-3">
+                        <ul class="ver-inline-menu tabbable margin-bottom-10">
+                            <li class="active">
+                                <a data-toggle="tab" href="#business_information">
+                                    <i class="fa fa-building-o"></i> Business Information </a>
+                                <span class="after">
+                                </span>
+                            </li>
+                            {% if(userProfile.owner != null or userProfile.id == 574) %}
+                                <li>
+                                    <a data-toggle="tab" href="#business_contact">
+                                        <i class="fa fa-envelope"></i> Contact Information </a>
+                                </li>
+
+                                <li>
+                                    <a data-toggle="tab" href="#business_links">
+                                        <i class="fa fa-link"></i> Links
+                                    </a>
+                                </li>
+
+                                {% if userProfile.businesses[0].types.first.id == 23 %}
+                                    <li>
+                                        <a data-toggle="tab" href="#business_doc_questions">
+                                            <i class="fa fa-question"></i> Transaction Questions </a>
+                                    </li>
+
+                                    <li>
+                                        <a data-toggle="tab" href="#business_docrules">
+                                            <i class="fa fa-file-text-o"></i> Transaction Documents
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a data-toggle="tab" href="#search_permissions">
+                                            <i class="fa fa-search"></i> Global Company Search
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    {% if checker.forAddon('form builder', app.user) %}
+                                        <li>
+                                            <a data-toggle="tab" href="#business_form">
+                                                <i class="fa fa-link"></i> Form
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if userProfile.businesses[0].id in [179] or checker.forAddon('transactions', app.user) %}
+                                    <li>
+                                        <a data-toggle="tab" href="#business_email_templates">
+                                            <i class="fa fa-sticky-note-o"></i> Email Templates
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                            <li class="dropdown-submenu">
+                            <a data-toggle="tab" class="test" href="#"><i class="fa fa-building-o"></i> Company Shop Settings
+                                <ul class="ver-inline-menu tabbable margin-bottom-10" style="display:none;">
+                                    {% if(userProfile.role.role == 'ROLE_MANAGER') %}
+                                        <li>
+                                            <a data-toggle="tab" href="#shop_mgt">
+                                                <i class="fa fa-shopping-cart"></i> Shop Management
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a data-toggle="tab" href="#shop_purchase">
+                                                <i class="fa fa-check"></i> Purchases
+                                            </a>
+                                        </li>
+                                     {% endif %}
+                                    <li>
+                                        <a data-toggle="tab" href="#split_settings">
+                                            <i class="fa fa-home"></i> Charity Settings
+                                        </a>
+                                    </li>
+                                </ul>
+                            </a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content">
+                            <div id="business_information" class="tab-pane active">
+                                {% if (ownBusiness == 'isSet') %}
+                                    <div class="portlet box blue">
+                                        <div class="portlet-title">
+                                            <div class="caption">
+                                                <i class="fa fa-building-o"></i> Business Information
+                                            </div>
+                                        </div>
+                                        <div class="portlet-body">
+                                            {{ form_errors(businessForm) }}
+                                            <form action="{{ path('users_profile', {'username': routeusername}) }}#business_information" method="POST" enctype="multipart/form-data" >
+                                                <div class="form-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <h3 class="form-section">Business Info</h3>
+                                                            <div class="form-group">
+                                                                {{ form_label(businessForm.themeColor) }}
+                                                                {{ form_widget(businessForm.themeColor) }}
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.themeColor) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                {{ form_label(businessForm.name) }}
+                                                                {{ form_widget(businessForm.name) }}
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.name) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                {{ form_label(businessForm.contactName) }}
+                                                                {{ form_widget(businessForm.contactName) }}
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.contactName) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                {{ form_label(businessForm.types) }}
+                                                                {% if (app.user.getVendorsWithMe|length > 0 or app.user.role.level > 2) %}
+                                                                    {{ form_widget(businessForm.types, { 'attr':{'disabled':'disabled'}}) }}
+                                                                    {% for t_ype in businessForm.vars.value.types %}
+                                                                        <input type="hidden" name="business[{{ businessForm.types.vars.name }}][]" value="{{ t_ype.id }}">
+                                                                    {% endfor %}
+                                                                {% else %}
+                                                                    {{ form_widget(businessForm.types) }}
+                                                                {% endif %}
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.types) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                {{ form_label(businessForm.workingStates) }}
+                                                                {{ form_widget(businessForm.workingStates, { 'attr': { 'require': true } }) }}
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.workingStates) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="form-group hidden">
+                                                                {{ form_label(businessForm.rating) }}
+                                                                <div id="spinner1">
+                                                                    <div class="input-group input-small">
+                                                                        {{ form_widget(businessForm.rating, { 'attr': {'class': 'spinner-input form-control', 'maxlength': '2'}}) }}
+                                                                        <div class="spinner-buttons input-group-btn btn-group-vertical">
+                                                                            <button type="button" class="btn spinner-up btn-xs blue">
+                                                                                <i class="fa fa-angle-up"></i>
+                                                                            </button>
+                                                                            <button type="button" class="btn spinner-down btn-xs blue">
+                                                                                <i class="fa fa-angle-down"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.rating) }}
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label style="display: block;" for="business_file_file">Logo </label>
+                                                                {{ form_widget(businessForm.file) }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <h3 class="form-section">Address</h3>
+                                                            <div class="form-group">
+                                                                {{ form_widget(businessForm.address) }}
+                                                                <span class="help-block">
+                                                                    {{ form_errors(businessForm.address) }}
+                                                                </span>
+                                                            </div>
+                                                        </div><!--Business address form -->
+                                                        <!--/span-->
+                                                    </div>
+
+                                                    <div class="row" style="margin-top: 15px;">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <a class="btn-add btn blue" data-target="post_aboutMe"> <i class="fa fa-plus"></i> Add About Me</a>
+                                                                <div id="post_aboutMe" data-prototype="{{ forms.widget_prototype(businessForm.aboutMe, 'Remove About Me', 0)|escape }}">
+                                                                    {% for widget in businessForm.aboutMe.children %}
+                                                                        {{ forms.widget_prototype(widget, 'Remove About Me', 0) }}
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" style="margin-top: 15px;">
+                                                    <button type="submit" class="btn btn-success">Submit</button>
+                                                    <button type="button" class="btn btn-default">Cancel</button>
+                                                </div>
+                                            {{ form_end(businessForm) }}
+                                        </div>
+                                    </div>
+
+                                    <div class="row" style="margin-top: 15px;">
+                                        {% if userProfile.businesses[0] is defined and userProfile.businesses[0].types.first.id == 23 %}
+                                            <div class="col-md-12">
+                                                {{ render(controller('LocalsBestUserBundle:AssociationRow:index',{ 'type': 'business' })) }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="profile-account">
+                                        <div class="portlet box blue">
+                                            <div class="portlet-title">
+                                                <div class="caption">
+                                                    <i class="fa fa-building-o"></i> Business Information
+                                                </div>
+                                            </div>
+                                            <div class="portlet-body">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <ul class="ver-inline-menu tabbable margin-bottom-10">
+                                                            <li>
+                                                                {% if business.filename is not empty %}
+                                                                    <img src="{{ vich_uploader_asset(business, 'file') }}" class="img-responsive" alt="{{business.filename}}">
+                                                                {% else %}
+                                                                    <img src="https://lorempixel.com/386/317/business/Dummy-Placeholder-Image/" class="img-responsive" alt="{{business.filename}}">
+                                                                {% endif %}
+                                                            </li>
+                                                        </ul>
+
+                                                        <div class="profile-info">
+                                                            <h4>{{ business.name}}</h4>
+
+                                                            <p>
+                                                                {{ business.address.city }}<br />
+                                                            </p>
+
+                                                            {% if business.contact is not null %}
+                                                                {% for phone in business.contact.phones %}
+                                                                    {% if phone|length > 1 %}
+                                                                        <ul class="list-inline">
+                                                                            <li>
+                                                                                {% if phone.type =='M' %}
+                                                                                    <span class="glyphicon glyphicon-phone"></span>
+                                                                                {% elseif phone.type =='H' %}
+                                                                                    <span class="glyphicon glyphicon-phone-alt"></span>
+                                                                                {% elseif phone.type =='O' %}
+                                                                                    <span class="glyphicon glyphicon-earphone"></span>
+                                                                                {% endif %}&nbsp;{{ phone.number }}&nbsp;(optional)
+                                                                            </li>
+                                                                        </ul>
+                                                                    {% else %}
+                                                                        <p>
+                                                                            {% if phone.type =='M' %}
+                                                                                <span class="glyphicon glyphicon-phone"></span>
+                                                                            {% elseif phone.type =='H' %}
+                                                                                <span class="glyphicon glyphicon-phone-alt"></span>
+                                                                            {% elseif phone.type =='O' %}
+                                                                                <span class="glyphicon glyphicon-earphone"></span>
+                                                                            {% endif %}&nbsp;{{ phone.number }}
+                                                                        </p>
+                                                                    {% endif %}
+                                                                {% endfor %}
+
+                                                                {% for email in business.contact.emails %}
+                                                                    {% if email|length > 1 %}
+                                                                        <ul class="list-inline">
+                                                                            <li>
+                                                                                <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                                                            </li>
+                                                                        </ul>
+                                                                    {% else %}
+                                                                        <p>
+                                                                            <span class="glyphicon glyphicon-envelope"></span>&nbsp;<a href="#">{{ email.email }} </a>
+                                                                        </p>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+
+                                                            <p>
+                                                                {{ business.contactname }}<br />
+                                                                {% if business.types|length > 0 %}
+                                                                    {% for type in business.types %}
+                                                                        {{ type.name}}<br />
+                                                                    {% endfor %}
+                                                                {% endif %}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-9">
+                                                    {% if business.aboutMe is not null %}
+                                                        {% for bio in business.aboutMe %}
+                                                            {% if bio.aboutMe|length > 0 %}
+                                                                <div>
+                                                                    {{ bio.aboutMe|raw }}
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if(userProfile.owner != null or userProfile.id == 574) %}
+                                <div id="business_contact" class="tab-pane">
+                                    <div class="portlet box blue">
+                                        <div class="portlet-title">
+                                            <div class="caption">
+                                                <i class="fa fa-envelope"></i> Contact Information
+                                            </div>
+                                        </div>
+                                        <div class="portlet-body">
+                                            {{ form_start(businessContactForm, {action: path('users_profile', {'username': routeusername})~'#business_contact'}) }}
+                                                <div class="form-group">
+                                                    <a class="btn btn-primary btn-add" data-target="post_email_business"><i class="icon-plus"></i> Add email</a><br />
+                                                    <div id="post_email_business" data-prototype="{{ forms.widget_prototype(businessContactForm.emails, 'Remove Email', 0)|escape }}">
+                                                        {% for widget in businessContactForm.emails.children %}
+                                                            {{ forms.widget_prototype(widget, 'Remove Email', 0) }}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <br /><br /><br /><br />
+                                                <div class="form-group">
+                                                    <a class="btn btn-primary btn-add" data-target="post_phone_business"><i class="icon-plus"></i> Add phone</a><br />
+                                                    <div id="post_phone_business" data-prototype="{{ forms.widget_prototype(businessContactForm.phones, 'Remove Phone', 0)|escape }}">
+                                                        {% for widget in businessContactForm.phones.children %}
+                                                            {{ forms.widget_prototype(widget, 'Remove Phone', 0) }}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="margin-top-10">
+                                                    <button type="submit" class="btn green"><i class="fa fa-check"></i> Save</button>
+                                                    <input type="reset" class="btn default" name="Reset" >
+                                                </div>
+                                                <div class="hidden">
+                                                    {{ form_end(businessContactForm) }}
+                                                </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if checker.forAddon('customers', app.user) %}
+                                    <div id="business_recipients" class="tab-pane">
+                                        {{ render(controller('LocalsBestUserBundle:BusinessRecipient:index')) }}
+                                    </div>
+                                {% endif %}
+
+
+                                <div id="business_links" class="tab-pane">
+                                    <div class="portlet box blue">
+                                        <div class="portlet-title">
+                                            <div class="caption">
+                                                <i class="fa fa-link"></i> Links
+                                            </div>
+                                        </div>
+                                        <div class="portlet-body">
+                                            <div class="alert alert-info">
+                                                <p>
+                                                    Custom login page link: <b>{{ url('login', {'slug': business.slug}) }}</b>
+                                                </p>
+                                            </div>
+                                            <div class="alert alert-info">
+                                                <p>
+                                                    Vendors page link: <b>{{ url('showing_vendors', {'businessSlug': business.slug}) }}</b>
+                                                </p>
+                                            </div>
+
+                                            {% if checker.forAddon('client portals', app.user) %}
+                                                <div class="alert alert-info">
+                                                    <p>
+                                                        Client Register link: <b>{{ url('client_register', {'referralId': app.user.id}) }}</b>
+                                                    </p>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if userProfile.businesses[0].types.first.id == 23 %}
+
+                                    {% if checker.forAddon('transactions', app.user) %}
+                                        <div id="business_doc_questions" class="tab-pane">
+                                            {% include('@LocalsBestUser/account/_doc-questions.html.twig') %}
+                                        </div>
+
+                                        <div id="business_docrules" class="tab-pane">
+                                            <div class="portlet box blue">
+                                                <div class="portlet-title">
+                                                    <div class="caption">
+                                                        <i class="fa fa-file-text-o"></i> Transaction Documents
+                                                    </div>
+                                                    <div class="actions">
+                                                        <button id="sample_editable_1_new" class="btn btn-danger">
+                                                            Add
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="portlet-body">
+                                                    <form id="doc-rule-form">
+                                                        <table class="table table-resposive" id="doc_rule_editable" style="border: 3px solid #ddd;">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th> Creating </th>
+                                                                    <th> Represent </th>
+                                                                    <th> Property Type </th>
+                                                                    <th> Status </th>
+                                                                    <th> Transaction Type </th>
+                                                                    <th> Year Built After </th>
+                                                                    <th> Year Built Before </th>
+                                                                    <th> Document Name </th>
+                                                                    <th> Actions </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for rule in docRules %}
+                                                                    <tr style="border: 3px solid #ddd;">
+                                                                        <td> {{ rule.creating }} </td>
+                                                                        <td> {{ rule.represent }} </td>
+                                                                        <td> {{ rule.propertyType }} </td>
+                                                                        <td> {{ rule.status }} </td>
+                                                                        <td> {{ rule.transactionType }} </td>
+                                                                        <td> {{ rule.yearBuiltAfter }} </td>
+                                                                        <td> {{ rule.yearBuiltBefore }} </td>
+                                                                        <td> {{ rule.documentName }} </td>
+                                                                        <td>
+                                                                            <a data-id="{{ rule.id }}" class="edit" href="javascript:;">
+                                                                                edit
+                                                                            </a>
+                                                                            <a data-id="{{ rule.id }}" class="delete" href="javascript:;">
+                                                                                delete
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    <div id="search_permissions" class="tab-pane">
+                                        {{ render(controller('LocalsBestUserBundle:Business:usersVisibility')) }}
+                                    </div>
+                                {% else %}
+                                    {% if checker.forAddon('form builder', app.user) %}
+                                        <div id="business_form" class="tab-pane">
+                                            <div class="col-md-12">
+                                                <div id='formbuilder'></div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if userProfile.businesses[0].id in [179] or checker.forAddon('transactions', app.user) %}
+                                    <div id="business_email_templates" class="tab-pane">
+                                        {{ render(controller('LocalsBestUserBundle:EmailTemplate:panelIndex')) }}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                                 <div id="split_settings" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-user"></i> Charity Settings
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <div class="form-group">
+                                            {{ form(paymentSplitSettings) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% if(userProfile.role.role == 'ROLE_MANAGER') %}
+                            <div id="shop_mgt" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-shopping-cart"></i> Shop Management
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <form method="post" action="{{ path('sku_change_shop_status') }}">
+                                            <label class="mt-radio mt-radio-outline">
+                                                all new items may be sold to my employees
+                                                <input class="" {% if business.shopSkuStatus == "can_be_sold" %}checked{% endif %}  type="radio" name="shopProductsStatus" value="can_be_sold">
+                                                <span></span>
+                                            </label>
+                                            <br>
+                                            <label class="mt-radio mt-radio-outline">
+                                                new items for sale must be approved by me
+                                                <input class="" {% if business.shopSkuStatus == "need_manager_approve" %}checked{% endif %}  type="radio" name="shopProductsStatus" value="need_manager_approve">
+                                                <span></span>
+                                            </label>
+                                             <br/>
+                                            <button type="submit" class="btn btn-primary">Update</button>
+                                        </form>
+                                        <br/>  
+                                        {% if checker.forAddon('packages', app.user) %}
+                                            <form method="post" action="{{ path('sku_change_shop_status1') }}">
+                                                 <br>
+                                                <label class="mt-checkbox mt-checkbox-outline">
+                                                    Do you want to offer custom quotes in Shop?
+                                                    <input class=""  type="checkbox" name="customQuote" {% if user.customQuotes is defined and user.customQuotes == "1" %}checked{% endif %}>
+                                                    <span></span>
+                                                </label>
+                                                <br/>
+                                                <button type="submit" class="btn btn-primary sku-button">Update</button>
+                                            </form>
+                                        {% endif %}
+                                        <table style="width: 100%;" id="example_shop" class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th data-orderable="false">Show in the shop</th>
+                                                    <th> Business Name </th>
+                                                    <th> Package Name </th>
+                                                    <th> Industry </th>
+                                                    <th> Category </th>
+                                                    <th> Rebate(%) </th>
+                                                    <th> Published Date </th>
+                                                    <th> Tags </th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="shop_purchase" class="tab-pane">
+                                <div class="portlet blue box">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <i class="fa fa-check"></i> Purchases
+                                            <span>{{ tooltip_text.getText('Payment Results','header')|raw }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <div class="table-responsive">
+                                            <table style="width: 100%;" id="example_purchase" class="table table-striped table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th class='no-export no-sort'> </th>
+                                                        <th data-priority="1"> Buyer </th>
+                                                        <th> Date </th>
+                                                        <th> Item </th>
+                                                        <th> Amount </th>
+                                                        <th> Rebate(%) </th>
+                                                        <th> Rebate($) </th>
+                                                        <th> Biz Share </th>
+                                                        <th> Business </th>
+                                                        <th> Charity </th>
+                                                        <th> Employee </th>
+                                                    </tr>
+                                                </thead>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th class='no-export no-sort'> </th>
+                                                        <th data-priority="1">  </th>
+                                                        <th>  </th>
+                                                        <th>  </th>
+                                                        <th id="totalPrice"></th>
+                                                        <th>  </th>
+                                                        <th id="totalRebatePrice"></th>
+                                                        <th id="bizShare"></th>
+                                                        <th id="business_purchase"></th>
+                                                        <th id="charity"></th>
+                                                        <th id="employee"></th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}                
+                        
+                        </div>
+                    </div>
+                    <!--end col-md-9-->
+                </div>
+            </div>
+
+            {% if(userProfile.role.role == 'ROLE_CLIENT' and userProfile.createdBy != null and userProfile.createdBy.role.level > 2) %}
+                <div class="tab-pane" id="createdBy">
+                    <div class="row profile-account">
+                        <div class="col-md-3">
+                            <ul class="ver-inline-menu tabbable margin-bottom-10">
+                                <li>
+                                    {% if userProfile.createdBy.filename is not empty %}
+                                        <img src="{{ vich_uploader_asset(userProfile.createdBy, 'file') }}" class="img-responsive" alt="{{userProfile.createdBy.filename}}">
+                                    {% else %}
+                                        <img src="https://lorempixel.com/386/317/business/Dummy-Placeholder-Image/" class="img-responsive" alt="{{userProfile.createdBy.filename}}">
+                                    {% endif %}
+
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6 profile-info">
+                                    {% if userProfile %}
+                                        <h1>{{ userProfile.createdBy.firstName }}&nbsp;{{ userProfile.createdBy.lastName }}</h1>
+                                        <p>
+                                            <span class="glyphicon glyphicon-envelope"></span>&nbsp;
+                                            <a href="#">
+                                                {{ userProfile.createdBy.primaryEmail.email }}
+                                            </a>
+                                        </p>
+                                        {% if userProfile.createdBy.primaryEmail|length > 1 %}
+                                            {% for email in userProfile.createdBy.contact.emails %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                                    </li>
+
+                                                </ul>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <p>
+                                            {% if userProfile.createdBy.primaryPhone.type =='M' %}
+                                            <span class="glyphicon glyphicon-phone"></span>
+                                        {% elseif userProfile.createdBy.primaryPhone.type =='H' %}
+                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                        {% elseif userProfile.createdBy.primaryPhone.type =='O' %}
+                                            <span class="glyphicon glyphicon-earphone"></span>
+                                            {% endif %}&nbsp;&nbsp; +{{ userProfile.createdBy.primaryPhone.number }}
+                                        </p>
+                                        {% if userProfile.createdBy.primaryPhone|length > 1 %}
+                                            {% for phone in userProfile.createdBy.contact.phones %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        {% if phone.type =='M' %}
+                                                        <span class="glyphicon glyphicon-phone">
+
+                                                            </span>
+                                                    {% elseif phone.type =='H' %}
+                                                        <span class="glyphicon glyphicon-phone-alt">
+
+                                                            </span>
+                                                    {% elseif phone.type =='O' %}
+                                                        <span class="glyphicon glyphicon-earphone">
+
+                                                            </span>
+                                                        {% endif %}&nbsp;&nbsp; +{{ phone.number }}&nbsp;(optional)
+                                                    </li>
+
+                                                </ul>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <p>
+                                            {% if userProfile.createdBy.preference.mail == 1 %}
+                                                <span class="glyphicon glyphicon-envelope"></span>
+                                            {% elseif userProfile.createdBy.preference.sms == 1 %}
+                                                <span class="glyphicon glyphicon-comment"></span>
+                                            {% endif %}
+                                            Preferred Contact Method
+
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 biography">
+                                    {% if userProfile.createdBy.aboutMe|length > 1 %}
+                                        {{ userProfile.createdBy.aboutMe|raw }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end col-md-9-->
+                </div>
+            {% endif %}
+
+            {% macro widget_prototype(widget, remove_text, margin) %}
+                {% if widget.vars.prototype is defined %}
+                    {% set form = widget.vars.prototype %}
+                    {% set name = widget.vars.prototype.vars.name %}
+                {% else %}
+                    {% set form = widget %}
+                    {% set name = widget.vars.full_name %}
+                {% endif %}
+
+                <div data-content="{{widget.vars.id}}_{{ name }}">
+                    {{ form_widget(form) }}
+                    <a data-related="{{widget.vars.id}}_{{ name }}" style="margin-top: {{ margin }}px;" class="btn default btn-sm btn-remove pull-right">
+                        <i class="fa fa-times"></i> {{ remove_text }}
+                    </a><br/>
+                </div>
+            {% endmacro %}
+
+
+            {% macro widget_primary_prototype(widget, widgetId, remove_text) %}
+                {% if widget.vars.prototype is defined %}
+                    {% set form = widget.vars.prototype %}
+                    {% set name = widget.vars.prototype.vars.name %}
+                {% else %}
+                    {% set form = widget %}
+                    {% set name = widget.vars.full_name %}
+                {% endif %}
+
+                <div data-content="{{widget.vars.id}}_{{ name }}">
+                    {{ form_widget(form) }}
+                    {% if(('emails' in name and app.user.primaryEmail.id != widgetId) or ('phones' in name and app.user.primaryPhone.id != widgetId)) %}
+                        <a data-related="{{widget.vars.id}}_{{ name }}" style="margin-top: -15px;"  class="btn default btn-sm btn-remove pull-right">
+                            <i class="fa fa-times"></i> {{ remove_text }}
+                        </a><br/>
+                    {% endif %}
+                </div>
+            {% endmacro %}
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,121 @@
+<div class="content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Send Email</h4>
+    </div>
+    <form class="form-horizontal" role="form" method="post" id="send-doc-email" action="{{ path('transaction_non_received_docs_send_email') }}">
+        <input type="hidden" name="transactionId" value="{{ transaction.id }}">
+        <input type="hidden" name="type" value="{{ type }}">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label for="email_address" class="col-md-2 control-label">Email Address</label>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <input type="text" name="email_address" id="email_address" required class="form-control" placeholder="Email Address" value="{{ transaction.createdBy.primaryEmail.email }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email_subject" class="col-md-2 control-label">Email Subject</label>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <input type="text" name="email_subject" id="email_subject" class="form-control" placeholder="Email Subject"
+                                                {% if emailTemplate is not null %}
+                                                    value="{{ emailTemplate.title }}"
+                                                {% else %}
+                                                    value="EasyCloses.com: Transactions documents are missed for '{{ transaction.fullAddress }}'"
+                                                {% endif %}
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email_body" class="col-md-2 control-label">Email Body</label>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <textarea rows="11" name="email_body" id="email_body" class="form-control wysihtml5" placeholder="Email Body">
+
+                                            {% if emailTemplate is not null %}
+                                                {{ emailTemplate.body }}
+                                            {% else %}
+                                                {% include('@LocalsBestUser/transaction/non-received-docs-email-templates/1.html.twig') %}
+                                            {% endif %}
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            <button type="submit" id="save" onclick="this.disabled=true;this.style.display = 'none';onSaveClick()" class="btn btn-success"><i class="fa fa-envelope"></i> Send</button>
+            <button type="button" id="wait" style="display: none;" disabled="disabled" class="btn btn-success">
+                <i class="fa fa-spin fa-spinner"></i> Please wait...
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+
+    var handleWysihtml5 = function() {
+
+        if (!jQuery().wysihtml5) {
+            return;
+        }
+
+        if (!$('.wysihtml5').data('wysihtml5')) {
+            $('.wysihtml5').wysihtml5({
+                "stylesheets": ["../../system/global/plugins/bootstrap-wysihtml5/wysiwyg-color.css"]
+            });
+        }
+    };
+
+    $("a.btn").on('click', function(){
+        $(document).ajaxComplete(function(){
+            handleWysihtml5();
+        })
+    });
+
+    function onSaveClick() {
+        $('#wait').show();
+        $(this).hide().attr('disabled', true);
+
+        var form = $("body #send-doc-email");
+        var url = form.attr('action');
+        $.ajax({
+            method: "POST",
+            url: url,
+            data: form.serialize(),
+            dataType: "json"
+        }).success(function(data){
+            var stringObject = '#' + data.objectId;
+            var cell = $(stringObject).parent();
+            cell.html('');
+            cell.html(data.button);
+
+            $(".btn").removeAttr('disabled');
+            swal("Good job!", "Email Campaign was started", "success")
+        });
+
+        $('#non-emails').modal('hide');
+    }
+
+    $(document).ready(function () {
+        handleWysihtml5();
+    });
+</script>

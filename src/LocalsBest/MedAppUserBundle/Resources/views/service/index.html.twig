@@ -1,0 +1,203 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Services{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Services
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/easycloses-styles/flip-block.css') }}" />
+
+    <style>
+        .portlet-title .action-button {
+            float: right;
+            margin: 5px;
+        }
+        
+        .row-fluid {
+            margin: 0 15px;
+        }
+
+        ul.thumbnails {
+            margin: 0 -10px;
+        }
+        .thumbnails .vendor-box {
+            width: 170px;
+            display: inline-block;
+            float: left;
+            margin: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            var table = $('#example');
+            var oTable = table.dataTable({
+                columnDefs: [{
+                    "orderable": false,
+                    "targets": [1, 2]
+                }],
+                dom: 'lfrtip'
+            });
+
+            vendorSelectedByAjaxRandomly();
+            
+            $('#main_businessType').change(function () {
+                var businessType = $(this).val();
+                if ($(this).val() === "") {
+                    businessType = 'all';
+                }
+                var limit = 4;
+                $("#vendorsLoadAjax").load('{{ path('vendor_selected_ajax')}}/' + businessType);
+            });
+            
+        });
+        
+        function vendorSelectedByAjaxRandomly()
+        {
+            var businessType = $('#main_businessType').val();
+            if (businessType === "") {
+                businessType = 'all';
+            }
+            var limit = 4;
+            $("#vendorsLoadAjax").load('{{ path('vendor_selected_ajax')}}/' + businessType);
+            
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN BORDERED TABLE PORTLET-->
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-database"></i> Featured Businesses
+                    </div>
+                    <div class="action-button">
+                        {#<a href="{{ path('vendors_invite') }}" class="btn btn-primary" data-original-title="" title="">Invite</a>#}
+                    </div>
+                    <div class="actions">
+
+                        {% if checker.forAddon('featured business directory-paid', app.user) %}
+                            <a class="btn  btn-success" href="{{ path('invite_paid_service') }}">
+                                <i class="fa fa-usd" aria-hidden="true"></i> Invite Paid Business
+                            </a>
+                        {% endif %}
+
+
+                        {% if checker.forAddon('featured business directory-free', app.user) %}
+                            <a class="btn  btn-danger" href="{{ path('vendor_add') }}">
+                                Invite Free Business <i class="icon-plus"></i>
+                            </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div class="col-md-6">
+                            {{ form_widget(form.businessType) }}
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <i>Click Business for Info</i>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" id="vendorsLoadAjax">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- END BORDERED TABLE PORTLET-->
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-database"></i> Featured Businesses
+                    </div>
+                    <div class="tools">
+
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <table {% if vendors|length >= 1 %}id="example"{% endif %} class="table table-bordered table-striped table-condensed">
+                        <thead class="flip-content">
+                            <tr>
+                                <th> Business Name </th>
+                                <th> Contact Information </th>
+                                <th> Actions </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if vendors|length >= 1 %}
+                                {% for vendor in vendors %}
+                                    <tr>
+                                        <td>
+                                            {{vendor.businesses[0].name}}
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('vendor_bio_ajax', {'vendorId': vendor.id}) }}" class="btn btn-primary" data-target="#ajax" data-toggle="modal">Show Contact Information</a>
+                                        </td>
+                                        <td >
+                                            {% if vendor in app.user.myvendors %}
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fa fa-gear"></i>
+                                                        <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu pull-right" role="menu">
+                                                        {% if(app.user.role.role == 'ROLE_ADMIN') %}
+                                                            <li>
+                                                                <a href="{{ path('vendor_edit2', {'vendorId': vendor.id}) }}" >
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                        <li>
+                                                            <a href="{{ path('vendor_remove', {'vendorId': vendor.id}) }}" >
+                                                                Remove
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else%}
+                                <tr>
+                                    <td colspan="8" align="middle"><span class="small">No record found</span></td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ajax" role="basic" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+                                    
+{% endblock %}	

@@ -1,0 +1,97 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    Cart
+{% endblock %}
+
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <table class="table cart-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Name</th>
+                            <th>QTY</th>
+                            <th>Price</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set totalAmount = 0 %}
+                        {% for item in products %}
+                            {% set totalAmount = totalAmount + (item.price * (1 + item.margin / 100) + item.setupFee ) %}
+                            <tr>
+                                <td class="cart-item-image">
+                                    {% if item.product.images is not empty %}
+                                        <img style="width: 70px; height: 70px;" src="{{ vich_uploader_asset(item.product.images.0, 'file', 'LocalsBest\\UserBundle\\Entity\\ProductImage') }}" title="{{ item.product.title }} alt="{{ item.product.title }}">
+                                    {% else %}
+                                        <img src="/shop/img/70x70.png" title="{{ item.product.title }} alt="{{ item.product.title }}"/>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('products_show', {slug: item.product.slug})}}">
+                                        {{ item.product.title }}
+                                    </a>
+                                </td>
+                                <td class="cart-item-quantity">
+                                    {% if item.product.is_system == 1 %}
+                                        <input readonly type="text" name="cart-quantity" class="cart-quantity" value="{{ item.quantity }}" />
+                                    {% else %}
+                                        <i cl ass="fa fa-minus cart-item-minus"></i>
+                                        <input type="text" name="cart-quantity" class="cart-quantity" value="{{ item.quantity }}" />
+                                        <i class="fa fa-plus cart-item-plus"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    ${{ (item.price * (1 + item.margin / 100) )|number_format }}
+                                </td>
+                                <td class="cart-item-remove">
+                                    <a class="fa fa-times" href="{{ path('products_cart_remove', {id:item.product.id}) }}"></a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center;">
+                                    <i>Empty Cart</i>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-3">
+                <ul class="cart-total-list">
+                    <li><span>Sub Total</span><span>${{ totalAmount|number_format }}</span>
+                    </li>
+                    <li><span>Shipping</span><span>$0.00</span>
+                    </li>
+                    <li><span>Taxes</span><span>$0.00</span>
+                    </li>
+                    <li><span>Total</span><span>${{ totalAmount|number_format }}</span>
+                    </li>
+                </ul>
+
+                {% if app.user %}
+                    {% if totalAmount > 0 %}
+                        <a class="btn btn-primary btn-lg" href="{{ path('products_checkout') }}">
+                            Checkout
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a class="btn btn-primary" href="{{ path('join') }}">
+                        Join
+                    </a>
+                    or
+                    <a class="btn btn-primary" href="{{ path('login') }}">
+                        Login
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="gap"></div>
+    </div>
+
+{% endblock %}

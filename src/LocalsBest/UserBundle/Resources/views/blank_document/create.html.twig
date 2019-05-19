@@ -1,0 +1,101 @@
+{% extends "::base.html.twig" %}
+
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block title %}
+    Create Blank Document
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('blank_docs_index') }}">Blank Documents</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Create Blank Document
+    </li>
+{% endblock %}
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-file-o"></i> Create Blank Document
+            </div>
+        </div>
+        <div class="portlet-body">
+            {{ form_start(form) }}
+                {{ form_row(form.type) }}
+                {{ form_row(form.title) }}
+                <div class="form-group {% if form_errors(form.title)|length > 0 %}has-error{% endif %}" style="display: none;">
+                    <label class="col-sm-2 control-label" for="localsbest_userbundle_blankdocument_title">Title</label>
+                    <div class="col-sm-10">
+                        <input disabled="disabled" id="localsbest_userbundle_blankdocument_title_text" name="localsbest_userbundle_blankdocument[title]" class="form-control">
+                        {{ form_errors(form.title) }}
+                    </div>
+                </div>
+
+                {{ form_row(form.file) }}
+
+                <div id="selectedFile" style="display: none;" class="form-group" style="display: none;">
+                    <label class="col-sm-2 control-label" for="localsbest_userbundle_blankdocument_title">Selected File</label>
+                    <div class="col-sm-10">
+                        <button type="button" disabled id="selectedFileName" class="btn default"></button>
+                    </div>
+                </div>
+
+                {{ form_row(form.ableRoles) }}
+
+                <div class="form-group">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <button class="btn btn-success" type="submit">
+                            <i class="fa fa-save"></i> Save
+                        </button>
+                        <a class="btn btn-default" href="{{ path('blank_docs_index') }}">
+                            <i class="fa fa-arrow-left"></i> Back
+                        </a>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <!-- End: life time stats -->
+
+    <script>
+        $(document).ready(function(){
+            $('#localsbest_userbundle_blankdocument_type').on('change', function(){
+                if($(this).val() == 'general') {
+                    $('#localsbest_userbundle_blankdocument_title').parent().parent().hide();
+                    $('#localsbest_userbundle_blankdocument_title').attr('disabled', true);
+
+                    $('#localsbest_userbundle_blankdocument_title_text').parent().parent().show();
+                    $('#localsbest_userbundle_blankdocument_title_text').attr('disabled', false);
+                } else {
+                    $('#localsbest_userbundle_blankdocument_title_text').parent().parent().hide();
+                    $('#localsbest_userbundle_blankdocument_title_text').attr('disabled', true);
+
+                    $('#localsbest_userbundle_blankdocument_title').parent().parent().show();
+                    $('#localsbest_userbundle_blankdocument_title').attr('disabled', false);
+                }
+            });
+
+            $('#localsbest_userbundle_blankdocument_type').trigger('change');
+
+            $("#localsbest_userbundle_blankdocument_file_file").on('change', function(){
+                $("#selectedFile").show();
+
+                var str = this.value;
+                var pieces = str.split("\\");
+
+                $("#selectedFileName").html(pieces[pieces.length-1])
+
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,11 @@
+Hello {{ share.user.firstname }},
+<br/>
+A Note has been shared with you by {{ share.createdBy.firstname}}&nbsp;{{ share.createdBy.lastname}} from {{ share.createdBy.businesses[0].name }}
+<br>
+<a href="{{ url('note_share_user', {'email': share.createdBy.primaryEmail.email}) }}">Click here</a>&nbsp; to view it.
+<br>
+<br>
+-We appreciate you allowing us to serve you!<br>
+<br>
+Sincerely,-<br>
+EasyCloses.com 888-740-0550

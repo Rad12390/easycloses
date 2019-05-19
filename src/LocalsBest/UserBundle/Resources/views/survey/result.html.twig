@@ -1,0 +1,26 @@
+{% extends "::base.html.twig" %}
+
+{% block content %}
+    <h3>
+        Survey #{{ survey.id }} <a href="{{ path('survey_index') }}" class="btn btn-sm grey">Back</a>
+    </h3>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>
+                {{ survey.question }}
+            </h3>
+
+            {% for answer in survey.answers %}
+                {{ answer.text }} ({{ answer.results|length }})
+                <div class="progress progress-striped active">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ answer.results|length }}" aria-valuemin="0" aria-valuemax="{{ survey.results|length }}" style="width: {% if survey.results|length == 0 %}0{% else %}{{ (answer.results|length / survey.results|length) * 100 }}{% endif %}%">
+                        <span class="sr-only"></span>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+{% endblock %}
+

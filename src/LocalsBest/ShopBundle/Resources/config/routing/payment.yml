@@ -1,0 +1,36 @@
+shop_charge:
+    path:     /charge
+    methods: POST
+    defaults: { _controller: LocalsBestShopBundle:Payment:charge }
+
+shop_payment_success:
+    path:     /success
+    defaults: { _controller: LocalsBestShopBundle:Payment:success }
+
+shop_sku_activation:
+    path:     /custome-activation/{skuId}
+    defaults: { _controller: LocalsBestShopBundle:Payment:customActivation }
+
+shop_admin_list:
+    path:     /admin-list
+    defaults: { _controller: LocalsBestShopBundle:Payment:adminList }
+
+shop_manager_list:
+    path:     /manager-list
+    defaults: { _controller: LocalsBestShopBundle:Payment:index }
+    
+datatable_manager_list:
+    path: /datatable/managerlist
+    defaults: { _controller: LocalsBestShopBundle:Datatable:managerList }
+    
+datatable_manager_list_advance_search:
+    path: /datatable/managerlist_advance_search
+    defaults: { _controller: LocalsBestShopBundle:Payment:managerListAdvanceSearch }
+
+datatable_admin_list:
+    path: /datatable/adminlist
+    defaults: { _controller: LocalsBestShopBundle:Datatable:adminList }
+    
+datatable_admin_list_advance_search:
+    path: /datatable/admin_advance_search
+    defaults: { _controller: LocalsBestShopBundle:Payment:adminListAdvanceSearch }

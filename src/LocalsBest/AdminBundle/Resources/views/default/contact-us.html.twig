@@ -1,0 +1,40 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Contact Us Requests</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Industry Type</th>
+            <th>MLS Board</th>
+            <th>Note</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for entity in entities %}
+                <tr>
+                    <td>
+                        {% if entity.sku is not null %}
+                            {{ entity.sku.title }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ entity.userName }}</td>
+                    <td>{{ entity.email }}</td>
+                    <td>{{ entity.phone }}</td>
+                    <td>{{ entity.industryType }}</td>
+                    <td>{{ entity.mlsBoard }}</td>
+                    <td>{{ entity.note }}</td>
+                    <td>{{ entity.createdAt|date("m/d/Y H:i") }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

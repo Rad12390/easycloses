@@ -1,0 +1,184 @@
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .row1 {
+        position: fixed;
+    }
+    #section-to-print * {
+        visibility: visible;
+    }
+    #section-to-print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+    #dropName2 {
+        border: none;
+    }
+}
+
+.row1 {
+    position: relative;
+}
+
+.auto-form {
+    padding-top: 20px;
+}
+
+.hide-div {
+    border: 1px solid #c3c3c3;
+    padding: 15px;
+}
+
+.hide-div h1 {
+    margin-top: 0;
+    font-size: 25px;
+}
+
+.hide-div h1 {
+    margin-top: 0;
+    font-size: 25px;
+    background-color: #3598dc;
+    color: #fff;
+    margin-top: -15px;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding: 10px 15px;
+    text-align: center;
+}
+
+.hide-div h4 {
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+.hide-div p.click {
+    font-weight: 600;
+}
+
+.action {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.action .panel-f {
+    display: inline-block;
+}
+
+.action .panel-f button.btn.btn-sm.btn-warning {
+    margin-right: 10px;
+    width: 80px;
+}
+
+.action .panel-f input.btn.btn-sm.btn-danger {
+    width: 80px;
+}
+
+div#section-to-print {
+    border: 1px solid #c3c3c3;
+}
+
+div#section-to-print h1 {
+    margin-top: 0;
+    font-size: 25px;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding: 10px 15px;
+    text-align: center;
+}
+
+.rightElement {
+    width: 48%;
+    float: left;
+    padding-left: 5px;
+}
+
+.leftElement {
+    width: 48%;
+    float: left;
+    padding-right: 10px;
+}
+
+#upload-button {
+    width: 150px;
+    display: block;
+    margin: 20px auto;
+}
+
+#file-to-upload {
+    display: none;
+}
+
+#pdf-main-container {
+    width: 100%;
+    margin: 20px auto;
+}
+
+#pdf-loader {
+    display: none;
+    text-align: center;
+    color: #999999;
+    font-size: 13px;
+    line-height: 100px;
+    height: 100px;
+}
+
+#pdf-contents {
+    width: auto;
+    display: block;
+}
+
+#pdf-meta {
+    overflow: hidden;
+    margin: 0 0 20px 0;
+}
+
+#pdf-buttons {
+    float: left;
+}
+
+#page-count-container {
+    float: right;
+}
+
+#pdf-current-page {
+    display: inline;
+}
+
+#pdf-total-pages {
+    display: inline;
+}
+
+#pdf-canvas {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+}
+
+#page-loader {
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    display: none;
+    color: #999999;
+    font-size: 13px;
+}
+
+.pdf-space {
+    width: 78%;
+    float: left;
+}
+
+.form-space {
+    width: 22%;
+    float: left;
+}
+#toolbar{
+    display:none;
+}
+
+.sorting{
+    display:none;
+}

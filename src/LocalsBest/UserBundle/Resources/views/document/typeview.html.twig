@@ -1,0 +1,742 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}"/>
+
+    <style>
+        div.table-responsive {
+            overflow-x: inherit !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+
+    <script>
+        var usersRestPath = "{{ path('rest_user_getall')}}?query=%QUERY";
+
+        jQuery(document).ready(function () {
+            var selectedUsernames = new Array();
+            var userReadReciepts = [];
+            var userFurtherActions = [];
+            $(document).click( function(event){
+            if( $(event.target).closest(".btn.red").length ) {
+                $('.portlet-body iframe').hide();
+                return;
+            }
+            if( $(event.target).closest(".modal-content").length )
+                return;
+                $('.portlet-body iframe').show();
+                event.stopPropagation();
+            });
+            
+            $('body').on('click', '.modal .close', function() {
+                $('.portlet-body iframe').show();
+            });
+            $('body').on('click', '.btn.btn-default', function() {
+                $('.portlet-body iframe').show();
+            });
+            $('body').on('click', '.disapprove', function() {
+                $('.portlet-body iframe').show();
+            });
+
+            if($('#sharedUserReadReciepts').val() !== '') {
+                userReadReciepts.push($('#sharedUserReadReciepts').val());
+            }
+            
+            $('.read_reciept_user').on('click', function () {
+                var checkValue = $(this).val();
+                if ($(this).prop("checked")) {
+                    userReadReciepts.push(checkValue);
+                } else {
+                    for (var i = 0; i < userReadReciepts.length; i++) {
+                        if (userReadReciepts[i] == checkValue) {
+                            userReadReciepts.splice(i, 1);
+                        }
+                    }
+                }
+                $('#sharedUserReadReciepts').val(userReadReciepts);
+            });
+            
+            if($('#sharedUserFurtherActions').val() !== '') {
+                userFurtherActions.push($('#sharedUserFurtherActions').val());
+            }
+            
+            $('.further_action_user').on('click', function () {
+                var checkValue = $(this).val();
+                if ($(this).prop("checked")) {
+                    userFurtherActions.push(checkValue);
+                } else {
+                    for (var i = 0; i < userFurtherActions.length; i++) {
+                        if (userFurtherActions[i] == checkValue) {
+                            userFurtherActions.splice(i, 1);
+                        }
+                    }
+                }
+                $('#sharedUserFurtherActions').val(userFurtherActions);
+            });
+            
+            $.each($("#selectedusers").val().split(','), function () {
+                if (this.trim().length) {
+                    selectedUsernames.push(this.toString());
+                }
+            });
+
+            $('.share_btn_remove').on('click', function (event) {
+                if (!confirm('Are you sure?')) {
+                    return false;
+                }
+
+                var username = $(this).data('username');
+                var id = $(this).data('removeid');
+
+                if ($(this).data('saved') == "1") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('share_remove_ajax')}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            for (var i = 0; i < selectedUsernames.length; i++) {
+                                if (selectedUsernames[i] == username) {
+                                    selectedUsernames.splice(i, 1);
+                                }
+                            }
+                        }
+
+                        alert(data.message);
+                        $('#remote #selectedusers').val(selectedUsernames.join(',') + ',');
+                        $('#remote .typeahead').val('').focus();
+                        $('#share_box_' + id + '').remove();
+                        return false;
+                    });
+                }
+            });
+
+            {% verbatim %}
+            var bestPictures = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: usersRestPath,
+                    wildcard: '%QUERY'
+                }
+            });
+
+            bestPictures.initialize();
+
+            $('#remote .typeahead').typeahead(null, {
+                name: 'best-pictures',
+                displayKey: 'username',
+                source: bestPictures.ttAdapter(),
+                templates: {
+                    suggestion: Handlebars.compile([
+                        '<div class="media">',
+                        '<div class="pull-left">',
+                        '<div class="media-object">',
+                        '<img src="{{ profilepic }}" width="50" height="50"/>',
+                        '</div>',
+                        '</div>',
+                        '<div class="media-body">',
+                        '<h4 class="media-heading">{{username}}</h4>',
+                        '<p>{{fullname}}</p>',
+                        '</div>',
+                        '</div>',
+                    ].join(''))
+                }
+            }).on('typeahead:selected', function (e, item) {
+                if ($.inArray(item.username, selectedUsernames) === -1) {
+                    var mediaHtml = Handlebars.compile([
+                        '<div class="media share_box todo-tasklist-item todo-tasklist-item-border-yellow" id="share_box_{{id}}">',
+                        '<input class="hidden" type="hidden" id="share_box_user_{{id}}" value="{{username}}">',
+                        '<a class="pull-left" href="#">',
+                        '<img class="media-object" src="{{ profilepic }}" alt="64x64" data-src="holder.js/64x64" style="width: 64px; height: 64px;">',
+                        '</a>',
+                        '<div class="media-body">',
+                        '<h4 class="media-heading">\n\
+                        <span class="pull-left">Request a Read Receipt</span>&nbsp;&nbsp;\n\
+                        <input type="checkbox" class="read_reciept_user" value="{{username}}">\n\
+                        </h4>',
+                        '<h4 class="media-heading">\n\
+                        <span class="pull-left">Request Accept Decline</span>&nbsp;&nbsp;\n\
+                        <input type="checkbox" class="further_action_user" value="{{username}}">\n\
+                        </h4>',
+                        '<h4 class="media-heading">{{ fullname }}</h4>',
+                        '{{ role }}<br />',
+                        '<button class="btn btn-danger pull-right share_btn_remove" data-removeid="{{id}}" data-username="{{username}} data-saved="0">',
+                        '<i class=" icon-trash"></i> &nbsp; Share Remove', '</button>',
+                        '</div>',
+                        '</div>'
+                    ].join(''));
+
+                    selectedUsernames.push(item.username);
+                    $(".share-portlet .portlet-body").prepend(mediaHtml(item));
+                    $('#remote #selectedusers').val(selectedUsernames.join(',') + ',');
+                    $('#remote .typeahead').val('').focus();
+                } else {
+                    alert("This Document already shared with this user");
+                    $('#remote .typeahead').val('').focus();
+                    return false;
+                }
+            });
+            {% endverbatim %}
+
+            $("#shareBtn").on("click", function(){
+                $(this).hide();
+                $("#shareBox").show();
+
+                $('html, body').animate({
+                    scrollTop: $("#shareBox").offset().top
+                }, 2000);
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block title %}
+    {{ documenttype.name }}
+{% endblock %}
+
+{% block page_title %}
+    {{ documenttype.name }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <i class="fa fa-file-text"></i>
+        <a href="{{ path('document_index') }}">Documents</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        {% include '@LocalsBestCommon/ui/filetype.html.twig' with {'filetype':  file.extension } %}
+        {{ file.clearFileName }}
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <!-- BEGIN PREVIEW PORTLET-->
+            <div class="portlet purple box">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-eye"></i>Preview
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse">    </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    {% include '@LocalsBestUser/document/preview.html.twig' with { 'file' : file } %}
+                </div>
+            </div>
+            <!-- END PREVIEW PORTLET-->
+
+            <!-- BEGIN NOTES PORTLET-->
+            <div class="portlet box blue" id="noteBox">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-comments"></i> Document Notes
+                    </div>
+                    <div class="actions">
+                        {% set objectType = 'LocalsBestUserBundle:Document' %}
+                        <a class="btn  btn-danger" href="{{ path('note_add', {'id': file.id ,'type': objectType}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">
+                            Add
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <ul class="chats">
+                        {% if notes|length >= 1 %}
+                            {% for note in notes %}
+                                {{ include ('@LocalsBestCommon/note/single.html.twig',{note: note}) }}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <!-- END NOTES PORTLET-->
+
+        </div>
+        <div class="col-md-6">
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-12">
+                    <a class="btn btn-default" href="{{ path('document_forapproval_index') }}"><i class="m-icon-swapleft m-icon-black"></i> Summary</a>
+                    {% if transaction is defined and transaction.id is not null %}
+                        <a class="btn btn-warning" href="{{ path('transaction_view', {'id': transaction.id}) }}"><i class="fa fa-arrow-circle-left"></i> Back to Transaction</a>
+                    {% endif %}
+                    <button class="btn btn-primary" id="shareBtn">Share</button>
+                    {% if nextResult %}
+                        {% set query = 'next' %}
+                        <a class="btn btn-default pull-right" href="{{ path('document_typeview', {'id': nextResult.id}) }}">Next Document <i class="m-icon-swapright m-icon-black"></i></a>
+                    {% endif %}
+                    {% if previousResult %}
+                        {% set query = 'previous' %}
+                        <a class="btn btn-default pull-right" style="margin-right:3px;" href="{{ path('document_typeview', {'id': previousResult.id}) }}"><i class="m-icon-swapleft m-icon-black"></i> Previous Document</a>
+                    {% endif %}
+                </div>
+		    </div>
+        </div>
+        <div class="col-md-6">
+            <!-- BEGIN ALERTS PORTLET-->
+            <div class="portlet blue box">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-info-circle"></i> {{ documenttype.document.clearFileName }}
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse"></a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <table class="table table-hover table-striped table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>Name :</td>
+                                <td>
+                                    {{ documenttype.document.createdBy.fullName }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Full Address :</td>
+                                <td>
+                                    {{ transaction.fullAddress }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Document Type :</td>
+                                <td>
+                                    {{ documenttype.name }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Status :</td>
+                                <td>
+                                    <div id="approved" style="padding: 5px;width: auto;color: #FFF;text-align: center;{% if documenttype.document is not null %} {% if (documenttype.approved is null or documenttype.approved == 0) and (documenttype.rejected is null or documenttype.rejected == 0) %} background-color:#ffb848;{% elseif documenttype.approved == true %}background-color:#3cc051;{% elseif documenttype.rejected == true %}background-color:#000000;{% endif %}{% else %}{% if documenttype.status == 'R' %} background-color:#d84a38;{% elseif documenttype.status == 'O' %} background-color:#999999;{% endif%}{% endif%}" rel="tooltip" title="" data-placement="top" data-original-title="{% if documenttype.approved == true %} Document Approved {% else%} Document Not Approved {% endif%}">
+                                        {% if documenttype.approved == true %} Document Approved {% else%} Document Not Approved {% endif%}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% if app.user.isDocumentApprover != 0 or (file.furtherAction != 0 and app.user.username in sharedFurtherActions) or app.user.role.level == 4 or app.user.role.level == 1 or app.user.id == 661 %}
+                                <tr>
+                                    <td colspan="2">
+                                        {% if documenttype.status != 'A'%}
+                                            <a class="btn btn-success" href="{{ path('document_type_approve', {'id': documenttype.id, 'from_transaction': fromTransaction}) }}" >
+                                                Approve <i class="fa fa-thumbs-o-up"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a data-target="#ajax" data-toggle="modal" class="btn btn-danger" href="{{ path('document_rejected', {'typeId': documenttype.id, 'object': file.id}) }}" >
+                                            Disapprove <i class="fa fa-thumbs-o-down"></i>
+                                        </a>
+
+                                        <a class="btn btn-info pull-right" href="{{ path('download_single_document', {'slug': slug}) }}">Download <i class="fa fa-cloud-download"></i></a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- END DESCRIPTION PORTLET-->
+
+            <div class="row">
+                {% if closingDocumentTypes|length >= 1 and closingId is not null%}
+                    <div class="col-md-6">
+                        <!-- BEGIN ALERTS PORTLET-->
+                        <div class="portlet box blue" id="closingDocument">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    <i class="fa fa-file-text-o"></i> Closing Docs
+                                </div>
+                                <div class="actions">
+                                    <a class="add_document btn  btn-danger" href="{{ path('document_type_add', {'objectId': closingId,'objectType': 'Closing','object': transaction.id })}}" style="color: white;" data-target="#ajax" data-toggle="modal">
+                                        Add
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="portlet-body no-more-tables customClosingDocumentBody">
+                                <div class="table-responsive">
+                                    <table id="datatable_example" class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf doc_vault doc_vault_listing" id="document_vault">
+                                        <tbody>
+                                        {% for documentType in closingDocumentTypes %}
+                                            {% set backgroundColor = "#d84a38" %}
+
+                                            {% if documentType.document is not null %}
+                                                {% if documentType.approved %}
+                                                    {% set backgroundColor = "#3cc051" %}
+                                                {% elseif documentType.rejected%}
+                                                    {% set backgroundColor = "#000000" %}
+                                                {% else%}
+                                                    {% set backgroundColor = "#ffb848" %}
+                                                {% endif %}
+                                            {% else %}
+                                                {% if documentType.status == 'R' %}
+                                                    {% set backgroundColor = "#d84a38" %}
+                                                {% elseif documentType.status == 'O' %}
+                                                    {% set backgroundColor = "#999999" %}
+                                                {% endif%}
+                                            {% endif%}
+                                            <tr class="odd gradeX doc closing required {% if (documentType.id == documenttype.id) %}success{% endif %}" id="1253955_1392118" style="height:20px;">
+                                                <td >
+                                                    <span class="badge" style="color: {{ backgroundColor }}; background-color: {{ backgroundColor }}"> 3 </span>
+                                                </td>
+                                                <td  id="Affiliated Business Disclosure" class="attach_name">
+                                                    <label class="control-label ">
+                                                        {% if documentType.document is not null %}
+                                                            <a href="{{ path('document_typeview', {'id': documentType.id }) }}">{{ documentType.name }}</a>
+                                                        {% else %}
+                                                            {{ documentType.name }}
+                                                        {% endif %}
+                                                        {% if documentType.isRequired == true %}
+                                                            <span class="required" aria-required="true"> * </span>
+                                                        {% endif %}
+                                                    </label>
+                                                </td>
+                                                <td >
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        {% if app.user.role.level <= 5 %}
+                                                            <ul class="dropdown-menu pull-right loadAjax" role="menu">
+                                                                {% if documentType.isRequired == true  %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null%}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove</a>
+                                                                        </li>
+                                                                    {% endif %}
+
+                                                                {% elseif documentType.isRequired == false %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove</a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove</a>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endif%}
+                                                            </ul>
+
+                                                        {% elseif documentType.isSystem == 0 and documentType.createdBy == app.user %}
+                                                            <ul class="dropdown-menu right-aligned loadAjax" role="menu">
+                                                                {% if documentType.isRequired == true  %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null%}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove</a>
+                                                                        </li>
+                                                                    {% endif %}
+
+                                                                {% elseif documentType.isRequired == false %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove</a>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endif%}
+                                                            </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- END DESCRIPTION PORTLET-->
+                    </div>
+                {% endif %}
+
+                {% if listingDocumentTypes|length >= 1 and listingId is not null %}
+                    <div class="col-md-6">
+                        <!-- BEGIN ALERTS PORTLET-->
+                        <div class="portlet box blue" id="listingDocument">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    <i class="fa fa-file-text-o"></i> Listing Docs
+                                </div>
+                                <div class="actions">
+                                    <a href="{{ path('document_type_add', {'objectId': listingId,'objectType': 'Listing','object': transaction.id })}}" class="add_document btn  btn-danger" style="color: white;" data-target="#ajax" data-toggle="modal">
+                                        Add
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="portlet-body no-more-tables customListingDocumentBody">
+                                <div class="table-responsive">
+                                    <table class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf doc_vault doc_vault_listing" id="document_vault">
+                                        <tbody>
+                                        {% for documentType in listingDocumentTypes %}
+                                            {% set backgroundColor = "#d84a38" %}
+                                            {% if documentType.document is not null %}
+                                                {% if documentType.approved %}
+                                                    {% set backgroundColor = "#3cc051" %}
+                                                {% elseif documentType.rejected%}
+                                                    {% set backgroundColor = "#000000" %}
+                                                {% else%}
+                                                    {% set backgroundColor = "#ffb848" %}
+                                                {% endif %}
+                                            {% else %}
+                                                {% if documentType.status == 'R' %}
+                                                    {% set backgroundColor = "#d84a38" %}
+                                                {% elseif documentType.status == 'O' %}
+                                                    {% set backgroundColor = "#999999" %}
+                                                {% endif%}
+                                            {% endif%}
+
+                                            <tr class="odd gradeX doc closing required {% if (documentType.id == documenttype.id) %}success{% endif %}" id="1253955_1392118" style="height:20px;">
+                                                <td >
+                                                    <span class="badge" style="color: {{ backgroundColor }}; background-color: {{ backgroundColor }}"> 3 </span>
+                                                </td>
+                                                <td  id="Affiliated Business Disclosure" class="attach_name">
+                                                    <label class="control-label ">
+                                                        {% if documentType.document is not null %}
+                                                            <a href="{{ path('document_typeview', {'id': documentType.id }) }}">{{ documentType.name }}</a>
+                                                        {% else %}
+                                                            {{ documentType.name }}
+                                                        {% endif %}
+                                                        {% if documentType.isRequired == true %}
+                                                            <span class="required" aria-required="true"> * </span>
+                                                        {% endif %}
+                                                    </label>
+                                                </td>
+                                                <td >
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+
+                                                        {% if app.user.role.level <= 5 %}
+                                                            <ul class="dropdown-menu pull-right loadAjax" role="menu">
+                                                                {% if documentType.isRequired == true  %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null%}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove Document
+                                                                            </a>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% elseif documentType.isRequired == false %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove Type</a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove Document</a>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endif%}
+                                                            </ul>
+                                                        {% elseif documentType.isSystem == 0 and documentType.createdBy == app.user %}
+                                                            <ul class="dropdown-menu right-aligned loadAjax" role="menu">
+                                                                {% if documentType.isRequired == true  %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null%}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Unrequire
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove Document</a>
+                                                                        </li>
+                                                                    {% endif %}
+
+                                                                {% elseif documentType.isRequired == false %}
+                                                                    {% if documentType.document is null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                    {% elseif documentType.document is not null %}
+                                                                        <li>
+                                                                            <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': transaction.id}) }}" >
+                                                                                Require
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': transaction.id}) }}">
+                                                                                <i class="fa fa-times"></i> Remove Document</a>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endif%}
+                                                            </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- END DESCRIPTION PORTLET-->
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- BEGIN NOTES PORTLET-->
+            <div class="portlet box blue" id="noteBox">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-comments"></i> Transaction Notes
+                    </div>
+                    <div class="actions">
+                        <a class="btn  btn-danger" href="{{ path('note_add', {'id': transaction.id ,'type': 'LocalsBestUserBundle:Transaction'}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">
+                            Add
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <ul class="chats">
+                        {% if transactionNotes|length >= 1 %}
+                            {% for note in transactionNotes %}
+                                {% if loop.index <= 2 %}
+                                    {{ include ('@LocalsBestCommon/note/single.html.twig', {note: note}) }}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <!-- END NOTES PORTLET-->
+
+            <!-- BEGIN SHARE PORTLET-->
+            <div id="shareBox" style="display: none;" class="portlet blue box share-portlet">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-share-alt"></i>Shares
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse">
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <!-- Existing share list starts -->
+                    {% for share in file.shares %}
+                        <div class="media share_box todo-tasklist-item todo-tasklist-item-border-green" id="share_box_{{share.id}}">
+                            <input class="hidden" type="hidden" id="share_box_user_{{share.id}}" value="{{ share.user.username}}">
+                            <a class="pull-left" href="#">
+                                <img class="media-object" src="{% if share.user.filename is not empty %} {{ vich_uploader_asset(share.user, 'file') }}{% endif %}" alt="64x64" style="width: 64px; height: 64px;">
+                            </a>
+                            <div class="media-body pull-left">
+                                <h4 class="media-heading">
+                                    <span class="pull-left">
+                                        Request a Read Receipt
+                                    </span>&nbsp;&nbsp;
+                                    <input type="checkbox" class="read_reciept_user" value="{{share.user.username}}"{% if share.readReciept == true %} checked="checked" {% endif%}/>
+                                </h4>
+                                <h4 class="media-heading">
+                                    <span class="pull-left">
+                                        Request Accept Decline
+                                    </span>&nbsp;&nbsp;
+                                    <input type="checkbox" class="further_action_user" value="{{share.user.username}}"{% if share.furtherAction == true %} checked="checked" {% endif%}/>
+                                </h4>
+                                <h4 class="media-heading">{{ share.user.fullname }}</h4>{{ share.user.role.name }}
+                            </div>
+                            <button class="btn btn-danger pull-right share_btn_remove" data-removeid="{{share.id}}" data-username="{{share.user.username}}" data-saved="1"><i class=" icon-trash"></i> &nbsp; Share Remove</button>
+                        </div>
+                    {% endfor %}
+                    <!-- Existing share list ends -->
+                    <br />
+                    <form action="{{ path('document_share', {'slug': slug}) }}" method="POST" enctype="multipart/form-data" name="shareValue" >
+                        <div id="remote">
+                            <input class="typeahead" type="text" placeholder="-- Group Users --">
+                            <input id="selectedusers" type="hidden" class="hidden" name="shares" value="{{ sharedwithusernames }}">
+                            <input id="sharedUserReadReciepts" type="hidden" class="hidden" name="readReciepts" value="{{ sharedReadReciepts }}">
+                            <input id="sharedUserFurtherActions" type="hidden" class="hidden" name="furtherActions" value="{{ sharedFurtherActions }}">
+                        </div>
+                        <div class="margin-top-10">
+                            <button type="submit" class="btn btn-success" id="share_btn"><i class="icon-share"></i> Share</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- END SHARE PORTLET-->
+        </div>
+    </div>
+{% endblock %}

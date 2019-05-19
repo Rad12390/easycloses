@@ -1,0 +1,69 @@
+<div class="form-group">
+    <label for="creating" class="col-md-3 control-label">
+        File Type:
+    </label>
+    <div class="col-md-9">
+        <select name="creating" id="creating" class="form-control">
+            {% for item in ['Listing', 'Closing'] %}
+                <option value="{{ item }}" {% if item == question.creating %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="represent" class="col-md-3 control-label">
+        Agent Represent:
+    </label>
+    <div class="col-md-9">
+        <select name="represent" id="represent" class="form-control">
+            {% for item in ['Any', 'Buyer', 'Seller', 'Buyer&Seller', 'Landlord', 'Tenant', 'Landlord&Tenant'] %}
+                <option value="{{ item }}" {% if item == question.represent %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="propertyType" class="col-md-3 control-label">
+        Property Type:
+    </label>
+    <div class="col-md-9">
+        <select name="propertyType" id="propertyType" class="form-control">
+            {% for item in ['Any', 'Single Family Home', 'Condo/Co-op', 'Multi-Family', 'Vacant Land', 'Manufactured Home'] %}
+                <option value="{{ item }}" {% if item == question.propertyType %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="transactionType" class="col-md-3 control-label">
+        Transaction Type:
+    </label>
+    <div class="col-md-9">
+        <select name="transactionType" id="transactionType" class="form-control">
+            {% for item in ['Any', 'Regular Sale', 'Bank Sale or REO', 'New Construction', 'Short Sale', 'Lease'] %}
+                <option value="{{ item }}" {% if item == question.transactionType %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="question" class="col-md-3 control-label">
+        Question Text:
+    </label>
+    <div class="col-md-9">
+        <input id="question" name="question" class="form-control" value="{{ question.question }}">
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="documentName" class="col-md-3 control-label">
+        Document Name:
+    </label>
+    <div class="col-md-9">
+        <input id="documentName" name="documentName" class="form-control" value="{{ question.documentName }}">
+    </div>
+</div>

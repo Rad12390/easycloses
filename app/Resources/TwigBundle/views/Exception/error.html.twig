@@ -1,0 +1,26 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <!-- BEGIN PAGE LEVEL STYLES -->
+    <link href="{{ asset('system/pages/css/error.min.css') }}" rel="stylesheet" type="text/css" />
+    <!-- END PAGE LEVEL STYLES -->
+{% endblock %}
+    
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 page-404">
+            <div class="number font-green" style="top: 0;">
+                {{ status_code }}
+            </div>
+            <div class="details">
+                <h3>{{ status_text }}</h3>
+                <p>
+                    Sorry about that...
+                    We have an error.  It's not you it's me... <br>
+                    Please call the toll-free number and let us know or Click on the red support ticket<br>
+                    <a href="{{ path('locals_best_user_homepage') }}">Back to Home Page</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

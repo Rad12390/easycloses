@@ -1,0 +1,256 @@
+{% extends "::base.html.twig" %}
+
+{% block content %}
+    <div class="portlet light bordered col-sm-12">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-money"></i> Payment Form
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="row">
+                <div class="col-sm-6">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Option</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if data.sign_installation.status != 'false' %}
+                                <tr>
+                                    <td>Sign Installation</td>
+                                    <td>${{ data.sign_installation.price|number_format }}</td>
+                                    <td>{{ data.sign_installation.quantity }}</td>
+                                    <td>${{ (data.sign_installation.price * data.sign_installation.quantity)|number_format }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if data.sign_fabrication.status != 'false' %}
+                                {% if data.sign_fabrication.with_photo_quantity > 0 %}
+                                    <tr>
+                                        <td>Sign Fabrication with Photo</td>
+                                        <td>${{ data.sign_fabrication.with_photo_price|number_format }}</td>
+                                        <td>{{ data.sign_fabrication.with_photo_quantity }}</td>
+                                        <td>${{ (data.sign_fabrication.with_photo_price * data.sign_fabrication.with_photo_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+
+                                {% if data.sign_fabrication.without_photo_quantity > 0 %}
+                                    <tr>
+                                        <td>Sign Fabrication without Photo</td>
+                                        <td>${{ data.sign_fabrication.without_photo_price|number_format }}</td>
+                                        <td>{{ data.sign_fabrication.without_photo_quantity }}</td>
+                                        <td>${{ (data.sign_fabrication.without_photo_quantity * data.sign_fabrication.without_photo_price)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endif %}
+                            {% if data.bulk_sign_fabrication.status != 'false' %}
+                                <tr>
+                                    <td>Bulk Sign Fabrication with Photo</td>
+                                    <td>${{ data.bulk_sign_fabrication.with_photo_price|number_format }}</td>
+                                    <td>{{ data.bulk_sign_fabrication.with_photo_quantity }}</td>
+                                    <td>${{ (data.bulk_sign_fabrication.with_photo_price * data.bulk_sign_fabrication.with_photo_quantity)|number_format }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Bulk Sign Fabrication without Photo</td>
+                                    <td>${{ data.bulk_sign_fabrication.without_photo_price|number_format }}</td>
+                                    <td>{{ data.bulk_sign_fabrication.without_photo_quantity }}</td>
+                                    <td>${{ (data.bulk_sign_fabrication.without_photo_quantity * data.bulk_sign_fabrication.without_photo_price)|number_format }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if data.rider_installation.status != 'false' %}
+                                <tr>
+                                    <td>Rider Installation</td>
+                                    <td>${{ data.rider_installation.price|number_format }}</td>
+                                    <td>{{ data.rider_installation.quantity }}</td>
+                                    <td>${{ (data.rider_installation.price * data.rider_installation.quantity)|number_format }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if data.a_frame.status != 'false' %}
+                                <tr>
+                                    <td>A Frame</td>
+                                    <td>${{ data.a_frame.price|number_format }}</td>
+                                    <td>{{ data.a_frame.quantity }}</td>
+                                    <td>${{ (data.a_frame.price * data.a_frame.quantity)|number_format }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if data.rider_fabrication.status != 'false' %}
+                                <tr>
+                                    <td>Rider Fabrication</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                {% if data.rider_fabrication.sold_quantity > 0 %}
+                                    <tr>
+                                        <td>SOLD</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.sold_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.sold_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.under_contract_quantity > 0 %}
+                                    <tr>
+                                        <td>UNDER CONTRACT</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.under_contract_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.under_contract_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.sale_pending_quantity > 0 %}
+                                    <tr>
+                                        <td>SALE PENDING</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.sale_pending_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.sale_pending_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.for_sale_quantity > 0 %}
+                                    <tr>
+                                        <td>FOR SALE</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.for_sale_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.for_sale_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.for_rent_quantity > 0 %}
+                                    <tr>
+                                        <td>FOR RENT</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.for_rent_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.for_rent_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.family_2_quantity > 0 %}
+                                    <tr>
+                                        <td>FAMILY 2</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.family_2_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.family_2_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.family_3_quantity > 0 %}
+                                    <tr>
+                                        <td>FAMILY 3</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.family_3_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.family_3_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.pool_quantity > 0 %}
+                                    <tr>
+                                        <td>POOL</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.pool_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.pool_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if data.rider_fabrication.other_quantity > 0 %}
+                                    <tr>
+                                        <td>OTHER</td>
+                                        <td>${{ data.rider_fabrication.price|number_format }}</td>
+                                        <td>{{ data.rider_fabrication.other_quantity }}</td>
+                                        <td>${{ (data.rider_fabrication.price * data.rider_fabrication.other_quantity)|number_format }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>TOTAL:</th>
+                                <th></th>
+                                <th></th>
+                                <th>${{ data.total|number_format }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="col-sm-6">
+                    <form method="post" action="{{ path('custom_form_charge', {'type': type, 'id': id}) }}">
+                        <div class="col-md-8 col-md-offset-2" style="margin-top:20px;">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <input class="form-control placeholder-no-fix" required type="text" placeholder="First Name" name="first_name" value="{{ user.firstName }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input class="form-control placeholder-no-fix" required type="text" placeholder="Last Name" name="last_name" value="{{ user.lastName }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-icon">
+                                    <i class="fa fa-envelope"></i>
+                                    <input class="form-control placeholder-no-fix" type="email" required placeholder="Email Address" id="user_email" name="user_email" value="{{ user.primaryEmail.email }}">
+                                    <span style="display: none;" id="help-block" class="help-block btn-danger"> This email address already used. Please use another email address. </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-icon">
+                                    <i class="fa fa-credit-card"></i>
+                                    <input class="form-control placeholder-no-fix" type="text" autocomplete="cc-number" required placeholder="Credit Card Number" name="credit_card_number">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <select class="form-control" name="expiration_month" required id="expiration_month" autocomplete="cc-exp-month" data-placeholder="Month" tabindex="1">
+                                            <option value="">Month</option>
+                                            <option value="01">01</option>
+                                            <option value="02">02</option>
+                                            <option value="03">03</option>
+                                            <option value="04">04</option>
+                                            <option value="05">05</option>
+                                            <option value="06">06</option>
+                                            <option value="07">07</option>
+                                            <option value="08">08</option>
+                                            <option value="09">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-control" name="expiration_year" required id="expiration_year" autocomplete="cc-exp-year" data-placeholder="Year" tabindex="1">
+                                            <option value="">Year</option>
+                                            <option value="2016">2016</option>
+                                            <option value="2017">2017</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2023">2023</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input class="form-control placeholder-no-fix col-md-4" required type="text" style="-webkit-text-security: disc;" autocomplete="cc-csc" placeholder="CVV2" name="cvv2">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <button type="submit" id="submit-btn" class="btn btn-success pull-left ">
+                                    Submit Order <i class="m-icon-swapright m-icon-white"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

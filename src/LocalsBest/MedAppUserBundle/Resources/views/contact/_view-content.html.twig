@@ -1,0 +1,388 @@
+<div class="row" style="margin-bottom: 10px;">
+    {% if file.id is defined and file.id is not null %}
+        {#<a class="btn yellow pull-left" href="{{ path('contact_edit', {'id': file.id}) }}">
+            <i class="fa fa-edit"></i> Edit Contact
+        </a>#}
+
+        <div class="col-sm-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <select class="form-control" id="change-type">
+                        <option {% if file.type == 'contact' %}selected{% endif %} value="contact">Contact</option>
+                        <option {% if file.type == 'lead' %}selected{% endif %} value="lead">Lead</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-control" id="change-is_active">
+                        <option {% if file.isActive == true %}selected{% endif %} value="1">Open</option>
+                        <option {% if file.isActive == false %}selected{% endif %} value="0">Closed</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-sm-3 pull-right">
+            {% if file.invitation == false and file.user is null %}
+                {% if checker.forAddon('client portals', app.user) %}
+                    <a class="btn btn-warning pull-right" href="{{ path('contact_invite_ajax', {'id': file.id ,'type': objectType}) }}">
+                        <i class="icon-paper-plane"></i> Send Member Invite
+                    </a>
+                {% endif %}
+            {% else %}
+                <span class="pull-right label label-default" style="font-size: x-large;">Invited</span>
+            {% endif %}
+        </div>
+
+        {% if app.user.role.level < 7 and app.user.businesses.first.id == 155 %}
+            <div class="col-sm-3 pull-right">
+                <button class="btn btn-success table-group-action-submit">
+                    <i class="fa fa-check"></i> Transfer Contact
+                </button>
+            </div>
+        {% endif %}
+
+        <div class="col-sm-3 pull-right">
+            <select class="form-control" id="change-category">
+                <option {% if file.category == '' %}selected{% endif %} value="">N/A</option>
+                <option {% if file.category == 'buyer' %}selected{% endif %} value="buyer">Buyer</option>
+                <option {% if file.category == 'seller' %}selected{% endif %} value="seller">Seller</option>
+                <option {% if file.category == 'landlord' %}selected{% endif %} value="landlord">Landlord</option>
+                <option {% if file.category == 'tenant' %}selected{% endif %} value="tenant">Tenant</option>
+            </select>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-info-circle"></i> Contact Info
+                </div>
+            </div>
+            <div class="portlet-body">
+                <table class="table table-striped table-bordered table-hover">
+                    <tbody>
+                        <tr>
+                            <td style="border-top:none;">Contact Name: </td>
+                            <td style="border-top:none;">
+                                <div style="display:inline;">
+                                    {{ file.firstname }}&nbsp;{{ file.lastname }}
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Phone -->
+                        <tr>
+                            <td>Phone Number: <div class="pull-right"><i class="icon-plus additional_field_btn hide" style="color:#666;"></i></div></td>
+                            <td>
+                                <div style="display:inline;">
+                                    {{ file.number }}
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Email -->
+                        <tr>
+                            <td>Email Address: </td>
+                            <td>
+                                <div style="display:inline;">
+                                    {{ file.email }}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a class="btn btn-primary" href="{{ path('contact_business_info', {'id': file.id}) }}" data-target="#ajax" data-toggle="modal">Business Info</a>
+            </div>
+        </div>
+
+        <div class="portlet box blue" id="eventBox">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-calendar"></i> Events
+                </div>
+                <div class="actions">
+                    <a class="btn btn-sm  btn-danger" href="{{ path('event_add_object', {'objectId': objectId.id, 'objectType': object}) }}">Add</a>
+                </div>
+            </div>
+            <div class="portlet-body customEventBody">
+
+                <table class="{% if contactEvents|length >= 1 %}customTable{%endif%} table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>
+                            <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                <input type="checkbox" class="group-checkable" />
+                                <span></span>
+                            </label>
+                        </th>
+                        <th></th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Due Date</th>
+                        <th>Alert</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if contactEvents|length >= 1 %}
+                        {% for event in contactEvents %}
+                            {% if event.time is not null %}
+                                <tr>
+                                    <td>
+                                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                            <input type="checkbox" class="group-checkable" />
+                                            <span></span>
+                                        </label>
+                                    </td>
+                                    <td><div class="circle-small attach_status_color" id="approved" style="{% if event.status.status is not null%} background-color:{{ event.status.color }}{% endif%}" rel="tooltip" title="" data-placement="top">
+                                        </div></td>
+                                    <td>{{ event.type }}</td>
+                                    <td><a href="{{ path('event_edit_object', {'objectId': objectId.id, 'objectType': object, 'slug': event.slug}) }}" ><strong>{{ event.title }}</strong></a></td>
+                                    <td>{{ event.time|date('m/d/Y') }} {#({{ time_diff(event.time)}} )#}</td>
+                                    <td>{% if event.alert == 1 %}<i class="icon-bell"></i>{% endif %}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                <i class="fa fa-gear"></i>
+                                                <span class="caret"></span>
+                                            </button>
+                                            {% if app.user.role.level < 5 %}
+                                                <ul class="dropdown-menu pull-right" role="menu">
+                                                    <li>
+                                                        <a href="{{ path('event_remove', {'id': event.id}) }}" class="event-remove">
+                                                            <i class="fa fa-times"></i> Remove
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            {% elseif app.user.role.level == 7 and event.createdBy == app.user and event.isRequired == false %}
+                                                <ul class="dropdown-menu pull-right" role="menu">
+                                                    <li>
+                                                        <a href="{{ path('event_remove', {'id': event.id}) }}" class="event-remove">
+                                                            <i class="fa fa-times"></i> Remove
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            {% endif%}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif%}
+                        {% endfor %}
+                    {% else%}
+                        <tr><td colspan="7" align="middle"><span class="small">No record found</span></td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-map-marker"></i> Property
+                </div>
+                <div class="actions">
+                    <a class="btn btn-sm  btn-danger" href="{{ path('subject_property_create', {'contactId': file.id}) }}" data-target="#ajax" data-toggle="modal">Add</a>
+                </div>
+            </div>
+            <div class="portlet-body customEventBody">
+                <div class="table-scrollable">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th> MLS </th>
+                                <th> Address </th>
+                                <th>  </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in file.subjectProperty  %}
+                                <tr>
+                                    <td>{{ item.mls }}</td>
+                                    <td>{{ item.fullAddress }}</td>
+                                    <td>
+                                        <a class="btn btn-sm  btn-danger" href="{{ path('subject_property_delete', {'id': item.id}) }}"><i class="fa fa-trash-o"></i> Delete</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td class="text-center" colspan="3">
+                                        There is no Subject Properties
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="portlet box blue" id="noteBox">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-comments"></i> Notes
+                </div>
+                <div class="actions">
+                    <a class="btn btn-sm  btn-danger" href="{{ path('note_add', {'id': objectId.id ,'type': object}) }}" data-target="#ajax" data-toggle="modal">Add</a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="chats">
+                    {% if notes|length >= 1 %}
+                        {% for note in notes %}
+                            {{ include ('@LocalsBestCommon/note/single.html.twig',{note: note}) }}
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        {% if file.wpContents|length > 0 %}
+            <div class="portlet box blue" id="wp_content">
+                <div class="portlet-title">
+                    <div class="caption">
+                        WP Requests
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="wp-content">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th> Type </th>
+                                    <th> Content </th>
+                                    <th> Time </th>
+                                </tr>
+                            </thead>
+                            {% for content in file.wpContents %}
+                                <tr>
+                                    <td> {{ content.type|capitalize }} </td>
+                                    <td> {{ content.content|raw }} </td>
+                                    <td> {{ content.createdAt|date('m.d.Y h:i') }} </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if app.user.businesses[0].types.first.id == 23 and app.user.role.level <=7 %}
+            <div class="portlet box blue" id="closingDocument">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="icon-docs"></i> Save Documents and Images
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-sm  btn-danger" href="{{ path('contact_document_add', {'id': file.id })}}" data-target="#ajax" data-toggle="modal">Add</a>
+                    </div>
+                </div>
+                <div class="portlet-body no-more-tables customClosingDocumentBody">
+                    {% if contactDocuments|length >= 1 and contactDocuments is not null %}
+
+                            <table class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf doc_vault doc_vault_listing" id="document_vault">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>
+                                            <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                <input type="checkbox" id="checkAll" name="checkAll" class="select_all">
+                                                <span></span>
+                                            </label>
+                                        </th>
+                                        <th style="width:250px;">File Name</th>
+                                        <th>Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for document in contactDocuments %}
+                                        <tr class="odd gradeX doc closing required " id="1253955_1392118" style="height:20px;">
+                                            <td>
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    <input type="checkbox" class="group-checkable" />
+                                                    <span></span>
+                                                </label>
+                                            </td>
+                                            <td>{{ document.fileName }}</td>
+                                            <td>{{ document.created|date('m-d-Y H:i:s') }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fa fa-gear"></i>
+                                                        <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu pull-right" role="menu">
+                                                        <li>
+                                                            <a href="{{ path('document_view', {'slug': document.slug}) }}" >View</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{{ path('document_delete', {'slug': document.slug}) }}" >Delete</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-tag"></i> Tags
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <form action="{{ path('tag_add', {'id': objectId.id ,'type': object}) }}" method="POST">
+                            <div class="form-body">
+                                <div class="form-group">
+                                    <div class="input-icon right">
+                                        {{ form_widget( form.tag, {'id': 'contact_tags'}) }}
+                                    </div>
+                                </div>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            {% if tagsAvailable is not empty %}
+                <div class="col-md-6">
+                    <div class="panel-group accordion" id="accordion1">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_1" aria-expanded="false">
+                                        Available Tags
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="collapse_1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                <div class="panel-body">
+                                    <p>
+                                        {% for aTag in tagsAvailable %}
+                                            <span class="badge badge-primary badge-roundless"> {{ aTag.tag }} </span>
+                                            <!-- <span class="label label-primary">  </span> &nbsp; -->
+                                        {% endfor %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

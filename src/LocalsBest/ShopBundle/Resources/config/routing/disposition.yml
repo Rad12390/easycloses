@@ -1,0 +1,30 @@
+dispositions:
+    path:     /
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:index" }
+
+dispositions_show:
+    path:     /{id}/show
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:show" }
+
+dispositions_new:
+    path:     /new
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:new" }
+
+dispositions_create:
+    path:     /create
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:create" }
+    methods: [POST]
+
+dispositions_edit:
+    path:     /{id}/edit
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:edit" }
+
+dispositions_update:
+    path:     /{id}/update
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:update" }
+    methods: [POST|PUT]
+
+dispositions_delete:
+    path:     /{id}/delete
+    defaults: { _controller: "LocalsBestShopBundle:Disposition:delete" }
+    methods: [POST|DELETE]

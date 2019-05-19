@@ -1,0 +1,103 @@
+{% set color = '' %}
+{% set level = 0 %}
+{% set break = false %}
+{% for documentType in transaction.closing.documentTypes %}
+    {% if break != true %}
+        {% if documentType.isRequired == true and documentType.document is not null %}
+            {% if (documentType.approved is null or documentType.approved == 0) and (documentType.rejected is null or documentType.rejected ==0) %}
+                {% if level <= 2 %}
+                    {% set color = '#ffb848'%}
+                    {% set level = 2 %}
+                {% endif %}
+            {% elseif documentType.approved == true %}
+                {% if level <= 1  %}
+                    {% set color = '#3cc051'%}
+                    {% set level = 1 %}
+                {% endif %}
+            {% elseif documentType.rejected == true %}
+                {% set color = '#000000'%}
+                {% set break = true %}
+            {% endif %}
+        {% elseif documentType.isRequired == true and documentType.document is null %}
+            {% set color = '#d84a38'%}
+            {% set break = true %}
+        {% endif%}
+    {% endif%}
+{% endfor %}
+
+{% if transaction.listing is defined and transaction.listing is not null %}
+    {% for documentType in transaction.listing.documentTypes %}
+        {% if break != true %}
+            {% if documentType.isRequired == true and documentType.document is not null %}
+                {% if (documentType.approved is null or documentType.approved == 0) and (documentType.rejected is null or documentType.rejected ==0) %}
+                    {% if level <= 2 %}
+                        {% set color = '#ffb848'%}
+                        {% set level = 2 %}
+                    {% endif %}
+                {% elseif documentType.approved == true %}
+                    {% if level <= 1  %}
+                        {% set color = '#3cc051'%}
+                        {% set level = 1 %}
+                    {% endif %}
+                {% elseif documentType.rejected == true %}
+                    {% set color = '#000000'%}
+                    {% set break = true %}
+                {% endif %}
+            {% elseif documentType.isRequired == true and documentType.document is null %}
+                {% set color = '#d84a38'%}
+                {% set break = true %}
+            {% endif%}
+        {% endif%}
+    {% endfor %}
+{% endif %}
+
+{% if color == '#3cc051' and transaction.status == 'Sold_Paid' %}
+    {% set color = '#4d90fe'%}
+{% elseif color == '#3cc051' and transaction.status == 'Leased_Paid' %}
+    {% set color = '#4d90fe'%}
+{% endif%}
+
+{% if transaction.transactionStatus == 'Contract_fell_thru' %}
+    {% set color = '#000000'%}
+{% endif %}
+
+<tr data-id="{{transaction.id}}">
+    <td><div class="circle-small attach_status_color" style="background-color:{{ color }}"></div></td>
+    <td>{{ transaction.closing.status|replace({'_': ' '}) }}</td>
+    <td>{{ transaction.transactionProperty.property.address.street}}, {{transaction.transactionProperty.property.address.city}},
+        {{transaction.transactionProperty.property.address.state}}, {{transaction.transactionProperty.property.address.zip}}</td>
+    <td><a id="btn-{{ transaction.id }}" href="{{ path('transaction_view', {'id': transaction.id}) }}" >{{ transaction.category }}</a></td>
+    {% if app.user.role.role != 'ROLE_AGENT' %}
+        <td>{{ transaction.closing.buyersAgentContact.contactName}}</td>
+    {% endif %}
+    <td>{{ transaction.closing.represent }}</td>
+    <td>{% for date in transaction.closing.closingContacts %}{% if date.title|lower == 'Closing Date'|lower %}{{ date.time|date('m-d-Y') }}{% endif %}{% endfor%}</td>
+    <td>{{ transaction.closing.moneyBox.contractPrice }}</td>
+    <td>
+        {% if (transaction.closing.represent == 'Seller' or transaction.closing.represent == 'Tenant') %}
+            {{ transaction.closing.sellerContact.contactName }}
+        {% else %}
+            {{ transaction.closing.buyerContact.contactName }}
+        {% endif %}
+    </td>
+    <td>{{ transaction.transactionProperty.mlsNumber }}</td>
+    <td>{{ transaction.updated|date('m-d-Y h:i') }}</td>
+    <td >
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-gear"></i>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu right-aligned" role="menu">
+                <li>
+                    <a href="{{ path('transaction_edit_closing', {'transaction': transaction.id, 'closing': transaction.closing.id}) }}" >
+                    Edit</a>
+                </li>
+                <li>
+                    <a href="{{ path('transaction_delete', {'id': transaction.id}) }}" >
+                    Archive</a>
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>

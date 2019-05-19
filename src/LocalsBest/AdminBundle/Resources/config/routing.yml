@@ -1,0 +1,4 @@
+admin_plans:
+    resource: "@LocalsBestAdminBundle/Controller/"
+    type:     annotation
+    prefix:   /

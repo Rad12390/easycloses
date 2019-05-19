@@ -1,0 +1,20 @@
+Hello {% if user is defined %}{{ user.firstname }} {{ user.lastname }}{% else %}*agent_first_name* *agent_last_name*{% endif %},
+<br>
+<p>Your listing expires soon and we are sending a reminder for you to reach out to your seller to extend the listing.</p>
+<br>
+<p>Address: {% if event is defined %}{{ event.listing.transaction.fullAddress }}{% else %}*transaction_address*{% endif %}</p>
+<p>Expiration Date: {% if event is defined %}{{ event.time|date("m/d/Y") }}{% else %}*event_time*{% endif %}</p>
+<br>
+<br>
+In your Transaction File please complete one of the following: <br>
+1) Change the Expiration Date in your Transaction File by Clicking on Edit Listing, then create a new Document Type called Extension Form and upload to your file.<br>
+or<br>
+2) Change the Listing Status in the dropdown to Expired in your Transaction File<br>
+{#<br>#}
+{#Thank you,<br>#}
+{#Loretta Skinner<br><br>#}
+{#Office Manager<br><br>#}
+{#Premier Real Estate Services LLC<br><br>#}
+{#PO Box 369<br><br>#}
+{#Milaca MN 56353<br><br>#}
+{#320-983-3555<br><br>#}

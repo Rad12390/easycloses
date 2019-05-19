@@ -1,0 +1,7 @@
+comment_create:
+    path:     /{skuId}/create
+    defaults: { _controller: "LocalsBestShopBundle:Comment:create" }
+    
+comment_delete:
+    path:     /{feedback}/delete/{skuId}
+    defaults: { _controller: "LocalsBestShopBundle:Comment:delete" }

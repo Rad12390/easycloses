@@ -1,0 +1,11 @@
+{% if (business.filename is not null) %}
+    <div>
+        <img src="https://s3.amazonaws.com/ec-users/{{ business.filename|url_encode }}" class="logo-default" style="height: 87px; width: 235px;" alt="{{ business.filename }}"/>
+    </div>
+{% endif %}
+
+<br>
+
+<div style="margin: 0 25px;">
+    {{ content }}
+</div>

@@ -1,0 +1,45 @@
+
+    <script>
+        jQuery(document).ready(function () {
+            $('.modal-content').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $("#add-note-form").submit(function() {
+                var url = $(this).attr('action');
+                var data = $(this).serialize();
+                $.post(url, data, function(data) {
+                    console.log(data);
+                });
+                location.reload(true);
+                return false;
+            });
+        });
+
+        function checkContent(elem) {
+            if( $(elem).val() == '' ) {
+                $("#save").prop( "disabled", true );
+            } else {
+                $("#save").prop( "disabled", false );
+            }
+        }
+    </script>
+
+
+<div class="modal-content">
+    <form action="{{ path('document_request_exemption', {'transactionId': transactionId ,'documentTypeId': documentTypeId}) }}" method="POST">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        <textarea onkeyup="checkContent(this)" id="fileContent" name="fileContent" class="form-control" rows="3" placeholder="Enter Reason for your Request"></textarea>
+                    </p>
+                    <p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn red" data-dismiss="modal">Cancel</button>
+            <button disabled type="submit" id="save" class="btn green"><i class="fa fa-check"></i> Save</button>
+        </div>
+    </form>
+</div>

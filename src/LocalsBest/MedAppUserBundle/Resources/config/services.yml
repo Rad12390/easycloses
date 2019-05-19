@@ -1,0 +1,16 @@
+services:
+    hwi_oauth.user.provider.entity:
+        class: HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUserProvider
+    ib_user.oauth_user_provider:
+        class: LocalsBest\MedAppUserBundle\Entity\UserRepository
+        factory: ["@doctrine", "getRepository"]
+        arguments:
+            - LocalsBest\MedAppUserBundle\Entity\User
+        calls:
+            - [setContainer, ["@service_container"]]
+    login_listener:
+        class: 'LocalsBest\MedAppUserBundle\Listener\LoginListener'
+        arguments: ['@security.authorization_checker', '@service_container']
+        tags:
+#            - { name: 'kernel.event_listener', event: 'security.interactive_login' }
+             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

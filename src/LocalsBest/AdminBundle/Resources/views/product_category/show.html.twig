@@ -1,0 +1,33 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Product Category</h1>
+
+    <table class="table record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ entity.title }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ entity.description }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <a class="btn btn-default" href="{{ path('admin_products-categories') }}">
+        Back to the list
+    </a>
+
+    <a class="btn btn-warning" href="{{ path('admin_products-categories_edit', { 'id': entity.id }) }}">
+        Edit
+    </a>
+
+    {{ form(delete_form) }}
+{% endblock %}

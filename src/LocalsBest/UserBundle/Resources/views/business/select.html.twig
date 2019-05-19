@@ -1,0 +1,41 @@
+{% extends "::blank.html.twig" %}
+
+{% block title %}
+    Select Business 
+{% endblock %}
+
+{% block content %}
+    <div class="portlet yellow box">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-cogs"></i>Select Business
+            </div>
+            <div class="tools">
+                
+                {#<a href="{{path('add_new_business')}}" > Add
+                </a>#}
+            </div>
+        </div>
+        <div class="portlet-body">
+            {% for business in businesses %}
+            <a  href="{{ path('switch_business', {'slug': business.slug}) }}" >    
+            <div class="note note-success">
+                <h4 class="block">{{ business.name}}</h4>
+                <p>
+                    {% if business.address is not null %}
+                        {{ business.address.city }}<br />
+                    {% endif %}
+                    {% if business.type is not null %}
+                        {{ business.type.name}}<br />
+                    {% endif %}
+                    {% if business.owner is not null %}
+                    Owned By : &nbsp;{{ business.owner.firstname}}
+                    {% endif %}
+                </p>
+            </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

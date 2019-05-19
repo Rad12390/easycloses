@@ -1,0 +1,8 @@
+Hello {% if user is defined %}{{ user.fullName }}{% else %}*agent_full_name*{% endif %}! Seems like one of the transactions you created - {% if transaction is defined %}{{ transaction.fullAddress }}{% else %}*transaction_address*{% endif %} - has
+{% if docs is defined %}{{ docs }}{% else %}*documents_count*{% endif %} document(s) that are still not uploaded. Please provide them to the EasyCloses system in order
+to check and close the transaction.<br>
+<br>
+If you experience any difficulties in uploading documents to the transaction, please call 1 (888) 740-0550 and
+LocalsBest will assist you.<br>
+<br>
+Thank you for your care and have a good day!<br>

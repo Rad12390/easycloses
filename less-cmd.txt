@@ -1,0 +1,3 @@
+lessc src\LocalsBest\EsignBundle\Resources\less\creator.less web\css\esign\creator.css
+lessc src\LocalsBest\EsignBundle\Resources\less\sender.less web\css\esign\sender.css
+lessc src\LocalsBest\EsignBundle\Resources\less\signee.less web\css\esign\signee.css

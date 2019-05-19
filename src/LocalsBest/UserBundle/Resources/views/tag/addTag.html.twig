@@ -1,0 +1,41 @@
+{% stylesheets 
+    'plugins/jquery-tags-input/jquery.tagsinput.css'
+    
+        filter='cssrewrite' %}
+<link rel="stylesheet" href="{{ asset_url }}" />
+{% endstylesheets %}
+
+<script>
+    jQuery(document).ready(function () {
+        $('#ajax').on('loaded.bs.modal', function (e) {
+            $('.tags_1').tagsInput({
+            width: 'auto'
+        });
+});
+        
+    });
+</script>
+
+{% javascripts 
+        'plugins/jquery-tags-input/jquery.tagsinput.min.js'
+%}
+<script type="text/javascript" src="{{ asset_url }}"></script>
+{% endjavascripts %}
+<div class="modal-content">
+    <form action="{{ path('tag_add', {'id': id ,'type': objectType}) }}" method="POST">
+
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <h4>Some Input Tag</h4>
+                    {{ form_widget( form.tag) }}
+                </div>
+            </div>   
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn green"><i class="fa fa-check"></i> Save Changes</button>
+        </div>
+        {{ form_end(form) }}
+</div>

@@ -1,0 +1,142 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Members{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/vue/dist/vue.js" xmlns:v-bind="http://www.w3.org/1999/xhtml"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vuejs-paginator/2.0.0/vuejs-paginator.js"></script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                members: [],
+                loading: false,
+                error: false,
+                currentPage: 1,
+                itemsPerPage: 10,
+                resultCount: 0,
+                industryTypes: [],
+                filters: {
+                    query: '',
+                    state: '',
+                    business: ''
+                }
+            },
+
+            methods: {
+                search: function() {
+                    // Clear the error message.
+                    this.error = '';
+                    // Empty the products array so we can fill it with the new products.
+                    this.members = [];
+                    // Set the loading property to true, this will display the "Searching..." button.
+                    this.loading = true;
+
+                    // Making a get request to our API and passing the query to it.
+                    this.$http.get('/members-search', {params: this.filters}).then((response) => {
+                        // If there was an error set the error message, if not fill the products array.
+                        response.body.error ? this.error = response.body.error : this.members = response.body;
+                        // The request is finished, change the loading to false again.
+                        this.loading = false;
+                        this.currentPage = 1;
+                        this.resultCount = this.members.length;
+                    });
+                },
+                totalPages: function() {
+                    return Math.ceil(this.resultCount / this.itemsPerPage)
+                },
+                nextPage: function () {
+                    if (this.currentPage < this.totalPages()) {
+                        this.currentPage++;
+                    }
+                },
+                prevPage: function () {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                    }
+                },
+                filteredItems: function () {
+                    return this.members.slice(((this.currentPage-1)*this.itemsPerPage), this.currentPage*this.itemsPerPage)
+                },
+                buttonStatus: function() {
+                    return !(this.filters.state != '' || this.filters.business.length >= 3)
+
+                }
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row" id="app">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="form-horizontal">
+                <div class="alert alert-danger" role="alert" v-if="error">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    {% verbatim %}
+                        {{ error }}
+                    {% endverbatim %}
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <button class="btn btn-info" v-bind:disabled="buttonStatus()" type="button" @click="search()" v-if="!loading">
+                            <i class="fa fa-search"></i>
+                            Search Member
+                        </button>
+                        <button class="btn  btn-danger" type="button" disabled="disabled" v-if="loading">
+                            <i class="fa fa-spin fa-gear"></i>
+                            Searching
+                        </button>
+                    </div>
+                    <div class="col-sm-3">
+                        <input v-model="filters.query" type="text" class="form-control" id="inputEmail3" placeholder="Member name, email, phone">
+                    </div>
+                    <div class="col-sm-2">
+                        <select v-model="filters.state" class="form-control">
+                            <option value="">- None -</option>
+                            {% for state in states %}
+                                <option value="{{ state.short_name }}">{{ state.short_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <input v-model="filters.business" class="form-control" placeholder="Company Name">
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="col-md-12" v-if="resultCount > itemsPerPage" style="margin-bottom: 10px;">
+            <button class="btn btn-default" @click="prevPage()" v-bind:disabled="currentPage == 1">
+                Prev
+            </button>
+            {% verbatim %}{{ currentPage }} of {{ totalPages() }}{% endverbatim %}
+            <button class="btn btn-default" @click="nextPage()" v-bind:disabled="currentPage == totalPages()">
+                Next
+            </button>
+        </div>
+
+        <div class="item col-xs-12 col-lg-12" v-for="member in filteredItems()">
+            <div class="thumbnail">
+                <div class="caption">
+                    <p>
+                        {% verbatim %}
+                            <a v-bind:href="/members/ + member.id">{{ member.firstName }} {{ member.lastName }}</a>
+                            <b v-for="business in member.businesses">{{ business.name }}</b>
+                            <i>{{ member.role.name }}</i>
+                        {% endverbatim %}
+                    </p>
+                    <p>
+                        <span v-for="phone in member.contact.phones"><i class="fa fa-phone"></i> {% verbatim %}{{ phone.number }} {% endverbatim %} </span>
+                        <span v-for="email in member.contact.emails"><i class="fa fa-envelope"></i> {% verbatim %}{{ email.email }} {% endverbatim %} </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+<li>
+    <a href="{{ path('locals_best_notification_click', { id: notification.id }) }}">
+        <span class="time">
+            {{ notification.created | date('m/d/Y') }}
+        </span>
+        <span class="details">
+            <span class="label label-sm label-icon label-success">
+                <i class="fa fa-plus"></i>
+            </span>
+            {{ notification.message }}
+        </span>
+    </a>
+</li>

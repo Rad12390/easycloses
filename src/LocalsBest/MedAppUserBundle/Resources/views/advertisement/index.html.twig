@@ -1,0 +1,150 @@
+<link rel='stylesheet' href="{{ asset('shop/bootstrap-star-rating/css/star-rating.css') }}">
+<style>
+    /*ICONS*/
+    .icon-group {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .icon-group > li {
+        line-height: 1em;
+        display: inline-block;
+        margin-right: 3px;
+        color: yellow;
+    }
+
+    .icon-group > li:last-child {
+        margin-right: 0;
+    }
+
+    .list-icon li {
+        margin-bottom: 5px;
+        padding-left: 17px;
+        position: relative;
+    }
+
+    .list-icon li:last-child {
+        margin-bottom: 0;
+    }
+
+    .list-icon li:before {
+        color: #757575;
+        line-height: 1.75em;
+        font-family: 'FontAwesome';
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .icon-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .icon-list .fa {
+        margin-right: 7px;
+    }
+
+    .icon-list-inline {
+        margin-bottom: 0;
+    }
+
+    .icon-list-inline > li {
+        display: inline-block;
+        margin-right: 3px;
+    }
+
+    .icon-list-inline > li:last-child {
+        margin-right: 0;
+    }
+
+    .icon-list-inline .fa {
+        margin-right: 0;
+    }
+
+    .icon-list-rating.icon-list-non-rated {
+        opacity: 0.5;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+        filter: alpha(opacity=50);
+    }
+
+    .star-rating > li {
+        margin: 0;
+        padding-right: 5px;
+        color: #949494;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1em;
+    }
+
+    .star-rating > li.hovered {
+        color: #666;
+    }
+
+    .star-rating > li.selected {
+        color: #2a8fbd;
+    }
+
+    /*END ICONS*/
+</style>
+
+{% if products|length > 0 or advertisement|length > 0 %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="col-md-12" style="margin-bottom: 10px; border: 1px solid #000000   ">
+                <div class="owl-carousel">
+                    {% for entity in products %}
+                        <div class="item">
+                            <a href="{{ path('products_show', { 'slug': entity.slug }) }}">
+                                {% if entity.images is not empty %}
+                                    <img style="max-height: 170px; max-width: 100%; width: inherit;" src="{{ vich_uploader_asset(entity.images.first, 'imageFile', 'LocalsBest\\UserBundle\\Entity\\ProductImage') }}" alt="{{ entity.title }}">
+                                {% else %}
+                                    <img style="max-height: 170px; max-width: 100%; width: inherit;" src="/shop/img/800x600.png" alt="{{ entity.title }}" title="{{ entity.title }}"/>
+                                {% endif %}
+                            </a>
+                        </div>
+                    {% endfor %}
+
+                    {% for entity in advertisement %}
+                        <div class="item">
+                            {% set urlMainPart = entity.url|split('?') %}
+                            {% set routeName = router.match(urlMainPart.0)._route %}
+                            <a href="{{ entity.url }}{% if routeName == 'job_add' %}{% if transaction is not null %}{% if '?' in entity.url %}&{% else %}?{% endif %}{{ 'transaction_id='~transaction.id }}{% endif %}{% endif %}" {% if entity.isNewTab %}target="_blank"{% endif %}>
+                                <img style="max-height: 170px; max-width: 100%; width: inherit;" src="{{ vich_uploader_asset(entity, 'image', 'LocalsBest\\UserBundle\\Entity\\Advertisement') }}" title="{{ entity.title }}">
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ asset('shop/bootstrap-star-rating/js/star-rating.js') }}"></script>
+    <script>
+        function ready() {
+            var owl = $('.owl-carousel');
+            owl.owlCarousel({
+                loop: true,
+                margin: 10,
+                nav: false,
+                autoplay: true,
+                autoplayTimeout: 2500,
+                autoplayHoverPause: true,
+                responsive:{
+                    0:{
+                        items:1
+                    },
+                    600:{
+                        items:3
+                    },
+                    1000:{
+                        items:4
+                    }
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", ready);
+    </script>
+{% endif %}

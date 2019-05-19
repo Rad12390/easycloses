@@ -1,0 +1,23 @@
+<tr>
+    <td data-title="Role">{{ contact.role }}</td>
+    <td data-title="Contact Name">{{ contact.contactName }}</td>
+    <td data-title="Phone Number">{%if contact.phone is not null%}{{ contact.phone }}{%endif%}</td>
+    <td data-title="Email">{%if contact.email is not null%}{{contact.email}}{%endif%}</td>
+    <td data-title="Company">{%if contact.company is not null%}{{contact.company}}{%endif%}</td>
+    <td data-title="Company Email">{%if contact.companyEmail is not null%}{{contact.companyEmail}}{%endif%}</td>
+    <td data-title="Company Phone">{%if contact.companyPhone is not null%}{{contact.companyPhone}}{%endif%}</td>
+    <td>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-gear"></i>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu right-aligned" role="menu">
+                <li>
+                    <a href="javascript:;" class="contactEdit" data-id="{{contact.id}}" data-role="Seller">
+                        Edit</a>
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>

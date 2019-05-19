@@ -1,0 +1,144 @@
+{% extends "::base.html.twig" %}
+
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block title %}
+    {%if contactId is not null%}
+        Edit Contact
+    {%else%}
+        Create Contact
+    {%endif%}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('contact_index') }}">Contacts</a>
+    </li>
+    {% if contactId is not null %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Edit Contact
+        </li>
+    {% else %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Create Contact
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(function () {
+        /*$('.tags_1').tagsInput({
+            width: 'auto'
+        });*/
+        
+       /* $("#contact_all_number").on('blur change', function () {
+           var element = $(this).val();
+           var checkType = 'primaryPhone';
+           var type = 'Contact';
+           $("#userLoadAjax").load('{{ path('user_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ element);
+        });
+        
+        $("#contact_all_email").on('blur change', function () {
+           var element = $(this).val();
+           var checkType = 'primaryEmail';
+           var type = 'Contact';
+           $("#userLoadAjax").load('{{ path('user_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ element);
+        });*/
+        
+        $('.invite_contact').on('click', function () {
+            if ($(this).is(":checked"))
+            {
+                $('.role_custom').removeClass('hidden');
+            } else {
+                $('.role_custom').addClass('hidden');
+            }
+        });
+
+    });
+</script>
+{% endblock %}
+
+{% block checkbox_widget %}
+    {% spaceless %}
+        <input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} />
+    {% endspaceless %}
+{% endblock checkbox_widget %}
+
+{% block content %}
+    <div class="row" id="userLoadAjax"></div>
+
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-book"></i> Contact
+            </div>
+        </div>
+        <div class="portlet-body">
+            {% if contactId is not null %}
+                <form class="form-horizontal" action="{{ path('contact_edit', {'id': contactId }) }}" method="POST">
+            {% else %}
+                <form class="form-horizontal" action="{{ path('contact_add') }}" method="POST">
+            {% endif %}
+                {{ form_row(form._token) }}
+                {{ form_row(form.firstName) }}
+                {{ form_row(form.lastName) }}
+                {{ form_row(form.number) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.type) }}
+                {% if form.source is defined %}
+                    {{ form_row(form.source) }}
+                {% endif %}
+
+                {{ form_row(form.category) }}
+
+                {% if form.generated_by is defined %}
+                    {{ form_row(form.generated_by) }}
+                {% endif %}
+
+                {#<div class="form-group">#}
+                    {#<label class="col-md-3 control-label">{{ form_label(form.tag) }}</label>#}
+                    {#<div class="col-md-9">#}
+                        {#<div class="input-icon">#}
+                            {#{{ form_widget(form.tag) }}#}
+                            {#<span class="help-block">#}
+                                {#{{ form_errors(form.tag) }}#}
+                            {#</span>#}
+                        {#</div>#}
+                    {#</div>#}
+                {#</div>#}
+
+                {% if form.invitation is defined %}
+                    <div class="form-group">
+                        <div class="col-sm-10 col-sm-offset-2">
+                            <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                Send Portal Invitation
+                                <input type="checkbox" id="contact_all_invitation" name="contact_all[invitation]" class="invite_contact" value="1" {% if contact.invitation == true %}checked="checked"{% endif %}>
+                                <span></span>
+                            </label>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <button type="submit" id="submit_business_btn" class="btn btn-success">
+                                <i class="fa fa-save"></i> Save
+                            </button>
+                            <a href="{{ path('contact_index') }}" class="btn btn-default">
+                                <i class="fa fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {{ form_end(form, {'render_rest': false}) }}
+        </div>
+    </div>
+{% endblock %}

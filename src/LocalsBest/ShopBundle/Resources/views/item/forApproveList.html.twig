@@ -1,0 +1,63 @@
+{% extends '::base.html.twig' %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function(){
+            $('select').on('change', function(){
+                var item = $(this).data('item');
+                var status = $(this).find('option:checked').val();
+
+                var el = this;
+
+                $.ajax({
+                    'url': '{{ path('items_status_change') }}',
+                    'method': 'POST',
+                    'data': {
+                        'item': item,
+                        'status': status
+                    },
+                    'success': function () {
+                        $(el).parent().parent().remove();
+                    }
+                });
+
+
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <h1>Items for approve List <span style='font-size: 14px;'>{{ tooltip_text.getText('Approve items Tab')|raw }}</span></h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for entity in entities %}
+                <tr>
+                    <td>
+                        <a href="{{ path('items_show', {'id': entity.id}) }}">{{ entity.title }}</a>
+                    </td>
+                    <td>
+                        <select data-item="{{ entity.id }}" class="form-control input-sm">
+                            <option value="4" {% if entity.status == 4 %}selected{% endif %}>Published</option>
+                            <option value="2" {% if entity.status == 3 %}selected{% endif %}>Approve</option>
+                        </select>
+                    </td>
+                    <td>{% if entity.createdAt %}{{ entity.createdAt|date('m/d/Y H:i') }}{% endif %}</td>
+                    <td>{{ entity.createdBy.fullName }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

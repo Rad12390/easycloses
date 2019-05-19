@@ -1,0 +1,345 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets 
+        'plugins/bootstrap-fileinput/bootstrap-fileinput.css'
+        'pages/css/profile.css'
+        'plugins/jquery-tags-input/jquery.tagsinput.css'
+        'plugins/bootstrap-markdown/css/bootstrap-markdown.min.css'
+        'plugins/typeahead/typeahead.css'
+        filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts 
+        'plugins/jquery-inputmask/jquery.inputmask.bundle.min.js'
+        'plugins/jquery.input-ip-address-control-1.0.min.js'
+        'plugins/bootstrap-pwstrength/pwstrength-bootstrap.min.js'
+        'plugins/bootstrap-switch/js/bootstrap-switch.min.js'
+        'plugins/jquery-tags-input/jquery.tagsinput.min.js'
+        'plugins/bootstrap-maxlength/bootstrap-maxlength.min.js'
+        'plugins/typeahead/handlebars.min.js'
+        'plugins/typeahead/typeahead.bundle.min.js'
+        'plugins/ckeditor/ckeditor.js'
+        'plugins/fuelux/js/spinner.min.js'
+        'plugins/bootstrap-touchspin/bootstrap.touchspin.js'
+        'plugins/bootstrap-fileinput/bootstrap-fileinput.js'
+        'pages/scripts/components-form-tools.js'
+    %}
+    <script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+            
+{% endblock %}
+
+{% block title %}
+    {{ user.firstName}} {{ user.lastName }}
+{% endblock %}
+
+{% block page_title %}
+    {{ user.firstName}} {{ user.lastName }}
+{% endblock %}
+
+{% block page_title_small %}
+    ( {{ user.role.name }} )
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-angle-right"></i>
+        <a href="{{ path('users_index') }}">Contacts</a>
+    </li>
+    <li>
+        <i class="fa fa-angle-right"></i>
+        <a href="#">Profile</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="tabbable tabbable-custom tabbable-full-width">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="#tab_1_3" data-toggle="tab">
+                    Profile Details </a>
+            </li>
+            {% if user %}
+                {% for business in user.businesses %}
+                    <li>
+                        <a href="#{{ business.slug }}" data-toggle="tab">
+                            {{ business.name}} </a>
+                    </li>
+                {% endfor %}
+
+                {% if(user.role.role == 'ROLE_CLIENT' and user.createdBy != null and user.createdBy.role.level > 2) %}
+                    <li>
+                        <a href="#createdBy" data-toggle="tab">
+                            {{ user.createdBy.firstname }} {{ user.createdBy.lastname }} </a>
+                    </li>
+                {% endif %}
+            {% endif %}        
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="tab_1_3">
+                <div class="row profile-account">
+                    <div class="col-md-3">
+                        <ul class="ver-inline-menu tabbable margin-bottom-10">
+                            <li>
+                                <div class="col-md-9">
+                                    {% if user.filename is not empty %}
+                                        <img src="{{ vich_uploader_asset(user, 'file') }}" class="img-responsive" alt="{{ user.filename }}">
+                                    {% else %}
+                                        <img src="https://lorempixel.com/386/317/business/Dummy-Placeholder-Image/" class="img-responsive" alt="{{ user.filename }}">
+                                    {% endif %}
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="profile-info">
+                            {% if user %}
+                                <h1>{{ user.firstName }}&nbsp;{{ user.lastName }}</h1>
+
+                                <p>
+                                    {% if user.primaryPhone is not null %}
+                                        {% if user.primaryPhone.type =='M' %}
+                                            <span class="glyphicon glyphicon-phone"></span>
+                                        {% elseif user.primaryPhone.type =='H' %}
+                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                        {% elseif user.primaryPhone.type =='O' %}
+                                            <span class="glyphicon glyphicon-earphone"></span>
+                                        {% endif %}
+                                        {{ user.primaryPhone.number }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </p>
+                                {% if user.contact.phones|length > 1 %}
+                                    {% for phone in user.contact.phones %}
+                                        <ul class="list-inline">
+                                            <li>
+                                                {% if phone.type =='M' %}
+                                                    <span class="glyphicon glyphicon-phone"></span>
+                                                {% elseif phone.type =='H' %}
+                                                    <span class="glyphicon glyphicon-phone-alt"></span>
+                                                {% elseif phone.type =='O' %}
+                                                    <span class="glyphicon glyphicon-earphone"></span>
+                                                {% endif %}
+                                                &nbsp; {{ phone.number }}&nbsp;(optional)
+                                            </li>
+
+                                        </ul>
+                                    {% endfor %}
+                                {% endif %}
+
+                                <p>
+                                    {% if user.primaryEmail is not null %}
+                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;<a href="#">{{ user.primaryEmail.email }} </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </p>
+                                {% if user.primaryEmail|length > 1 %}
+                                    {% for email in user.contact.emails %}
+                                        <ul class="list-inline">
+                                            <li>
+                                                <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                            </li>
+                                        </ul>
+                                    {% endfor %}
+                                {% endif %}
+                                {#<p>
+                                    {% if user.preference.mail == 1 %}
+                                        <span class="glyphicon glyphicon-envelope"></span>
+                                    {% elseif user.preference.sms == 1 %}
+                                        <span class="glyphicon glyphicon-comment"></span>
+                                    {% endif %}
+                                    Preferred Contact Method
+                                </p>#}
+                            {% endif %}
+                        </div>
+
+                        {% if(user.role.level > app.user.role.level) %}
+                            <a class="btn yellow pull-left" href="{{ path('users_profile_edit', {'username': user.username}) }}">
+                                <i class="fa fa-edit"></i> Edit Profile
+                            </a>
+                        {% endif %}
+
+                    </div>
+                    <div class="col-md-9">
+                        <div class="biography">
+                            {% if user.aboutMe|length > 1 %}
+                                {{ user.aboutMe|raw }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if user %}
+                {% for business in user.businesses %}
+                    <div class="tab-pane" id="{{ business.slug }}">
+                        <div class="row profile-account">
+                            <div class="col-md-3">
+                                <ul class="ver-inline-menu tabbable margin-bottom-10">
+                                    <li>
+                                        <div class="col-md-9">
+                                            {% if business.filename is not empty %}
+                                                <img src="{{ vich_uploader_asset(business, 'file') }}" class="img-responsive" alt="{{ business.filename }}">
+                                            {% else %}
+                                                <img src="https://lorempixel.com/386/317/business/Dummy-Placeholder-Image/" class="img-responsive" alt="{{ business.filename }}">
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div class="profile-info">
+                                    <h4>{{ business.name}}</h4>
+
+                                    <p>
+                                        {{ business.address.city }}<br />
+                                    </p>
+
+                                    {% if business.contact is not null %}
+                                        {% for phone in business.contact.phones %}
+                                            {% if phone|length > 1 %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        {% if phone.type =='M' %}
+                                                            <span class="glyphicon glyphicon-phone"></span>
+                                                        {% elseif phone.type =='H' %}
+                                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                                        {% elseif phone.type =='O' %}
+                                                            <span class="glyphicon glyphicon-earphone"></span>
+                                                        {% endif %}
+                                                        &nbsp;{{ phone.number }}&nbsp;(optional)
+                                                    </li>
+                                                </ul>
+                                            {% else %}
+                                                <p>
+                                                    {% if phone.type =='M' %}
+                                                        <span class="glyphicon glyphicon-phone"></span>
+                                                    {% elseif phone.type =='H' %}
+                                                        <span class="glyphicon glyphicon-phone-alt"></span>
+                                                    {% elseif phone.type =='O' %}
+                                                        <span class="glyphicon glyphicon-earphone"></span>
+                                                    {% endif %}
+                                                    &nbsp;{{ phone.number }}
+                                                </p>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% for email in business.contact.emails %}
+                                            {% if email|length > 1 %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                                    </li>
+                                                </ul>
+                                            {% else %}
+                                                <p>
+                                                    <span class="glyphicon glyphicon-envelope"></span>&nbsp;<a href="#">{{ email.email }} </a>
+                                                </p>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    <p>
+                                        {{ business.contactname }}<br />
+                                        {% for t_ype in business.types %}
+                                            {{ t_ype.name }}<br>
+                                        {% endfor %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                {% if business.aboutMe is not null %}
+                                    {% for bio in business.aboutMe %}
+                                        {% if bio.aboutMe|length > 0 %}
+                                            <div>
+                                                {{ bio.aboutMe|raw }}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% if(user.role.role == 'ROLE_CLIENT' and user.createdBy != null  and user.createdBy.role.level > 2) %}
+                    <div class="tab-pane" id="createdBy">
+                        <div class="row profile-account">
+                            <div class="col-md-4">
+                                <ul class="ver-inline-menu tabbable margin-bottom-10">
+                                    <li>
+                                        {% if user.createdBy.filename is not empty %}
+                                            <img src="{{ vich_uploader_asset(user.createdBy, 'file') }}" class="img-responsive" alt="{{ user.createdBy.filename }}">
+                                        {% else %}
+                                            <img src="https://lorempixel.com/386/317/business/Dummy-Placeholder-Image/" class="img-responsive" alt="{{ user.createdBy.filename }}">
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                                <div class="profile-info">
+                                    {% if user %}
+                                        <h1>{{ user.createdBy.firstName }}&nbsp;{{ user.createdBy.lastName }}</h1>
+                                        <p>
+                                            <span class="glyphicon glyphicon-envelope"></span>&nbsp;
+                                            <a href="#">{{ user.createdBy.primaryEmail.email }} </a>
+                                        </p>
+                                        {% if user.createdBy.primaryEmail|length > 1 %}
+                                            {% for email in user.createdBy.contact.emails %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                                    </li>
+                                                </ul>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <p>
+                                            {% if user.createdBy.primaryPhone.type =='M' %}
+                                                <span class="glyphicon glyphicon-phone"></span>
+                                            {% elseif user.createdBy.primaryPhone.type =='H' %}
+                                                <span class="glyphicon glyphicon-phone-alt"></span>
+                                            {% elseif user.createdBy.primaryPhone.type =='O' %}
+                                                <span class="glyphicon glyphicon-earphone"></span>
+                                            {% endif %}&nbsp;&nbsp; +{{ user.createdBy.primaryPhone.number }}
+                                        </p>
+                                        {% if user.createdBy.primaryPhone|length > 1 %}
+                                            {% for phone in user.createdBy.contact.phones %}
+                                                <ul class="list-inline">
+                                                    <li>
+                                                        {% if phone.type =='M' %}
+                                                            <span class="glyphicon glyphicon-phone"></span>
+                                                        {% elseif phone.type =='H' %}
+                                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                                        {% elseif phone.type =='O' %}
+                                                            <span class="glyphicon glyphicon-earphone"></span>
+                                                        {% endif %}&nbsp;&nbsp; +{{ phone.number }}&nbsp;(optional)
+                                                    </li>
+                                                </ul>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <p>
+                                            {% if user.createdBy.preference.mail == 1 %}
+                                                <span class="glyphicon glyphicon-envelope"></span>
+                                            {% elseif user.createdBy.preference.sms == 1 %}
+                                                <span class="glyphicon glyphicon-comment"></span>
+                                            {% endif %}
+                                            Preferred Contact Method
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="biography">
+                                    {% if user.createdBy.aboutMe|length > 1 %}
+                                        {{ user.createdBy.aboutMe|raw }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!--end col-md-9-->
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

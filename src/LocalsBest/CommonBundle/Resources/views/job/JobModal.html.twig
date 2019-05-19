@@ -1,0 +1,531 @@
+<style type="text/css">
+    .modal-error{
+        border-color: red;
+        background: rgb(250, 255, 189) !important;
+    }
+    .modal-success{
+        border-color: #468847;
+        background: #fff !important;
+    }
+    span.error{
+        color: red;
+    }
+    .portlet.box>.portlet-body{ overflow-x: auto; }
+    label.control-label.non-edit {text-align: left;word-wrap: break-word;}
+    .job-descriptive{float: left;margin-right: 6px;margin-left: 18px;margin-top: 8px;}
+</style>
+    <div class="modal-content">
+            <div class="modal-header" style="background-color: #3598dc">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title" style="font-weight: 700;color: #fff;">{% if header_name is defined and header_name is not empty %} {{header_name}}{% else %}Job Order{% endif %}</h4>
+            </div>
+    <form class="form-horizontal is-readonly modal-form" role="form" method="POST" enctype="multipart/form-data">
+        <p class="job-descriptive style-label">Verify your information is correct and click SAVE</p>
+        <input type="button" class="btn btn-info save" value="Save" style="float:right;margin-right: 12px;">
+        <input type="button" class="btn btn-info edit" value="Edit" style="float:right;margin-right: 12px;">
+        <input type="hidden" class="objecttype" value="{% if type == 'Transaction' %}LocalsBestUserBundle:Transaction{% else %}null{% endif %}"/>
+        <input type="hidden" class="objectid" value="{{id}}"/>
+        <div class="modal-body" style="clear:both">                       
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-body">
+                        <div class="form-non-editable">
+                            <div class="form-group row">
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Job Type:</label>
+                                </div>
+                                 <div class="col-md-4">
+                                    {% set industrytypevalue ='' %}
+                                    {% for jobtype1 in jobtype %}
+                                        {% set counter= loop.index %}
+                                        {% for jobtypeId1 in jobtypeId %}
+                                            {% if counter == loop.index %}
+                                                {% if industrytype is defined and jobtypeId1 == industrytype %}
+                                                    {% set industrytypevalue= jobtype1 %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+
+                                    <label class="control-label non-edit" name="job[industryType]">{% if industrytypevalue is not empty%}{{industrytypevalue}}{% else %}{{'-'}}{% endif %}</label>
+                                    <select name="job[industryType]" class="form-control placeholder-no-fix job_industryType editing" aria-invalid="false">
+                                        <option value="">- Select a Job Type -</option>     
+                                        {% for jobtype1 in jobtype %}
+                                            {% set counter= loop.index %}
+                                            {% for jobtypeId1 in jobtypeId %}
+                                                {% if counter == loop.index %}
+                                                    {% set id= jobtypeId1 %}
+                                                     <option value="{{jobtypeId1}}"  {% if industrytype is defined and jobtypeId1 == industrytype %} selected {% endif %}>{{jobtype1}}</option>
+                                                {% endif %}
+                                            {% endfor %}
+
+
+                                        {% endfor %}
+                                    </select>                  
+                                </div>     
+
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Order Type:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label non-edit" name="job[orderType]">{% if order_type is defined %} {{order_type}} {% endif %}</label>
+                                    <select name="job[orderType]" required="required" class="form-control placeholder-no-fix job_orderType editing" autofocus="" aria-required="true" aria-invalid="true" aria-describedby="job_orderType-error">
+                                        <option value="">- Select an Order Type -</option>            
+                                        <option value="Order" {% if order_type is defined and order_type=='Order' %}selected{% endif %}>Order a Job</option>            
+                                        <option value="Quote" {% if order_type is defined and order_type=='Quote' %}selected{% endif %}>Get Quotes</option>            
+                                        <option value="Info" {% if order_type is defined and order_type=='Info' %}selected{% endif %}>Send me Info</option>
+                                    </select>                            
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Business:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    {% set industrytypevalue ='' %}
+                                    {% for jobtype1 in jobtype %}
+                                        {% set counter= loop.index %}
+                                        {% for jobtypeId1 in jobtypeId %}
+                                            {% if counter == loop.index %}
+                                                {% if industrytype is defined and jobtypeId1 == industrytype %}
+                                                    {% set industrytypevalue= jobtype1 %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+
+                                    <label class="control-label non-edit business_label" name="job[vendors][]">{% if business_package is defined %}{{business_package}}{% endif %}</label>
+                                    <select name="job[vendors][]" class="form-control placeholder-no-fix job_business editing" aria-invalid="false">
+                                         <option value="">- Select a Business -</option>   
+                                         {% if business_package is defined %}
+                                            <option value="{{business_packageId}}" selected>{{business_package}}</option>
+                                         {% endif %}
+                                    </select>                  
+                                </div>    
+
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Name:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label non-edit" name="job[contacts][0][contactName]">{% if client.name is defined %}{{client.name}}{% endif %}</label>
+                                    <input type="text" {% if client.name is defined %}value="{{client.name}}"{% endif %} name="job[contacts][0][contactName]" class="job_contacts_0_contactName form-control placeholder-no-fix editing" placeholder="Name" autofocus="" aria-required="true" aria-invalid="true">
+
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Phone:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label non-edit" name="job[contacts][0][phone]">{% if client.phone is defined %} {{client.phone}} {% endif %}</label>
+                                    <input type="text" {% if client.phone is defined %}value="{{client.phone}}"{% endif %} name="job[contacts][0][phone]" class="job_contacts_0_phone form-control placeholder-no-fix editing" placeholder="Phone" autofocus="" aria-required="true" aria-invalid="true" >
+
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Email:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label non-edit" name="job[contacts][0][email]">{% if client.email is defined %}{{client.email}}{% endif %}</label>
+                                    <input type="text" {% if client.email is defined %}value="{{client.email}}"{% endif %} name="job[contacts][0][email]" class="job_contacts_0_email form-control placeholder-no-fix editing" placeholder="Email" autofocus="" aria-required="true" aria-invalid="true">
+
+                                </div>  
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Company:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label non-edit" name="job[contacts][0][company]">{% if client.company is defined %} {{client.company}} {% endif %}</label>
+                                    <input type="text" {% if client.company is defined %}value="{{client.company}}"{% endif %} name="job[contacts][0][company]" class="job_contacts_0_company form-control placeholder-no-fix editing" placeholder="Phone" autofocus="" aria-required="true" aria-invalid="true" >
+
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Contact By:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label non-edit" name="job[contacts][0][contactBy]">{{'Phone'}}</label>
+                                    <select name="job[contacts][0][contactBy]" class="job_contacts_0_contactBy form-control placeholder-no-fix ajax-email editing" aria-required="true" aria-invalid="false" aria-describedby="job_contacts_0_contactBy-error">            
+                                        <option value="phone" {% if client.contact is defined and client.contact=='phone' %}selected{% endif %}>Phone</option>            
+                                        <option value="email" {% if client.contact is defined and client.contact=='email' %}selected{% endif %}>Email</option>            
+                                        <option value="text" {% if client.contact is defined and client.contact=='text' %}selected{% endif %}>Text</option>            
+                                        <option value="do_not_contact" {% if client.contact is defined and client.contact=='do_not_contact' %}selected{% endif %}>Do not contact</option>
+                                    </select>    
+                                </div>     
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="form-editable">
+                            {% if (restrict_address_ask is defined and restrict_address_ask ==1 ) or (restrict_address_require is defined and restrict_address_require ==1 ) or (type == 'Transaction') %}
+                                <div class="form-group row">
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Address:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" {% if address is defined %}value="{{address}}"{% endif %} name="job[jobProperty][property][address][street]" class="job_jobProperty_property_address_street form-control placeholder-no-fix editing" placeholder="Address" autofocus="" autocomplete="off" aria-invalid="false">
+                                </div>      
+
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">City:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text"  {% if city is defined %}value="{{city}}"{% endif %} name="job[jobProperty][property][address][city]" class="job_jobProperty_property_address_city form-control placeholder-no-fix editing" placeholder="City" autofocus="" autocomplete="off" aria-invalid="false">
+                                </div>
+                            </div>
+                            
+                                <div class="form-group row">
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">State:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" {% if state is defined %}value="{{state}}"{% endif %} name="job[jobProperty][property][address][state]" class="job_jobProperty_property_address_state form-control placeholder-no-fix editing" placeholder="State" maxlength="2" autofocus="" autocomplete="off" aria-invalid="false">
+                                </div>      
+
+                                <div class="col-md-2">
+                                    <label class="control-label style-label">Zip:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" {% if zip is defined %}value="{{zip}}"{% endif %}  name="job[jobProperty][property][address][zip]" class="job_jobProperty_property_address_zip form-control placeholder-no-fix editing" placeholder="Zip Code" maxlength="5" autofocus="" autocomplete="off">                            
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="form-group row">
+                                {% if restrict_address_ask is defined and restrict_address_ask ==1 or (restrict_address_require is defined and restrict_address_require ==1 ) or (type == 'Transaction') %}
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label" style="text-align:left">Unit Number:</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text"  name="job[jobProperty][mlsBoard]" class="job_jobProperty_property_address_state form-control placeholder-no-fix editing" placeholder="Unit Number" autofocus="" autocomplete="off" aria-invalid="false">
+                                    </div>      
+                                {% endif %}
+                                {% if restrict_other_ask is defined and restrict_other_ask ==1 or (restrict_other_require is defined and restrict_other_require ==1 ) or (type == 'Transaction') %}
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label" style="text-align:left">Property Type:</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        {% set propertytypevalue= '' %}
+                                        {% for key, propertytype in property %}
+                                            {% if property_value is defined and property_value == key %}  
+                                                {% set propertytypevalue= propertytype %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <select name="job[jobProperty][property][type]" class="job_jobProperty_property_type form-control placeholder-no-fix editing" autofocus="">
+                                            <option value="">Property Type</option>
+                                            {% for key, propertytype in property %}
+                                               <option value="{{key}}" {% if property_value is defined and property_value == key %} selected {% endif %}>{{propertytype}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div> 
+                                {% endif %}
+                            </div>
+                            {% if restrict_other_ask is defined and restrict_other_ask ==1 or (restrict_other_require is defined and restrict_other_require ==1 ) or (type == 'Transaction') %}
+                                <div class="form-group row">
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label">Year Built:</label>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <input type="text" name="job[jobProperty][yearBuilt]" class="form-control placeholder-no-fix job_jobProperty_yearBuilt editing" placeholder="Year Built" autofocus="" {% if year is defined and year is not empty %} value="{{year}}"{% endif %}>                            
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if restrict_note_ask is defined and restrict_note_ask ==1 or (restrict_note_require is defined and restrict_note_require ==1 ) or (type == 'Transaction') %}
+                                <div class="form-group row">
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label">Notes:</label>
+                                    </div>
+
+                                    <div class="col-md-10">
+                                        <textarea name="note" class="form-control" rows="2" placeholder="Enter notes about this job." aria-invalid="false"></textarea>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if restrict_image_ask is defined and restrict_image_ask ==1 or (restrict_image_require is defined and restrict_image_require ==1 ) or (type == 'Transaction') %}
+                                <div class="form-group row">
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label">image file :</label>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <input type="file" name="images">
+                                        <input type="hidden" name="imagename" class="form-control">
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if restrict_event_ask is defined and restrict_event_ask ==1  or (restrict_event_require is defined and restrict_event_require ==1 ) or (type == 'Transaction') %}
+                                <div class="form-group row">
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label">Event Name:</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" name="job[events][0][title]" class="form-control placeholder-no-fix job_events_0_title editing" placeholder="">
+                                    </div>      
+
+                                    <div class="col-md-2">
+                                        <label class="control-label style-label">Date:</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" name="job[events][0][time]" class="form-control placeholder-no-fix date-picker job_events_0_time editing" placeholder="MM/DD/YYYY" autofocus="" required="" aria-required="true" aria-invalid="true">
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-validation/js/jquery.validate.min.js') }}"></script>
+    <script src="https://jqueryvalidation.org/files/dist/additional-methods.min.js"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+            
+            var $form = $(".job_modal").find('form').find('.form-non-editable');
+            var $form2 = $(".job_modal").find('form').find('.form-editable');
+            var $form1 =  $(".job_modal").find('form');
+            var isReadonly  = $form.hasClass('is-readonly');
+            $form1.find('.modal-body').find('input,textarea,select').prop('disabled', isReadonly);
+            $form.find('.non-edit').css("display","block");
+            $form1.find('.non-edit').css("display","block");
+            $form.find('.editing').css("display","none");
+            $form2.find('.editing').css("display","block");
+            $(".date-picker").datepicker().datepicker("setDate", "0");
+            
+            $form1.find('.job_industryType, .job_orderType').change(function () {
+                jobIndustryTypeValue = $(".job_industryType");
+                if (jobIndustryTypeValue.val() === "" || $(".job_orderType").val() === "") {
+                    //$("#vendor_slider_wrapper h4").text("Please select the Job type and Order type to fetch matching Vendors");
+                   // return false;
+                }
+                
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('vendor_selected_ajax') }}/" + jobIndustryTypeValue.val()+ '?job=true',
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    var length= response.vendors.length;
+                    $(".job_business").empty();
+                  for(var i=0;i<length;i++){
+                      $(".job_business").append("<option value="+response.vendorsId_array[i]+">"+response.vendors[i]+"</option>");
+                  }
+                })
+                
+            });
+            
+            
+            jobIndustryTypeValue = $form.find(".job_industryType");
+            {#if(jobIndustryTypeValue.val()!=''){
+            {% if business_package is defined %}
+                {% set business_package= business_package %}
+            {% else %}
+                {% set business_package= 0 %}
+            {% endif %}
+            var business_package= {{business_package}};
+            if(business_package){
+                $.ajax({
+                        method: "GET",
+                        url: "{{ path('vendor_slider_ajax1') }}/" + jobIndustryTypeValue.val(),
+                        dataType: "json"
+                    })
+                    .done(function (response) {
+                        var length= response.vendors.length;
+                         $(".business_label").html('-');
+                         var today = new Date();
+                         $(".date-picker").closest('.col-md-3').find('label').html(today.getDate()+'-'+(today.getMonth()+1)+'-'+today.getFullYear());
+                      for(var i=0;i<length;i++){
+                          if(response.vendorsId_array[i]==business_package){
+                              var select= 'selected';
+                             
+                          }
+                          else{
+                              var select='';
+                          }
+                           $(".business_label").html(response.vendors[i]);
+                          $(".job_business").append("<option value="+response.vendorsId_array[i]+" "+select+">"+response.vendors[i]+"</option>");
+                      }
+                    })
+                }
+            }
+            else{
+                $(".business_label").html('-');
+                var today = new Date();
+               
+                $(".date-picker").closest('.col-md-3').find('label').html(today.getDate()+'-'+(today.getMonth()+1)+'-'+today.getFullYear());
+            }#}
+            $('.edit').on('click', function(){
+                var $form = $(".job_modal").find('form').find('.form-non-editable');
+                var $form2 = $(".job_modal").find('form').find('.form-editable');
+                var $form1 =  $(".job_modal").find('form');
+                $form.find('.non-edit').css("display","none");
+                $form.find('.editing').css("display","block");
+                $(".date-picker").datepicker().datepicker("setDate", "0");
+                $("#mydate").datepicker({ dateFormat: "yy-mm-dd"}).datepicker("setDate", "0");
+            });
+            
+            $('.cancel').on('click', function(){
+                var $form = $(this).closest('form');
+                $form.toggleClass('is-readonly is-editing');
+                $form.find('.form-non-editable').find('input,textarea,select').prop('disabled', true);
+            });
+            
+            $('.save').unbind().click(function() {
+                var _this= $(this);
+                var $form = $(".job_modal").find('form').find('.form-non-editable');
+                var $form2 = $(".job_modal").find('form').find('.form-editable');
+                var $form1 =  $(".job_modal").find('form');
+                $form.find('.non-edit').css("display","none");
+                $form.find('.editing').css("display","block");
+                $(".date-picker").datepicker().datepicker("setDate", "0");
+               // var inputFile = document.getElementsByClassName('images');
+               var objecttype= $(".objecttype").val();
+               var objectid= $(".objectid").val();
+               
+               
+                var value= $(this).closest("form.modal-form").valid();
+                if(value){
+                    var data = new FormData();
+                    if($('input[type=file]').length > 0 && $('input[type=file]')[0].files[0]){
+                       var file = $('input[type=file]')[0].files[0]; 
+                       data.append('data', file, file.name);
+                    }
+                    var file1 = $(this).closest('form').serialize();
+                    data.append('data', file1);
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('job_add_new') }}/"+objecttype+"/"+objectid,
+                        data: data,
+                        processData: false,
+                        contentType: false,
+                        cache: false
+                    })
+                    .done(function (response) {
+                       // return false;
+                       if(response){
+                           
+                           if(_this.closest('.job_modal').hasClass("last")){
+                                $("form[name='checkout']").submit();
+                            }
+                           var package_array= $(".package_array").val();
+                           if(package_array!= null){
+                                var package_new= package_array;
+                                var package_array1=[];
+                                var final=[];
+                                var value_array=[];
+                                 package_array.split(',').forEach(function (package_array) {
+                                     package_array1.push(parseInt(package_array))
+                                 });
+                                var split= package_new.split(',');
+                                value_array= package_array1;
+                                for(var i=1;i<package_array1.length;i++){
+                                    if(i==1){
+                                         $('.job_modal').css("display","none");
+                                         $('#ajax'+package_array1[i]).css("display","block");
+                                         var index= value_array.indexOf(package_array1[i]);
+                                         if(index > -1){
+                                             value_array.splice(index,1);
+                                         }
+                                         $(".package_array").val(value_array);
+                                     }
+                                }
+                                
+                            }
+                            else{
+                                location.reload();
+                            }
+                       }
+                    })
+                }
+                    
+                });
+                
+            //validate all the form(as the no. of package in cart) before submiting the job form
+            $('form.modal-form').each(function () {
+                $(this).validate({
+                    errorElement: 'span', //default input error message container
+                    errorClass: 'help-block', // default input error message class
+                    focusInvalid: false, // do not focus the last invalid input
+                    ignore: "",
+                    rules: {
+                        "job[industryType]": {
+                            required: true
+                        },
+                        "job[orderType]": {
+                            required: true
+                        },
+                        "job[vendors][]":{
+                            required: true
+                        },
+                        "job[jobProperty][property][address][zip]":{
+                            digits: true
+                        },
+                        {% if restrict_other_require is defined and restrict_other_require == 1 %}
+                            "job[jobProperty][property][type]":{
+                                required: true
+                            },
+                            "job[jobProperty][yearBuilt]":{
+                                required:true,
+                                maxlength:4,
+                                digits: true,
+                                minlength:4
+                            },
+                        {% endif %}
+                         {% if restrict_event_require is defined and restrict_event_require == 1 %}
+                            "job[events][0][title]":{
+                                required: true
+                            },
+                        {% endif %}
+                        {% if restrict_address_require is defined and restrict_address_require == 1 %}
+                            "job[jobProperty][property][address][street]":{
+                                required: true
+                            },
+                            "job[jobProperty][property][address][city]":{
+                                required:true
+                            },
+                            "job[jobProperty][property][address][state]":{
+                                required:true
+                            },
+                        {% endif %}
+                       
+                        "job[contacts][0][phone]":{
+                            minlength:7,
+                        },
+                        "job[contacts][0][email]":{
+                            email: true
+                        },
+                        {% if restrict_note_require is defined and restrict_note_require == 1 %}
+                            "note":{
+                              required:true  
+                            },
+                        {% endif %}
+                        {% if restrict_image_require is defined and restrict_image_require == 1 %}
+                            "images":{
+                                required:true,
+                                accept: "image/jpeg, image/png, application/pdf, image/jpg"
+                            },
+                        {% endif %}
+                        {% if (restrict_image_require is defined and restrict_image_require == 0) and (restrict_image_ask is defined and restrict_image_ask == 1) %}
+                            "images":{
+                                accept: "image/jpeg, image/png, application/pdf, image/jpg"
+                            },
+                        {% endif %}
+                    },
+                    highlight: function(element) { // hightlight error inputs
+                        $(element).removeClass('modal-success'); 
+                        $(element).addClass('modal-error'); // set error class to the control group
+                    },
+                    unhighlight: function (element) {
+                        $(element).removeClass('modal-error'); 
+                        $(element).addClass('modal-success');
+                    },
+                    errorPlacement: function (error, element) {
+                        $("span.error").html("");
+                        $("<span class='error'>"+error.text()+"</span>").insertAfter(element);
+                    },
+                    submitHandler : function(form) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+</div>

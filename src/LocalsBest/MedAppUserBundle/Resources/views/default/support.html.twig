@@ -1,0 +1,38 @@
+<div class="modal-content" id="support-modal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h3>
+            Easycloses Support
+            {% if business.id not in [179] and checker.forAddon('concierge service', app.user) %}
+                <span class="pull-right" style="margin-right:5px;"><i class="icon-phone"></i> (888) 740-0550</span>
+            {% endif %}
+        </h3>
+    </div>
+    <form id="support-form">
+        <div class="modal-body">
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">{{ form_label(form.type) }}</label>
+                    <div class="col-sm-8">
+                        {{ form_widget(form.type) }}
+                    </div>
+                </div>
+            </div><br/>
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Support Notes</label>
+                    <div class="col-sm-8">
+                        {{ form_widget(form.note) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-check"></i> Submit</button>
+            <button type="button" id="wait" style="display: none;" disabled="disabled" class="btn btn-success">
+                <i class="fa fa-spin fa-spinner"></i> Please wait...
+            </button>
+        </div>
+    {{ form_end(form) }}
+</div>

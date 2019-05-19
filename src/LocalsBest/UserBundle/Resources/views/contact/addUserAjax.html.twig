@@ -1,0 +1,57 @@
+{% block javascripts %}
+<script>
+        $(function () {
+            addContactBYAjax();
+        });
+
+        function addContactBYAjax()
+        {
+            $("a[data-action='ajax']").click(function () {
+                var confirmMessage = $(this).data('confirm');
+
+                if (confirm(confirmMessage)) {
+                    var url = $(this).attr('href');
+
+                    $.get(url).done(function (resp) {
+                        if ($.parseJSON(resp).message) {
+                            alert($.parseJSON(resp).message);
+                            addContactBYAjax();
+                        }
+                    });
+                }
+
+                return false;
+            });
+        }
+    </script>
+
+{%endblock%}
+{% if user is not null %}
+    <div class="profile-sidebar">
+        <!-- PORTLET MAIN -->
+        <div class="portlet light profile-sidebar-portlet">
+            <!-- SIDEBAR USERPIC -->
+            <div class="profile-userpic">
+                <img src="{{ vich_uploader_asset(user, 'file') }}" class="img-responsive" alt="{{user.filename}}">
+            </div>
+            <!-- END SIDEBAR USERPIC -->
+            <!-- SIDEBAR USER TITLE -->
+            <div class="profile-usertitle">
+                <div class="profile-usertitle-name">
+                    {{user.firstname}}&nbsp;{{user.lastname}}
+                </div>
+                <div class="profile-usertitle-job">
+                    {% if user.owner.type is defined and user.owner.type is not null%}
+                        {{user.owner.type.name}}
+                    {% endif %}
+                </div>
+            </div>
+            <!-- END SIDEBAR USER TITLE -->
+            <!-- SIDEBAR BUTTONS -->
+            <div class="profile-userbuttons">
+                <a id="add_business_contact" class="btn  green-haze btn-sm" href="{{ path('contact_add_business',{'id': user.id})}}"><i class="fa fa-plus"></i>Add</a>
+            </div>
+        </div>
+    </div>    
+{% endif%}
+

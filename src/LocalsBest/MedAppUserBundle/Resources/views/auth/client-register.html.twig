@@ -1,0 +1,200 @@
+{% extends "::client-blank.html.twig" %}
+
+{% form_theme form _self %}
+
+{% block checkbox_widget %}
+    {% spaceless %}
+        <input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} />
+    {% endspaceless %}
+{% endblock checkbox_widget %}
+
+{% block title %}
+    Client Register for {{ business.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-3 col-sm-offset-3">
+            <div class="content">
+                <form class="login-form" action="{{ path('login_check', {'slug': business.slug}) }}" method="post">
+
+                    <h3 class="form-title">Login to your account</h3>
+                    <div class="alert alert-danger display-hide">
+                        <button class="close" data-close="alert"></button>
+                        <span> Enter any Useremail and password. </span>
+                    </div>
+                    <div class="form-group ">
+                        <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                        <label class="control-label visible-ie8 visible-ie9">Username</label>
+                        <div class="input-icon">
+                            <i class="fa fa-user"></i>
+                            <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="_username" required="true"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label visible-ie8 visible-ie9">Password</label>
+                        <div class="input-icon">
+                            <i class="fa fa-lock"></i>
+                            <input class="form-control placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="_password" required="true"/>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <label class="rememberme mt-checkbox mt-checkbox-outline">
+                            <input type="checkbox" id="remember_me" name="_remember_me" /> Remember me
+                            <span></span>
+                        </label>
+                        <button type="submit" class="btn green pull-right">
+                            Login <i class="m-icon-swapright m-icon-white"></i>
+                        </button>
+                    </div>
+                    <div class="forget-password">
+                        <h4>Forgot your password ?</h4>
+                        <p>
+                            no worries, click <a href="{{ path('forget_password') }}" >
+                                here </a>
+                            to reset your password.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="content">
+            {{ form_start(form, {attr: {class: 'register_form'} }) }}
+                {{ form_errors(form) }}
+                <h3>Sign Up</h3>
+                <p>
+                    Enter your personal details below:
+                </p>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">First Name</label>
+                    <div class="input-icon">
+                        <i class="fa fa-font"></i>
+                        {{ form_widget(form.firstName) }}
+                        <span class="help-block">
+                            {{ form_errors(form.firstName) }}
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Last Name</label>
+                    <div class="input-icon">
+                        <i class="fa fa-font"></i>
+                        {{ form_widget(form.lastName) }}
+                        <span class="help-block">
+                            {{ form_errors(form.lastName) }}
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Email</label>
+                    <div class="input-icon">
+                        <i class="fa fa-envelope"></i>
+                        {% for email in form.contact.emails %}
+                            {{ form_widget(email.email) }}
+                            <span class="help-block">
+                                {{ form_errors(email.email) }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Phones</label>
+                    <div class="input-icon">
+                        <i class="fa fa-phone"></i>
+                        {% for phone in form.contact.phones %}
+                            {{ form_widget(phone.number) }}
+                            <span class="help-block">
+                                    {{ form_errors(phone.number) }}
+                                </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Phone Type</label>
+                    <div class="input-icon">
+                        {% for phone in form.contact.phones %}
+                            {{ form_widget(phone.type) }}
+                            <span class="help-block">
+                                    {{ form_errors(phone.type) }}
+                                </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group {% if isClientBusinessNameError == true %}error{% endif %}">
+                    <label class="control-label visible-ie8 visible-ie9">Business Name</label>
+                    <div class="input-icon">
+                        <i class="fa fa-bank"></i>
+                        <input class="form-control placeholder-no-fix" name="client_business_name" placeholder="Business Name" required="required">
+                        {% if isClientBusinessNameError == true %}
+                            <span class="help-block">
+                                <ul>
+                                    <li>Business Name is required field</li>
+                                </ul>
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <p>
+                    Create login credentials for your new account
+                </p>
+
+                <div class="form-group {% if form.username.vars.errors|length %}has-error{% endif %}">
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <div class="input-icon">
+                        <i class="fa fa-user"></i>
+                        {{ form_widget(form.username)}}
+                        <span class="help-block">
+                                {{ form_errors(form.username) }}
+                            </span>
+                    </div>
+                </div>
+                <div class="form-group {% if form.password.first.vars.errors|length %}has-error{% endif %}">
+                    <div class="input-icon">
+                        <i class="fa fa-lock"></i>
+                        {{ form_widget(form.password.first) }}
+                        <span class="help-block">
+                                {{ form_errors(form.password.first) }}
+                            </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-lock"></i>
+                        {{ form_widget(form.password.second) }}
+                        <span class="help-block">
+                                {{ form_errors(form.password.second) }}
+                            </span>
+                    </div>
+                </div>
+                <div class="hidden">
+                    {{ form_widget(form.role) }}
+                </div>
+                <div class="form-group">
+                    <label class="rememberme mt-checkbox mt-checkbox-outline">
+
+                        {{ form_widget(form.tnc) }}
+                        I agree to the <a href="#"> Terms of Service </a> and <a href="#"> Privacy Policy </a>
+                        <span></span>
+                    </label>
+                    <div id="register_tnc_error"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Sign Up <i class="m-icon-swapright m-icon-white"></i>
+                    </button>
+
+                </div>
+                {{ form_end(form) }}
+
+                <p>
+                    Please contact Easy Closes at 239-443-3020 for help signing in or registering
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

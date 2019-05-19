@@ -1,0 +1,15 @@
+.row-fluid {
+    margin: 0 15px;
+}
+
+.thumbnails .vendor-box {
+    width: 170px;
+    display: inline-block;
+    float: left;
+    margin: 5px;
+}
+
+.scroll-bar {
+    overflow-y: scroll;
+    height: 285px;
+}

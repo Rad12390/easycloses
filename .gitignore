@@ -1,0 +1,17 @@
+/app/config/parameters.yml
+/web/bundles/
+/app/cache/*
+/app/logs/*
+!app/cache/.gitkeep
+!app/logs/.gitkeep
+/vendor/
+/composer.phar
+.idea/
+web/uploads/
+web/facebook/*
+composer.lock
+/nbproject/*
+Vagrantfile
+.vagrant
+/app/sessions/
+web/.htaccess

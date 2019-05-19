@@ -1,0 +1,68 @@
+{% extends '::base.html.twig' %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Items
+    </li>
+{% endblock %}
+
+{% block content -%}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-puzzle-piece"></i> Items
+                <span>{{ tooltip_text.getText('Items','header')|raw }}</span>
+            </div>
+            <div class="actions">
+                <a class="btn red" href="{{ path('items_new') }}">
+                    <i class="fa fa-plus"></i> Create New
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Inventory</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        {% if app.user.role.level == 1 %}
+                            <th>Business</th>
+                            <th>User</th>
+                            <th>Plugin {{ tooltip_text.getText('Plug-in')|raw }}</th>
+                        {% endif %}
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for entity in entities %}
+                        <tr>
+                            <td>{{ entity.title }}</td>
+                            <td>{{ entity.quantity }}</td>
+                            <td>{{ entity.typeText }}</td>
+                            <td>{{ entity.statusText }}</td>
+                            {% if app.user.role.level == 1 %}
+                                <td>{{ entity.createdBy.businesses.first.name }}</td>
+                                <td>{{ entity.createdBy.fullName }}</td>
+                                <td>{{ entity.plugin }}</td>
+                            {% endif %}
+                            <td>{% if entity.createdAt %}{{ entity.createdAt|date('m/d/Y H:i') }}{% endif %}</td>
+                            <td>
+                                <a class="btn btn-xs btn-info"
+                                   href="{{ path('items_show', { 'id': entity.id }) }}">show</a>
+                                <a class="btn btn-xs btn-warning" href="{{ path('items_edit', { 'id': entity.id }) }}">edit</a>
+                                <a class="btn btn-xs btn-success"
+                                   href="{{ path('items_new', { 'copy_of': entity.id }) }}">copy</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,34 @@
+tags:
+    path:     /
+    defaults: { _controller: "LocalsBestShopBundle:Tag:index" }
+
+tags_show:
+    path:     /{id}/show
+    defaults: { _controller: "LocalsBestShopBundle:Tag:show" }
+
+tags_new:
+    path:     /new
+    defaults: { _controller: "LocalsBestShopBundle:Tag:new" }
+
+tags_create:
+    path:     /create
+    defaults: { _controller: "LocalsBestShopBundle:Tag:create" }
+    methods: [POST]
+
+tags_edit:
+    path:     /{id}/edit
+    defaults: { _controller: "LocalsBestShopBundle:Tag:edit" }
+
+tags_update:
+    path:     /{id}/update
+    defaults: { _controller: "LocalsBestShopBundle:Tag:update" }
+    methods: [POST|PUT]
+
+tags_delete:
+    path:     /{id}/delete
+    defaults: { _controller: "LocalsBestShopBundle:Tag:delete" }
+    methods: [POST|DELETE]
+
+tags_add_package:
+    path:     /package/addTag
+    defaults: { _controller: "LocalsBestShopBundle:Tag:createTagsPackage" }

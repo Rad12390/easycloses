@@ -1,0 +1,12 @@
+Hello {{ share.user.firstname }},
+<br/>
+<br/>
+{{ note.note }}
+<br/>
+<br/>
+<a href="{{ url('note_share_transaction', {'objectType': share.objectType, 'objectId': share.objectId}) }}">Click here to see note</a>.
+<br/>
+<br/>
+{{ share.createdBy.firstname}}&nbsp;{{ share.createdBy.lastname}} <br>
+{{ share.createdBy.primaryEmail.email}}<br>
+{{ share.createdBy.primaryPhone.number}}

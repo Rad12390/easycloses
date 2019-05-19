@@ -1,0 +1,78 @@
+{% extends '::base.html.twig' %}
+{% block stylesheets %}
+    <link href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+    <style>
+        #example_wrapper{margin-top: 15px;}
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    
+    <script>
+        $(document).ready(function(){
+            //datatable for better package filteration
+            var dTable = $('#example').dataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                columns: [
+                    null,
+                    null,
+                    {
+                      className:"comments"
+                    },
+                    null,
+                    null,
+                    null,
+                ],
+                "order": [[ 3, "desc" ]],
+                ajax: {
+                    url: "{{path('custom_quotes_datatable')}}?{{ params|raw }}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        windowForLogout(data)
+                    },  
+                },
+                dom: 'lfBtrip',
+                buttons: [
+                   
+                ],
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-shopping-cart"></i> Custom Quotes <span>{{ tooltip_text.getText('Custom Quote','header')|raw }}</span>
+                
+            </div>
+            <div class="actions"></div>
+        </div>
+        <div class="portlet-body">
+                    
+            <table style="width: 100%;" id="example" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th> Package name </th>
+                        <th> Quoted User </th>
+                        <th> Quote Comment </th>
+                        <th> Quoted Date </th>
+                        <th> Package Creation Date </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+{% endblock %}

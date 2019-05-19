@@ -1,0 +1,149 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Documents for Approval{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Documents For Approve
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}"/>
+
+    <style>
+        div.table-responsive {
+            overflow-x: inherit !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            var table = jQuery('#example').DataTable({
+                columnDefs: [ {
+                    targets  : 'no-sort',
+                    orderable: false
+                }],
+                dom: 'lfrtip',
+                processing: true,
+                stateSave: true,
+                responsive: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ path('datatable_doc_for_approve_limit') }}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        
+                        windowForLogout(data)
+                    }
+                },
+                searchDelay: 800,
+
+                fnDrawCallback: function() {
+                    $.ajax({
+                        method: 'GET',
+                        dataType: "json",
+                        url: "{{ path('ajax_session_save')}}",
+                        data: {
+                            order: this.fnSettings().aaSorting
+                        }
+                    }).done(function (data) {
+
+                    });
+                }
+            });
+
+            table.on( 'search.dt', function () {
+                $.ajax({
+                    method: 'GET',
+                    dataType: "json",
+                    url: "{{ path('ajax_session_save')}}",
+                    data: {
+                        filter: $('div.dataTables_filter input').val()
+                    }
+                }).done(function (data) {
+
+                });
+            });
+
+            $.ajax({
+                method: 'GET',
+                dataType: "json",
+                url: "{{ path('ajax_session_save')}}",
+                data: {
+                    filter: ''
+                }
+            }).done(function (data) {
+
+            });
+        });
+    </script>
+
+{% endblock %}
+
+
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-file-text-o"></i> Documents for Approval
+            </div>
+            <div class="tools">
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table style="width: 100%;" id="example" class="table table-bordered table-striped">
+                    <thead class="flip-content">
+                        <tr>
+                            <th width="2%" class="no-sort"></th>
+                            <th width="3%">Status</th>
+                            <th width="25%">Address</th>
+                            <th width="25%">Name</th>
+                            <th width="10%">Agent Name</th>
+                            <th width="8%">Closing Date</th>
+                            <th width="5%" class="no-sort">Actions</th>
+                        </tr>
+                    </thead>
+
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- End: life time stats -->
+
+    <div class="modal fade" id="basic" tabindex="-1" role="basic" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">Modal Title</h4>
+                </div>
+                <div class="modal-body">
+                    Modal body goes here
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn blue">Save changes</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+{% endblock %}	

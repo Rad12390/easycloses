@@ -1,0 +1,73 @@
+{% set color = '' %}
+{% set level = 0 %}
+{% set break = false %}
+{% for documentType in transaction.listing.documentTypes %}
+    {% if break != true %}
+        {% if documentType.isRequired == true and documentType.document is not null %}
+            {% if (documentType.approved is null or documentType.approved == 0) and (documentType.rejected is null or documentType.rejected ==0) %}
+                {% if level <= 2 %}
+                    {% set color = '#ffb848'%}
+                    {% set level = 2 %}
+                {% endif %}
+            {% elseif documentType.approved == true %}
+                {% if level <= 1  %}
+                    {% set color = '#3cc051'%}
+                    {% set level = 1 %}
+                {% endif %}
+            {% elseif documentType.rejected == true %}
+                {% set color = '#000000'%}
+                {% set break = true %}
+            {% endif %}
+        {% elseif documentType.isRequired == true and documentType.document is null  %}
+            {% set color = '#d84a38'%}
+            {% set break = true %}
+        {% endif%}
+    {% endif%}
+{% endfor %}
+{% if color == '#3cc051' and transaction.status == 'Sold_Paid' %}
+    {% set color = '#4d90fe'%}
+{% elseif color == '#3cc051' and transaction.status == 'Leased_Paid' %}
+    {% set color = '#4d90fe'%}
+{% endif%}
+
+<tr data-id="{{ transaction.id }}">
+    <td><div class="circle-small attach_status_color" style="background-color:{{ color }}"></div></td>
+    <td>{{ transaction.listing.status }}</td>
+    <td>{{ transaction.transactionProperty.property.address.street}}, {{transaction.transactionProperty.property.address.city}},
+        {{transaction.transactionProperty.property.address.state}}, {{transaction.transactionProperty.property.address.zip}}</td>
+    <td><a id="btn-{{transaction.id}}" href="{{ path('transaction_view', {'id': transaction.id}) }}" >{{ transaction.category }}</a></td>
+    {% if app.user.role.role != 'ROLE_AGENT' %}
+        <td >{{ transaction.listing.listingAgentContact.contactName}}</td>
+    {% endif %}
+    <td >{{ transaction.listing.represent }}</td>
+    <td >{% for date in transaction.listing.listingContacts %}{% if date.title|lower == 'Expiration Date'|lower %}{{ date.time|date('m-d-Y') }}{% endif %}{% endfor%}</td>
+    <td>{{ transaction.listing.moneyBox.contractPrice }}</td>
+    <td >{{ transaction.listing.sellerContact.contactName }}</td>
+    <td >{{ transaction.transactionProperty.mlsNumber }}</td>
+    <td >{{ transaction.updated|date('m-d-Y h:i') }}</td>
+    <td >
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-gear"></i>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu right-aligned" role="menu">
+                <li>
+                    <a href="{{ path('transaction_edit_listing', {'id': transaction.id}) }}" >
+                    Edit</a>
+                </li>
+                <li>
+                    <a href="{{ path('transaction_delete', {'id': transaction.id}) }}" >
+                    Archive</a>
+                </li>
+                <li>
+                    {% if transaction.listing.represent == 'Seller'%}
+                    <a  href="{{ path('transaction_edit_closing_by_type', {'transaction': transaction.id ,'type': 'Buyer'}) }}" >Add Buyer</a>
+                    {% elseif transaction.listing.represent == 'Landlord'%}
+                    <a  href="{{ path('transaction_edit_closing_by_type', {'transaction': transaction.id ,'type': 'Tenant'}) }}" >Add Tenant</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>

@@ -1,0 +1,95 @@
+ec_shop_main_page:
+    path:     /
+    defaults: { _controller: LocalsBestShopBundle:Sku:list }
+
+LocalsBestShopBundle_stripe:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/stripe.yml"
+    prefix:   /stripe
+
+LocalsBestShopBundle_skus:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/sku.yml"
+    prefix:   /products
+
+LocalsBestShopBundle_comments:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/comment.yml"
+    prefix:   /comments
+
+LocalsBestShopBundle_tags:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/tag.yml"
+    prefix:   /tags
+
+LocalsBestShopBundle_combo:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/combo.yml"
+    prefix:   /combos
+
+LocalsBestShopBundle_items:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/item.yml"
+    prefix:   /items
+
+LocalsBestShopBundle_packages:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/package.yml"
+    prefix:   /packages
+
+LocalsBestShopBundle_cart:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/cart.yml"
+    prefix:   /cart
+
+LocalsBestShopBundle_payment:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/payment.yml"
+    prefix:   /payment
+    
+LocalsBestShopBundle_summary:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/summary.yml"
+    prefix:   /summary
+
+LocalsBestShopBundle_order:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/order.yml"
+    prefix:   /orders
+
+
+LocalsBestShopBundle_categories:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/category.yml"
+    prefix:   /categories
+
+LocalsBestShopBundle_dispositions:
+    resource: "@LocalsBestShopBundle/Resources/config/routing/disposition.yml"
+    prefix:   /dispositions
+store:
+    path:     /store
+    defaults: { _controller: LocalsBestShopBundle:Cart:store }
+
+show:
+    path:     /show
+    defaults: { _controller: LocalsBestShopBundle:Cart:show }
+
+refund:
+    path:     /refund
+    defaults: { _controller: LocalsBestShopBundle:Order:refund}
+
+shop_sku_cancelsub:
+    path:     /cancelsub
+    defaults: { _controller: LocalsBestShopBundle:Order:cancelSub}
+
+custom_quotes:
+    path:     /customQuote/save/{id}
+    defaults: { _controller: LocalsBestShopBundle:Quote:customQuotes }
+    
+listing_custom_quotes:
+    path:     /products/customQuote
+    defaults: { _controller: LocalsBestShopBundle:Quote:customQuotesListing }
+    
+custom_quotes_datatable:
+    path:     /customQuote/datatable
+    defaults: { _controller: LocalsBestShopBundle:Quote:customQuotesDatatable }
+
+termsAndconditions:
+    path:     /terms/{mode}
+    defaults: { _controller: LocalsBestShopBundle:Terms:terms }
+    
+saveterms:
+    path:     /save-terms/{mode}
+    defaults: { _controller: LocalsBestShopBundle:Terms:saveTerms }
+    
+getTermStatus:
+    path:     /getTermStatus
+    defaults: { _controller: LocalsBestShopBundle:Terms:getTermStatus }

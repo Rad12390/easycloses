@@ -1,0 +1,93 @@
+{% extends "::empty.html.twig" %}
+
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.2/isotope.pkgd.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            var $grid = $('.grid').isotope({
+                // options
+                itemSelector: '.element-item',
+                layoutMode: 'fitRows'
+            });
+
+            // filter items on button click
+            $('.filter-button-group').on( 'click', 'li', function() {
+                var filterValue = $(this).attr('data-filter');
+                $grid.isotope({ filter: filterValue });
+            });
+
+            $("#all").trigger('click');
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-4 ">
+        <!-- BEGIN Portlet PORTLET-->
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    Categories
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="list-group filter-button-group">
+                    <li id="all" class="list-group-item" data-filter="*" style="cursor: pointer;">
+                        All
+                    </li>
+                    {% set categoryBlk = '' %}
+                    {% for category in categories if category.name != category %}
+                        {% set categoryBlk = category.name %}
+                        <li class="list-group-item" data-filter=".{{ category.name|lower|replace({' ': '_', '&': 'and'}) }}" style="cursor: pointer;">
+                            {{ category.name }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <!-- END Portlet PORTLET-->
+    </div>
+
+    <div class="col-md-8 ">
+        <!-- BEGIN Portlet PORTLET-->
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    Real Estate Service Directory
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="slimScrollDiv">
+                    <div class="scroller" data-rail-visible="1" data-rail-color="yellow" data-handle-color="#a1b2bd" data-initialized="1">
+                        <div class="row grid">
+                            {% for vendor in vendors %}
+                                <div class="col-md-3 text-center element-item {% for type in vendor.businesses[0].types %} {{ type.name|lower|replace({' ': '_', '&': 'and'}) ~' ' }} {% endfor %} ">
+                                    <!-- BEGIN Portlet PORTLET-->
+                                    <div class="portlet box blue-hoki">
+                                        <div class="portlet-title">
+                                            <div class="caption">
+                                                {{ vendor.businesses[0].name }}
+                                            </div>
+                                        </div>
+                                        <div class="portlet-body">
+                                            {% if vendor.businesses[0].filename is not empty and vendor.businesses[0].filename is not null %}
+                                                <img style="margin: 0 auto; height: 140px;" src="{{ vich_uploader_asset(vendor.businesses[0], 'file') }}" class="img-responsive" alt="{{ vendor.businesses[0].filename }}">
+                                            {% else %}
+                                                <img style="margin: 0 auto; height: 140px;" src="/images/empty-vendor.jpg" class="img-responsive" alt="{{ vendor.businesses[0].filename }}">
+                                            {% endif %}
+                                            {{ vendor.businesses[0].name }} <br>
+                                            <a href="{{ path('vendor_bio_ajax', {'vendorId': vendor.id}) }}" data-target="#ajax" data-toggle="modal">Bio</a><br>
+                                        </div>
+                                    </div>
+                                    <!-- END Portlet PORTLET-->
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END Portlet PORTLET-->
+    </div>
+{% endblock %}

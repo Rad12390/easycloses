@@ -1,0 +1,82 @@
+.header {
+  color: #b9c8e0;
+  background-color: #1d365d !important;
+  height: 72px;
+  position: relative;
+}
+.header .fa-home {
+  font-size: 30px;
+  line-height: 72px;
+}
+.header h1 {
+  line-height: 72px;
+}
+.header .header-title {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.nav-tabs .nav-link.active {
+  background-color: rebeccapurple;
+  color: whitesmoke;
+}
+h4 {
+  line-height: 30px;
+}
+#btn_add_sign_doc {
+  margin-top: 25px;
+}
+td,
+th {
+  font-size: 15px !important;
+}
+td.status {
+  width: 10%;
+}
+td.name {
+  /* width: 50%; */
+  color: #4087e2;
+  font-family: bold;
+  font-size: 20px !important;
+}
+td.action {
+  width: 30%;
+}
+.action-item {
+  cursor: pointer;
+}
+.editing {
+  display: inline-block;
+  vertical-align: middle;
+  background: red;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.published {
+  display: inline-block;
+  vertical-align: middle;
+  background: yellow;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #818231;
+}
+.signed {
+  display: inline-block;
+  vertical-align: middle;
+  background: green;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.approved {
+  display: inline-block;
+  vertical-align: middle;
+  background: blue;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}

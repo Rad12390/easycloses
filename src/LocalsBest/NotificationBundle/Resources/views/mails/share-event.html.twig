@@ -1,0 +1,8 @@
+Hello {{ share.user.firstname }},<br><br>
+A new Event has been shared with you by {{ share.createdBy.firstname}}&nbsp;{{ share.createdBy.lastname}} from {{ share.createdBy.businesses[0].name }}<br><br>
+Event Name: {{ event.title }}<br><br>
+Start Time: {{ event.time|date('m/d/Y H:m') }}<br><br>
+End Time: {{ event.endTime|date('m/d/Y H:m') }}<br><br>
+Event Type: {% if event.type == 'Custom' %}{{ event.custom }}{% else %}{{ event.type }}{% endif %}<br><br>
+Description: {{ event.description }}<br><br>
+<br>

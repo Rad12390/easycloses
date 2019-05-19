@@ -1,0 +1,307 @@
+{% extends '::ec-shop-layout.html.twig' %}
+
+{% form_theme comment_form 'bootstrap_3_layout.html.twig' %}
+
+{% block title %}
+    {{ entity.title }} | Products
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ asset('shop/bootstrap-star-rating/css/star-rating.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('shop/bootstrap-star-rating/js/star-rating.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.js') }}"></script>
+    <script src="{{ asset('shop/js/page-ec-product-detail.js', null, false, 3) }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-validation/js/jquery.validate.min.js') }}"></script>
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+        {% if success== false %}
+          <div class="col-md-12 restrict-view">
+              <b>You are not having enough permission to view </b>
+          </div>
+        {% else %}
+            <div class="col-md-9">
+
+                {% if app.user %}
+                    <div id="review-dialog" class="mfp-with-anim mfp-hide mfp-dialog clearfix">
+                        <h3>Add a Comment</h3>
+
+                        {{ form(comment_form) }}
+                    </div>
+                {% endif %}
+                <div class="box" style="border: 5px solid #7f898b;">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="fotorama" data-nav="thumbs" data-allowfullscreen="1" data-width="100%" data-height="300" data-thumbheight="80" data-thumbwidth="80">
+                                 <img src="{{ vich_uploader_asset(entity.package, 'file') }}" alt="{{ entity.title }}" title="{{ entity.title }}">
+                                {% for image in result %}
+                                    {% if image is not empty %}
+                                        <img src="{{image}}"/>
+                                    {% else %}
+                                        <img src="/shop/img/800x600.png"/>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="product-info box">
+                                {% if entity.comments|length > 0 %}
+                                    <ul class="icon-group icon-list-rating text-color" title="{{ entity.averageRating|round(1) }}/5 rating">
+                                        {{ entity.averageRating|round(1)|rating|raw }}
+                                    </ul>
+                                    <small><a href="#" class="text-muted">based on {{ entity.comments|length }} reviews</a></small>
+                                {% endif %}
+                                <h2>{{ entity.title }}</h2>
+                                <p>By {{entity.package.createdBy.owner}}</p>
+                                <p class="product-info-price">
+
+                                    {% if entity.package is not null and entity.package.type in [5, 6] %}
+                                    {% else %}
+                                        {% if entity.retailPrice == 0 %}
+                                            Free
+                                        {% else %}
+                                            ${{ entity.retailPrice|number_format }}
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                                {% if tags is not empty %}
+                                    <p style="border-bottom: 1px solid #d9d9d9; color: #2a8fbd; margin-bottom: 10px; padding-bottom: 10px;">
+                                        {% for tag in tags %}
+                                            <a href="#"><i class="fa fa-tag"></i> {{ tag.name }}</a>
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
+                                <p class="text-smaller text-muted">
+                                    {{ entity.shortDescription|raw }}
+                                </p>
+
+                                {% if entity.package is not null and entity.package.type in [5, 6] %}
+                                {% else %}
+                                    <ul style="list-style-type:none">
+                                        {% for price in entity.prices if (price.amount) >= 0 %}
+                                            <li>
+                                                <label>
+                                                    <input value="{{ price.id }}" {% if loop.first == true %}checked{% endif %} class="payment-type" type="radio" name="payment">
+                                                    {% if (price.amount) == 0 %}
+                                                        Free
+                                                    {% else %}
+                                                        ${{ entity.retailPrice|number_format }}
+                                                        {% if price.type == 'subscription' %}
+                                                            per
+                                                            {{ price.subscriptionType }}(s)
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+
+                                <ul class="list-inline">
+                                    {% if entity.package is not null and entity.package.type == 6 %}
+                                        <li>
+                                            <a class="btn btn-default btn-sm btn-green" href="{{ path('shop_sku_activation', {'skuId': entity.id, 'disposition': 'email'}) }}">
+                                                <i class="fa fa-envelope"></i> Send Email
+                                            </a>
+                                        </li>
+                                        {% if checker.forAddon('text info package', entity.createdBy) %}
+                                            <li>
+                                                <a class="btn btn-default btn-sm" href="{{ path('shop_sku_activation', {'skuId': entity.id, 'disposition': 'text'}) }}">
+                                                    <i class="fa fa-mobile"></i> Text
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    {% elseif entity.package is not null and entity.package.type == 5 %}
+                                        <li>
+                                            <a class="btn btn-info btn-sm" target="_blank" href="{{ entity.package.industryPath }}">
+                                                <i class="fa fa-link"></i> Show
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li>
+                                            <a href="#" class="btn btn-primary btn-sm to_cart" data-sku="{{ entity.id }}"><i class="fa fa-shopping-cart"></i> Add to cart</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li>
+                                        <a class="btn btn-info btn-sm" href="{{ path('sku_contact_us', {'product': entity.id}) }}">Contact Us</a>
+                                    </li>
+                                </ul>
+                                 {% if quotes is defined and quotes == true and entity.package.type!=7 %}
+                                    <p style="margin-top: 14px;font-size: 12px;">Do you need a special requirement? </p>
+                                    <p style="font-size: 12px;margin-top: -10px;">Click here to <a class="btn btn-blue btn-sm custom-quote" {% if status is defined and status == 0 %} disabled{% endif %}>Get a Custom Quote</a></p>
+                                {% endif %}
+                                
+                                {% if entity.package is not null and entity.package.options|length > 0 %}
+                                    <ul style="list-style-type:none">
+                                        {% for option in entity.package.options %}
+                                            <li>
+                                                {{ option.title }}
+                                            </li>
+                                            <li>
+                                                <ul>
+                                                    {% for optionValue in option.optionsValues %}
+                                                        <li>
+                                                            <label>
+                                                                <input value="{{ optionValue }}" {% if loop.first == true %}checked{% endif %} class="options" required type="radio" data-option_id="{{ option.id }}" name="options[{{ option.id }}]">
+                                                                {{ optionValue }}
+                                                            </label>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gap"></div>
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs" id="myTab">
+                            <li class="active">
+                                <a href="#tab-1" data-toggle="tab">
+                                    <i class="fa fa-pencil"></i> Description
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#tab-4" data-toggle="tab">
+                                    <i class="fa fa-comments"></i> Reviews
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#tab-5" data-toggle="tab">
+                                    <i class="fa fa-comments"></i> Business Info
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="tab-1">
+                                <p>
+                                    {{ entity.description|raw }}
+                                </p>
+
+                                <ul>
+                                    {% for item in entity.printableItems %}
+                                        <li><b>{{ item.title }}</b> - {{ item.description }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="tab-pane fade" id="tab-4">
+                                {% if app.user %}
+                                    <a class="popup-text btn btn-primary" style="margin-bottom: 15px;" href="#review-dialog" data-effect="mfp-zoom-out">
+                                        <i class="fa fa-pencil"></i> Add a review
+                                    </a>
+                                {% else %}
+                                    <div style="margin-bottom: 15px;">
+                                        <a class="btn btn-primary" href="{{ path('join') }}">
+                                            Join
+                                        </a>
+                                        or
+                                        <a class="btn btn-primary" href="{{ path('login') }}">
+                                            Login
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <ul class="comments-list">
+                                    {% for feedback in entity.comments %}
+                                        <li>
+                                            <!-- REVIEW -->
+                                            <article class="comment">
+                                                <div class="comment-author">
+                                                    {% if feedback.createdBy is not null %}
+                                                        {% if feedback.createdBy.fileName is not empty %}
+                                                            <img src="{{ vich_uploader_asset(feedback.createdBy, 'file') }}" style="width: 50px; height: 50px;" alt="{{ feedback.createdBy.fullName }}" title="{{ feedback.createdBy.fullName }}">
+                                                        {% else %}
+                                                            <img src="{{ asset('images/empty-avatar.png') }}" style="width: 50px; height: 50px;" alt="{{ feedback.createdBy.fullName }}" title="{{ feedback.createdBy.fullName }}">
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <img src="{{ asset('images/empty-avatar.png') }}" style="width: 50px; height: 50px;" alt="{{ feedback.createdBy.fullName }}" title="{{ feedback.createdBy.fullName }}"/>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="comment-inner">
+                                                    <ul class="icon-group icon-list-rating comment-review-rate" title="{{ feedback.rating }}/5 rating">
+                                                        {{ feedback.rating|rating|raw }}
+                                                    </ul>
+                                                    <span class="comment-author-name">{{ feedback.createdBy.fullName }} about {{ feedback.item.title }}</span>
+                                                    <p class="comment-content">
+                                                        {{ feedback.text }}
+                                                    </p>
+                                                </div>
+                                                {% if app.user.role.name == 'Admin' %}
+                                                    <div class="delete-comment">
+                                                        <a class="btn btn-danger" href="{{ path('comment_delete',{'skuId':entity.id, 'feedback':feedback.id}) }}" data-effect="mfp-zoom-out">
+                                                            <i class="fa fa-trash"></i> Delete
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            </article>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="tab-pane fade" id="tab-5">
+                                <p>
+                                    {{ aboutme|raw }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="gap"></div>
+
+                {{ render(controller('LocalsBestShopBundle:Sku:related', { 'sku': entity, 'productLimit': 3 })) }}
+
+            </div>
+
+            <div class="col-md-3">
+                <aside class="sidebar-right">
+                    {{ render(controller('LocalsBestShopBundle:Sku:recentViewed', { 'productLimit': 3, 'businessSlug': business.slug })) }}
+                    {{ render(controller('LocalsBestShopBundle:Sku:popular', { 'productLimit': 3, 'businessSlug': business.slug })) }}
+                    {{ render(controller('LocalsBestShopBundle:Sku:recentReviews', { 'productLimit': 3 })) }}
+                </aside>
+            </div>
+         {% endif %}
+        </div>
+
+    </div>
+    {% if quotes is defined and quotes == true %}
+        <div class="modal fade" id="customQuotes" role="basic" aria-hidden="true">
+            <div class="modal-dialog" style="transform: none !important;">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #3598dc">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" style="font-weight: 700;color: #fff;font-family: inherit;"><i class="fa fa-comments"></i> Add a note describing the custom quote you would like the business to provide </h4>
+                    </div>
+                    <form class="form-horizontal modal-form" role="form" method="post" novalidate="novalidate" action="{{ path('custom_quotes',{'id': entity.package.id}) }}">
+                        <div class="modal-body">
+                                <div class="portlet-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <textarea name="quote" class="form-control" rows="4" placeholder="Enter quotes about this package."></textarea>
+                                            <input type="hidden" name="sku" value="{{entity.id}}"/> 
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger cancel" data-dismiss="modal">Cancel</button>
+                            <input type="submit" class="btn btn-info quoteSave" value="Submit">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

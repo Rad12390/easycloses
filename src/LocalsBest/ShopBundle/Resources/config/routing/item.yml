@@ -1,0 +1,46 @@
+items:
+    path:     /
+    defaults: { _controller: "LocalsBestShopBundle:Item:index" }
+
+items_show:
+    path:     /{id}/show
+    defaults: { _controller: "LocalsBestShopBundle:Item:show" }
+
+items_new:
+    path:     /new
+    defaults: { _controller: "LocalsBestShopBundle:Item:new" }
+
+items_create:
+    path:     /create
+    defaults: { _controller: "LocalsBestShopBundle:Item:create" }
+    methods: [POST]
+
+items_edit:
+    path:     /{id}/edit
+    defaults: { _controller: "LocalsBestShopBundle:Item:edit" }
+
+items_update:
+    path:     /{id}/update
+    defaults: { _controller: "LocalsBestShopBundle:Item:update" }
+    methods: [POST|PUT]
+
+items_delete:
+    path:     /{id}/delete
+    defaults: { _controller: "LocalsBestShopBundle:Item:delete" }
+    methods: [POST|DELETE]
+
+items_for_approve_list:
+    path:     /for-approve
+    defaults: { _controller: "LocalsBestShopBundle:Item:forApproveList" }
+
+items_status_change:
+    path:     /status-change
+    defaults: { _controller: "LocalsBestShopBundle:Item:statusChange" }
+    
+get_single_item:
+    path:     /get-single-item
+    defaults: { _controller: "LocalsBestShopBundle:Item:getSingleItem" }
+    
+get_city_based_state:
+    path:     /get-city-based-state
+    defaults: { _controller: "LocalsBestShopBundle:Item:getCityBasedState" }

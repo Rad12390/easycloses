@@ -1,0 +1,46 @@
+<li class="in todo-tasklist-item ">
+    <img style="width: 45px;height: 45px;" class="todo-userpic pull-left" src="{% if note.createdBy is defined and note.createdBy is not null and note.createdBy.fileName is defined and note.createdBy.fileName is not empty %}{{ vich_uploader_asset(note.createdBy, 'file') }}{% else %}https://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image {% endif%}" width="27px" height="27px">
+
+    <div class="message">
+        <div class="todo-tasklist-controls pull-right">
+            {% if note.important is defined and note.important == false %}
+                <a class="mark-important-star" href="#" id="review-click" data-reviewid="{{note.id}}" data-saved="0" ><strong><i class="fa fa-star-o inbox-started"></i></strong></a>
+            {% elseif note.important is defined and note.important == true %}
+                <a href="#" id="review-click" data-reviewid="{{note.id}}" data-saved="1" ><strong><i class="fa fa-star inbox-started"></i></strong></a>
+            {% endif %}
+        </div>
+        <span class="arrow">
+        </span>
+        <a href="#" class="name">
+            {% if note.createdBy is defined and note.createdBy.fullname is defined and note.createdBy.fullname is not empty %}{{ note.createdBy.fullname }}{% endif%}
+        </a>
+        <span class="datetime">
+            {% if note.note is defined and note.note is not empty %}
+                {{ note.created|date('F j, Y, g:i a') }}
+            {% endif%}
+            {% if note.createdBy == app.user %}
+                {% if transactionStatus is defined and file.transactionStatus in ['Sold_Paid', 'Leased_Paid'] %}
+                {% else %}
+                    &nbsp;&nbsp;
+                    <a href="{{ path('note_edit', {'id': note.id}) }}" data-target="#ajax" data-toggle="modal">
+                        <i class="icon-pencil"></i>
+                    </a>
+                {% endif %}
+            {% endif %}
+            {% if(note.createdBy != app.user) %}
+                {% for share in note.shares %}
+                    {% if(share.user == app.user) %}
+                        <i style="color: #3cc051;" class="fa fa-arrow-left"></i>
+                    {% endif %}
+                {% endfor %}
+            {% elseif(note.createdBy == app.user and note.shares|length > 0) %}
+                <i style="color: #d84a38;" class="fa fa-arrow-right"></i>
+            {% endif %}
+        </span>
+        <span class="body" style="word-wrap: break-word;">
+            {% if note.note is defined and note.note is not empty %}
+                {{ note.note }}
+            {% endif%}
+        </span>
+    </div>
+</li>

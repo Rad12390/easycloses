@@ -1,0 +1,23 @@
+{% for note in notes %}
+    <li class="in" id="note-{{ note.id }}">
+        <img style="width: 45px;height: 45px;" class="avatar" src="{% if note.createdBy is defined and note.createdBy is not null and note.createdBy.fileName is defined and note.createdBy.fileName is not empty %}{{ vich_uploader_asset(note.createdBy, 'file') }}{% else %}http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image {% endif%}" width="27px" height="27px">
+        <div class="message">
+            <span class="arrow"></span>
+            <a class="name">
+                {{ note.createdBy.firstName }} {{ note.createdBy.lastName }}
+            </a>
+            <span class="datetime">
+                at {{ note.created|date('F j, Y, g:i a') }}
+            </span>
+            <a href="javascript:;" style="float: right; color: red;" onclick="hideNote({{ note.id }})">
+                <i class="red fa fa-trash-o"></i>
+            </a>
+            <span class="body">
+                {{ render(controller('LocalsBestUserBundle:Default:getEntity', { 'object': note.objectType, 'id': note.objectId, 'createdBy': note.createdBy } )) }}
+            </span>
+            <span class="body">
+                {{ note.note }}
+            </span>
+        </div>
+    </li>
+{% endfor %}

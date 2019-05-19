@@ -1,0 +1,149 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}
+    Payments Table - Products
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Payments Results
+    </li>
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+   
+    <script type="text/javascript" src="{{ asset('system/global/plugins/moment.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-date-time-pickers.min.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            moment().format('yyyy-mm-dd');
+            var d = new Date(); d.setDate( d.getDate());
+            $('input[name="to"]').datepicker('setDate', d); 
+            d = new Date(); d.setMonth(d.getMonth() - 1);
+            $('input[name="from"]').datepicker('setDate', d);
+        });
+    </script>
+    
+{% endblock %}
+
+{% block content -%}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="portlet light form-fit ">
+                <div class="portlet-body form">
+                    <form action="{{path('shop_summary_summary')}}" class="form-horizontal form-bordered" method="POST">
+                        <div class="row">
+
+                            <div class="col-md-2">
+                                <select class="form-control" name="summary">
+                                    <option value="manager">Manager</option>
+                                    <option value="employee">Employee</option>
+                                    <option value="charity">Charity</option>
+                                </select>
+                                <span class="help-block"> Summary </span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="input-group input-large date-picker input-daterange" data-date="10/11/2012" data-date-format="yyyy-mm-dd">
+                                    <input type="text" class="form-control" name="from">
+                                    <span class="input-group-addon"> to </span>
+                                    <input type="text" class="form-control" name="to"> 
+                                </div>
+                                <!-- /input-group -->
+                                <span class="help-block"> Select date range </span>
+                            </div>
+
+                            <div class="col-md-2">
+                                <button type="submit" class="btn blue btn-outline">
+                                    <i class="fa fa-check"></i> Submit</button>
+
+
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-check"></i> Payments Results
+                <span>{{ tooltip_text.getText('Payment Results','header')|raw }}</span>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Marked Up Price</th>
+                            <th>Retail Price</th>
+                            <th>Vendor Payout</th>
+                            <th>Manager Payout</th>
+                            <th>Charity Share</th>
+                            <th>Agent Share</th>
+                            <th>Stripe Fees</th>
+                            <th>Residual Amount</th>
+                            <th>LB Left</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr class="text-primary text-center">
+                                <td colspan="3">Buyer: {{ order.user.fullName }}</td>
+                                <td colspan="3">Order: {{ order.code }}</td>
+                                <td colspan="3">{{ order.createdAt|date("m.d.Y") }}</td>
+                            </tr>
+                            {% for shopItem in order.shopItems %}
+                                <tr>
+                                    {% set wholesale = shopItem.price / (1 + shopItem.markup / 100) %}
+                                    {% set stripeFee = shopItem.price * (2.9 / 100) + 0.3 %}
+                                    {% set businessEntity = order.business %}
+                                    {% set businessOwner = businessEntity.owner %}
+                                    {% set paymentSplitSettings = businessOwner.paymentSplitSettings %}
+                                    {% set managerPercentage = businessEntity.shopPercentage is null ? defaultPercentage/100 : businessEntity.shopPercentage/100 %}
+                                    {% set managerAmount = (shopItem.price - wholesale - stripeFee) * managerPercentage %}
+                                    {# {% set charityAmount = managerAmount*businessOwner.paymentSplitSettings.charityPercentage/100 %}#}
+                                    {% set charityAmount = 0 %}
+                                    {# {% set employeeAmount = managerAmount*businessOwner.paymentSplitSettings.employeePercentage/100 %}#}
+                                    {% set employeeAmount = 0 %}
+                                    {% set LBAmount = ((shopItem.price - wholesale - stripeFee) * (1 - managerPercentage)) %}
+                                    {% set residualAmount = LBAmount * 0.1 %}
+
+                                    <td>{{ shopItem.title }}</td>
+                                    <td>${{ shopItem.price }}</td>
+                                    <td>${{ (wholesale)|number_format }}</td>
+                                    <td>${{ (wholesale - stripeFee)|number_format }}</td>
+                                    <td>${{ (managerAmount-(charityAmount+employeeAmount))|number_format }}</td>
+                                    <td>${{ charityAmount|number_format }}</td>
+                                    <td>${{ employeeAmount|number_format }}</td>
+                                    <td>${{ stripeFee|number_format }}</td>
+                                    <td>${{ residualAmount|number_format }}</td>
+                                    <td>${{ (LBAmount - residualAmount)|number_format }}</td>
+                                </tr>
+                            {% else %}
+                                <tr class="text-danger text-center">
+                                    <td colspan="7">
+                                        <i>Empty Order</i>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

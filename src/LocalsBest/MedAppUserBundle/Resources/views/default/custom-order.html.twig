@@ -1,0 +1,17 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}Custom Order Form{% endblock %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="box" style="border: 5px solid #7f898b;">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

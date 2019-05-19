@@ -1,0 +1,19 @@
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-gear"></i> <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu pull-right" role="menu">
+        <li>
+            <a href="{{ path('job_edit', {'id': job.id}) }}" >
+                Edit
+            </a>
+        </li>
+        {% if job.createdBy.id == app.user.id %}
+            <li>
+                <a href="{{ path('job_delete', {'id': job.id}) }}" >
+                    Archive
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</div>

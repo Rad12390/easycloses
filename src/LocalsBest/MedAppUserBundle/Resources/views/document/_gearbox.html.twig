@@ -1,0 +1,53 @@
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-gear"></i>
+        <span class="caret"></span>
+    </button>
+
+    {% if app.user.role.level <= 5 %}
+        <ul class="dropdown-menu right-aligned loadAjax" role="menu">
+            {% if documentType.isRequired == true  %}
+                <li>
+                    <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': file.id}) }}" >
+                        Unrequire
+                    </a>
+                </li>
+            {% elseif documentType.isRequired == false %}
+                <li>
+                    <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': file.id}) }}" >
+                        Require
+                    </a>
+                </li>
+            {% endif %}
+            <li>
+                <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': file.id}) }}">
+                    <i class="fa fa-times"></i> Remove {% if (documentType.document is defined and documentType.document is not null) %}doc{% else %}row{% endif %}
+                </a>
+            </li>
+        </ul>
+    {% elseif (app.user.role.level == 7 and (documentType.createdBy == app.user or file.createdBy == app.user)) %}
+        <ul class="dropdown-menu right-aligned loadAjax" role="menu">
+            {% if( documentType.isSystem == 0 and documentType.isRequired == true and documentType.createdBy.role.level >= app.user.role.level) %}
+                <li>
+                    <a href="{{ path('document_type_unrequired', {'typeId': documentType.id,'object': file.id}) }}" >
+                        Unrequire
+                    </a>
+                </li>
+            {% endif %}
+            {% if( documentType.isSystem == 0 and documentType.isRequired == false ) %}
+                <li>
+                    <a href="{{ path('document_type_required', {'typeId': documentType.id,'object': file.id}) }}" >
+                        Require
+                    </a>
+                </li>
+            {% endif %}
+            {% if ( ( documentType.isSystem == 0 and documentType.createdBy.role.level >= app.user.role.level) or ( documentType.document is not null and documentType.approved == 0 ) ) %}
+                <li>
+                    <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id,'object': file.id}) }}">
+                        <i class="fa fa-times"></i> Remove {% if (documentType.document is defined and documentType.document is not null) %}doc{% else %}row{% endif %}
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</div>

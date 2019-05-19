@@ -1,0 +1,28 @@
+{% if products|length > 0 %}
+    <div class="sidebar-box">
+        <h5>Recent Viewed</h5>
+        <ul class="thumb-list">
+            {% for product in products %}
+                <li>
+                    <a href="{{ path('products_show', { 'slug': product.slug }) }}">
+                        {% if product.images is not empty %}
+                            <img src="{{ vich_uploader_asset(product.images.first, 'imageFile', 'LocalsBest\\UserBundle\\Entity\\ProductImage') }}" alt="{{ product.title }}">
+                        {% else %}
+                            <img src="/shop/img/70x70.png" alt="{{ product.title }}" title="{{ product.title }}"/>
+                        {% endif %}
+                    </a>
+                    <div class="thumb-list-item-caption">
+                        <h5 class="thumb-list-item-title">
+                            <a href="{{ path('products_show', { 'slug': product.slug }) }}">
+                                {{ product.title }}
+                            </a>
+                        </h5>
+                        <p class="thumb-list-item-price">
+                            {{ product.getPrice }}
+                        </p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

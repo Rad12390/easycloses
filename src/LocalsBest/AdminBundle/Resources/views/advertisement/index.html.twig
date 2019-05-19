@@ -1,0 +1,52 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Advertisement list</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Url</th>
+                <th>Title</th>
+                <th>Pages</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('admin_advertisement_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{{ entity.url }}</td>
+                <td>{{ entity.title }}</td>
+                <td>
+                    {% if entity.forPage is not empty %}
+                        {% for page in entity.forPage %}
+                            <span class="label label-info">{{ page|capitalize }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="label label-primary">All</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if entity.isActive %}
+                        <span class="label label-success">Active</span>
+                    {% else %}
+                        <span class="label label-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a class="btn btn-xs btn-info" href="{{ path('admin_advertisement_show', { 'id': entity.id }) }}">show</a>
+                    <a class="btn btn-xs btn-warning" href="{{ path('admin_advertisement_edit', { 'id': entity.id }) }}">edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a class="btn btn btn-success" href="{{ path('admin_advertisement_new') }}">
+        Create a new entry
+    </a>
+
+    {% endblock %}

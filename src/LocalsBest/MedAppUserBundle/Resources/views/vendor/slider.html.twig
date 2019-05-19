@@ -1,0 +1,65 @@
+<div class="render_business" id="render_business">
+    <div class="row">
+        {#<div class="col-sm-12">#}
+            {#<ul class="bxslider">#}
+                {% for vendor in vendors %}
+                    {% if vendor.vendorCategory == 3 %}
+                        {% set color = "#D4AF37" %}
+                        {% set name  = "Gold" %}
+                    {#{% elseif vendor.vendorCategory == 2 %}#}
+                        {#{% set color = "#C0C0C0" %}#}
+                        {#{% set name  = "Silver" %}#}
+                    {% elseif vendor.vendorCategory == 1 %}
+                        {% set color = "#CD7F32" %}
+                        {% set name  = "Bronze" %}
+                    {% else %}
+                        {% set color = "#000000" %}
+                        {% set name  = "" %}
+                    {% endif %}
+                    <div class="col-lg-3 col-md-4 col-sm-4 vendor-box">
+                        <div style="min-height:250px; margin-bottom:0; background-color:#fff; position:relative; border: 1px solid; text-align: center; overflow: hidden;">
+                            <div style="
+                                position: absolute;
+                                top: 30px;
+                                left: -35px;
+                                transform: rotate(-45deg);
+                                font-size: 16px;
+                                background-color: {{color}};
+                                display: block;
+                                width: 150px;
+                                text-align: center;
+                            ">{{ name }}</div>
+                            <div class="img_contain" style="height: 120px; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-align: center; -webkit-align-items: center; -webkit-box-align: center; align-items: center;">
+                                {% if vendor.businesses.first.fileName is null or vendor.businesses.first.fileName is empty %}
+                                    <img src="{{ asset('images/empty-vendor.jpg') }}" alt="" style="max-width:100%; max-height:90px; margin: 0 auto;">
+                                {% else %}
+                                    <img src="{{ vich_uploader_asset(vendor.businesses[0], 'file') }}" alt="" style="max-width:100%; max-height:90px; margin: 0 auto;">
+                                {% endif %}
+                            </div>
+
+                            <div style="bottom: 10px; position: absolute; text-align: center; width: 100%;">
+                                <h5>
+                                    <strong>{{ vendor.firstname }} {{ vendor.lastname }}</strong><br/>
+                                    {{ vendor.businesses[0].name }}<br>
+                                    <a href="{{ path('vendor_bio_ajax', {'vendorId': vendor.id}) }}" data-target="#ajax" data-toggle="modal">Bio</a><br>
+                                    {% for t_ype in vendor.businesses[0].types %}
+                                        {{ t_ype.name }}<br>
+                                    {% endfor %}
+                                </h5>
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-success order_quote_btn mt-checkbox mt-checkbox-single mt-checkbox-outline" style="margin-left: 15px;">
+                                        <input {% if isVendorPrefilled %}checked{% endif %} type="checkbox" id="job_vendors_{{ vendor.id }}" name="job[vendors][]" value="{{ vendor.id }}" class="toggle">
+                                        Select
+                                        <span style="top: inherit; background-color: #fff; margin-left: 5px;"></span>
+                                    </label>
+                                </div>
+
+                                <div class="btn green order_job_btn hide" name="order_vendors" id="order_vendors" data-id="12139">Order Job</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {#</ul>#}
+        {#</div>#}
+    </div>
+</div>

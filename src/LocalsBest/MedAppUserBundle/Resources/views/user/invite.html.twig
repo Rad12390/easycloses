@@ -1,0 +1,160 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    Invites
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('users_index') }}">Users</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Invites
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            $("select#invite_role").on("change", function(){
+                if($(this).val() == 8) {
+                    $("#categoryBlock"). show();
+                    $("#businessTypeBlock"). show();
+                } else {
+                    $("#categoryBlock"). hide();
+                    $("#businessTypeBlock"). hide();
+                }
+            });
+
+            var table = $('#example');
+
+            var oTable = table.dataTable({
+                "columnDefs": [{
+                    "orderable": false
+                }],
+                "order": [
+                    [1, 'desc']
+                ]
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    
+    {% if error is defined and error is not empty %}
+        <div class="Metronic-alerts alert alert-danger fade in">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+            <i class="fa-lg fa fa-warning"></i>  {{ error }}
+        </div>
+    {% endif %}
+
+    {{ form_start(form, {attr: {class: 'form-inline'} }) }}
+        <div class="form-group">
+            <label class="sr-only" for="exampleInputEmail2">Email address</label>
+            {{ form_widget(form.email) }}
+            {#<span class="help-block">
+            {{ form_errors(form.email) }}
+            </span>#}
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="exampleInputPassword2">Role</label>
+            {{ form_widget(form.role) }}
+            {#<span class="help-block">
+            {{ form_errors(form.role) }}
+            </span>#}
+        </div>
+        {% if (app.user.role.role == 'ROLE_ADMIN') %}
+            <div id="categoryBlock" class="form-group" style="display: none;">
+                <label class="sr-only" for="exampleInputPassword2">Role</label>
+                {#<span class="help-block">
+                {{ form_errors(form.role) }}
+                </span>#}
+            </div>
+            <div id="businessTypeBlock" class="form-group" style="display: none;">
+                <label class="sr-only" for="exampleInputPassword2">Role</label>
+                {#<span class="help-block">
+                {{ form_errors(form.role) }}
+                </span>#}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-success">Invite</button>
+    {{ form_end(form) }}
+    
+    <br/><br/>
+    
+    <div class="portlet box blue">
+	    <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-globe"></i> All Invited Users
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="dataTables_wrapper no-footer">
+                <table class="table table-striped table-bordered table-hover dataTable no-footer" id="example">
+                        <thead>
+                            <tr role="row">
+                                <th style="width: 10px;">
+                                    Record&nbsp;#
+                                </th>
+                                <th style="width: 100px;">
+                                    Created By
+                                </th>
+                                <th style="width: 120px;">
+                                    Invited
+                                </th>
+                                <th style="width: 176px;">
+                                    Invitation Email
+                                </th>
+                                <th style="width: 100px;">
+                                    Role
+                                </th>
+                                <th style="width: 100px;">
+                                    Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in inviteUsers %}
+                                <tr class="gradeX odd" role="row">
+                                    <td> {{ user.id }} </td>
+                                    <td>
+                                        <a href="{{ path('user_view', {'username': user.createdBy.username}) }}">
+                                            {{ user.createdBy.fullName }}
+                                        </a>
+                                    </td>
+                                    <td> {{ user.created|date("m/d/Y H:i") }} </td>
+                                    <td> {{ user.email }} </td>
+                                    <td>
+                                        {% if user.role is defined and user.role is not null %}
+                                            {{ user.role.name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.status == 'I' %}
+                                            <span class="label label-sm label-warning">Invite</span>
+                                        {% elseif user.status == 'A' %}
+                                            <span class="label label-sm label-success">Approved </span>
+                                        {% elseif user.status == 'E' %}
+                                            <span class="label label-sm label-danger">Expired</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+            </div>
+        </div>
+</div>
+{% endblock %}	

@@ -1,0 +1,24 @@
+shop_summary_summary:
+    path:     /summary
+    methods: POST
+    defaults: { _controller: LocalsBestShopBundle:Summary:summary }
+    
+shop_summary_manager:
+    path:     /manager
+    methods: GET
+    defaults: { _controller: LocalsBestShopBundle:Summary:manager }
+    
+shop_summary_charity:
+    path:     /charity
+    methods: GET
+    defaults: { _controller: LocalsBestShopBundle:Summary:charity }
+    
+shop_summary_employee:
+    path:     /employee
+    methods: GET
+    defaults: { _controller: LocalsBestShopBundle:Summary:employee }
+    
+shop_payouts:
+    path:     /payout
+    methods: GET
+    defaults: { _controller: LocalsBestShopBundle:Summary:manager }

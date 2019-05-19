@@ -1,0 +1,1005 @@
+locals_best_user_homepage:
+    path:     /
+    defaults: { _controller: LocalsBestUserBundle:Default:main }
+
+locals_best_terms:
+    path:     /terms-and-conditions
+    defaults: { _controller: LocalsBestUserBundle:Default:terms }
+
+login:
+    path:     /login/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Auth:login, slug: null}
+
+join:
+    path:     /join
+    defaults: { _controller: LocalsBestUserBundle:Default:join }
+
+payment_checkout:
+    path:   /checkout
+    defaults: { _controller: LocalsBestUserBundle:Payment:checkout }
+
+payment_charge:
+    path:   /charge
+    defaults: { _controller: LocalsBestUserBundle:Payment:charge }
+
+ajax_states_by_ind_type:
+    path: /get-states-by-ind-type
+    defaults: { _controller: LocalsBestUserBundle:Default:ajaxStatesByType }
+
+ajax_businesses_by_state:
+    path: /get-businesses-by-state
+    defaults: { _controller: LocalsBestUserBundle:Default:ajaxBusinessesByState }
+
+ajax_plans_by_all:
+    path: /ajax-get-plans
+    defaults: { _controller: LocalsBestUserBundle:Default:ajaxPlansByAll }
+    
+login_check:
+    path: /login_check/{slug}
+    defaults: { slug: null}
+
+logout:
+    path: /logout
+
+register:
+    path:     /register/{token}
+    defaults: { _controller: LocalsBestUserBundle:Auth:register, token: null }
+
+new_register:
+    path:     /new-register
+    defaults: { _controller: LocalsBestUserBundle:Auth:newRegister }
+
+
+client_register:
+    path:     /client-register/{referralId}
+    defaults: { _controller: LocalsBestUserBundle:Auth:clientRegister }
+
+forget_password:
+    path:     /recovery
+    defaults: { _controller: LocalsBestUserBundle:Auth:forgotPassword }
+    
+reset_password:
+    path:     /reset-password/{token}
+    defaults: { _controller: LocalsBestUserBundle:Auth:resetPassword }
+    
+users_index:
+    path:     /users
+    defaults: { _controller: LocalsBestUserBundle:User:index }
+    
+users_grid:
+    path:     /users/grid
+    defaults: { _controller: LocalsBestUserBundle:User:grid }
+    
+users_add:
+    path:     /users/add
+    defaults: { _controller: LocalsBestUserBundle:User:add }
+    
+users_invite:
+    path:     /invites
+    defaults: { _controller: LocalsBestUserBundle:User:invite }
+    
+user_view:
+    path:     /users/view/{username}
+    defaults: { _controller: LocalsBestUserBundle:User:view, username: null }
+    
+user_detail:
+    path:     /users/detail/{username}
+    defaults: { _controller: LocalsBestUserBundle:User:detail, username: null }
+    
+user_edit:
+    path:     /users/edit/{username}
+    defaults: { _controller: LocalsBestUserBundle:User:edit, username: null }
+
+users_stripe_account:
+      path:     /stripe-account/{userId}
+      defaults: { _controller: LocalsBestUserBundle:Account:stripeAccount, userId:null }
+
+users_stripe_account_activation:
+      path:     /stripe-account-activation
+      defaults: { _controller: LocalsBestUserBundle:Account:stripeAccountActivation }
+
+#users_stripe_account_revoke:
+#      path:     /stripe-account-detach
+#      defaults: { _controller: LocalsBestUserBundle:Account:stripeAccountRevoke }
+
+users_profile_stripe:
+     path:     /connectauth/
+     defaults: { _controller: LocalsBestUserBundle:Account:connectAuth}
+
+users_profile:
+    path:     /profile/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:profile, username: null }
+    
+users_profile_edit:
+    path:     /profile/edit/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:profile}
+    
+user_checked_ajax:
+    path:     /user/checked-ajax/{type}/{checkType}/{element}
+    defaults: { _controller: LocalsBestUserBundle:User:ajaxChecked, type: null, checkType: null, element: null}
+    
+change_password:
+    path:     /change-password/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:change, username: null }
+    
+users_invite_grid:
+    path:     /users/grid
+    defaults: { _controller: LocalsBestUserBundle:User:gridInvite }
+    
+user_delete:
+    path:    /user/remove/{id}
+    defaults: { _controller: LocalsBestUserBundle:User:delete}
+
+user_document_add:
+    path:     /users/{id}/document/add
+    defaults: { _controller: LocalsBestUserBundle:User:documentAdd}
+
+user_document_delete:
+    path:     /users/document/remove/{slug}
+    defaults: { _controller: LocalsBestUserBundle:User:documentRemove}
+    
+user_make_document_approver:
+    path:    /user/{id}/makedocapprover
+    defaults: { _controller: LocalsBestUserBundle:User:makeDocumentApprover}
+user_unmake_document_approver:
+    path:    /user/{id}/unmakedocapprover
+    defaults: { _controller: LocalsBestUserBundle:User:unMakeDocumentApprover}
+
+contact_document_add:
+    path:     /contacts/{id}/document/add
+    defaults: { _controller: LocalsBestUserBundle:Contact:documentAdd}
+
+contact_delete:
+    path:    /contact/remove/{id}
+    defaults: { _controller: LocalsBestUserBundle:Contact:delete}    
+    
+account_user_preference:
+    path:     /preferences/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:preference, username: null }
+    
+account_user_accountProfile:
+    path:     /account_profiles/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:accountProfile, username: null }
+    
+account_user_business:
+    path:     /business/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:business, username: null }
+    
+account_user_property:
+    path:     /property
+    defaults: { _controller: LocalsBestUserBundle:Account:property, username: null }
+  
+account_property_add:
+    path:     /property/add/{username}
+    defaults: { _controller: LocalsBestUserBundle:Property:edit, id: null}
+    
+account_property_edit:
+    path:     /property/edit/{id}/{username}
+    defaults: { _controller: LocalsBestUserBundle:Property:edit }
+
+account_property_delete:
+    path:     /property/delete/{id}/{username}
+    defaults: { _controller: LocalsBestUserBundle:Property:delete }
+
+    
+account_user_contactProfile:
+    path:     /contact/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:contact, username: null  }
+    
+account_business_contact:
+    path:     /contact_business/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:contactBusiness, username: null  }
+    
+select_business:
+    path:     /businesses
+    defaults: { _controller: LocalsBestUserBundle:Business:select }
+
+business_delete:
+    path:     /business/delete/{id}
+    defaults: { _controller: LocalsBestUserBundle:Business:delete }
+
+
+switch_business:
+    path:     /switch_business/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Business:switch }
+    
+event_add:
+    path:     /event/add
+    defaults: { _controller: LocalsBestUserBundle:Event:edit, slug: null }
+    
+event_add_object:
+    path:     /event/add/{objectType}/{objectId}
+    defaults: { _controller: LocalsBestUserBundle:Event:edit, slug: null }
+    
+event_edit_object:
+    path:     /event/edit/{slug}/{objectType}/{objectId}
+    defaults: { _controller: LocalsBestUserBundle:Event:edit }
+    
+event_edit:
+    path:     /event/edit/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Event:edit, slug: null }
+
+event_share_response:
+    path:     /event/shared/{token}
+    defaults: { _controller: LocalsBestUserBundle:Event:sharedView}
+
+event_remove:
+    path:     /event/remove/{id}
+    defaults: { _controller: LocalsBestUserBundle:Event:removeEvent, id: null }
+    
+event_index:
+    path:     /events
+    defaults: { _controller: LocalsBestUserBundle:Event:index }
+    
+event_view:
+    path:     /events/view/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Event:view }
+    
+event_mark_complete:
+    path:     /events/mark-complete/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Event:markComplete }
+    
+event_note_add:
+    path:     /event/add-note/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Event:addNote}
+    
+event_share:
+    path:     /events/share/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Event:share }
+    
+share_remove_ajax:
+    path:     /share/remove/{id}
+    defaults: { _controller: LocalsBestUserBundle:Share:removeShare, id: null }
+    
+share_remove_event_ajax:
+    path:     /share/event/remove/{id}
+    defaults: { _controller: LocalsBestUserBundle:Share:removeEventShare, id: null }
+    
+assign_remove_ajax:
+    path:     /event/{slug}/remove-assignedto/{id}
+    defaults: { _controller: LocalsBestUserBundle:Share:removeEvent, id: null }
+    
+review_important_ajax:
+    path:     /note/{objectType}/{objectId}/review-important/{id}
+    defaults: { _controller: LocalsBestUserBundle:Note:reviewImportant, id: null, objectType: null, objectId: null}
+
+review_not_important_ajax:
+    path:     /note/{objectType}/{objectId}/review-not-important/{id}
+    defaults: { _controller: LocalsBestUserBundle:Note:reviewNotImportant, id: null, objectType: null, objectId: null}
+        
+note_add:
+    path:     /add-note/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Note:addNote}
+    
+note_edit:
+    path:     /edit-note/{id}
+    defaults: { _controller: LocalsBestUserBundle:Note:editNote}
+    
+tag_add:
+    path:     /add-tag/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Tag:addTag}
+    
+tag_remove:
+    path:     /remove-tag/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Tag:removeTag}
+
+tag_add_v2:
+    path:     /add-tag-v2/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Tag:addTagNew}
+
+tag_remove_v2:
+    path:     /remove-tag-v2/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Tag:removeTagNew}
+    
+job_status_change_ajax:
+    path:     /job/status-ajax/{id}/{type}/{status}
+    defaults: { _controller: LocalsBestUserBundle:Job:ajaxStatus, id: null, type: null, status: null }
+
+vendor_view:
+    path:     /vendor/view/{id}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:view}
+    
+vendor_index:
+    path:     /vendors
+    defaults: { _controller: LocalsBestUserBundle:Vendor:index}
+    
+vendor_add:
+    path:     /vendor/add/{token}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:edit, token: null}
+
+vendor_edit:
+    path:     /vendor/edit/{id}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:edit}
+    
+vendors_invite:
+    path:     /vendor/invites
+    defaults: { _controller: LocalsBestUserBundle:Vendor:invite }
+    
+vendor_selected_ajax:
+    path:     /vendors/random/{businessType}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:ajaxSelected, businessType: null}
+    
+vendor_slider_ajax:
+    path:     /vendors/slider/{businessType}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:slider, businessType: null }  
+
+vendor_json_ajax:
+    path:     /vendors/{businessType}.json
+    defaults: { _controller: LocalsBestUserBundle:Vendor:json, businessType: null }  
+    
+contact_index:
+    path:     /contacts
+    defaults: { _controller: LocalsBestUserBundle:Contact:index}
+    
+contact_json:
+    path:     /contacts.json
+    defaults: { _controller: LocalsBestUserBundle:Contact:json}
+    
+contact_add:
+    path:     /contact/add/
+    defaults: { _controller: LocalsBestUserBundle:Contact:edit, id: null}
+
+contact_import:
+    path:     /import-from-file
+    defaults: { _controller: LocalsBestUserBundle:Contact:import }
+
+contact_ajax_import:
+    path:     /ajax-import
+    defaults: { _controller: LocalsBestUserBundle:Contact:ajaxImport }
+
+contact_edit:
+    path:     /contact/edit/{id}
+    defaults: { _controller: LocalsBestUserBundle:Contact:edit}
+    
+contact_view:
+    path:     /contact/view/{id}
+    defaults: { _controller: LocalsBestUserBundle:Contact:view}
+    
+service_index:
+    path:     /services
+    defaults: { _controller: LocalsBestUserBundle:Service:index}
+    
+site_support:
+    path:     /site-support
+    defaults: { _controller: LocalsBestUserBundle:Default:support}
+    
+add_new_business:
+    path:    /add/business/new
+    defaults: { _controller: LocalsBestUserBundle:Business:add}
+
+business_index:
+    path:    /businesses/list
+    defaults: { _controller: LocalsBestUserBundle:Business:index }
+
+business_search:
+    path:    /businesses-search
+    defaults: { _controller: LocalsBestUserBundle:Business:search }
+
+contact_add_business:
+    path:    /contact/add-ajax/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Contact:addUserAjax}
+    
+note_index:
+    path:     /notes
+    defaults: { _controller: LocalsBestUserBundle:Note:index}
+    
+notes_add:
+    path:     /note/add
+    defaults: { _controller: LocalsBestUserBundle:Note:editNote, id: null}
+    
+users_load_ajax:
+    path:     /users/load-ajax/{status}
+    defaults: { _controller: LocalsBestUserBundle:User:loadAjax, status: null }
+    
+contact_invite_ajax:
+    path:     /contact/{id}/invite-ajax/{type}
+    defaults: { _controller: LocalsBestUserBundle:Contact:inviteAjax }
+
+contact_mass_invite_ajax:
+    path: /contact-mass-invite
+    defaults: { _controller: LocalsBestUserBundle:Contact:massInviteAjax }
+    
+note_share_user:
+    path:   /note/share/contact/{email}
+    defaults: { _controller: LocalsBestUserBundle:Contact:shareResponse}
+    
+event_status_change_ajax:
+    path:     /event/{id}/status-change
+    defaults: { _controller: LocalsBestUserBundle:Event:statusChangeAjax}
+
+vendor_checked_ajax:
+    path:     /vendor/checked-ajax/{type}/{checkType}/{element}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:ajaxChecked, type: null, checkType: null, element: null}
+
+user_add_vendor:
+    path:     /vendor/add-user/{vendorId}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:addToUser}
+
+vendor_remove:
+    path:     /vendor/remove/{vendorId}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:removeVendor}
+
+vendor_bio_ajax:
+    path:     /vendor/bio/{vendorId}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:bioAjax}
+    
+vendor_edit2:
+    path:     /vendor-edit/{vendorId}
+    defaults: { _controller: LocalsBestUserBundle:User:VendorEdit}
+
+test_for_wes:
+    path: /test-route
+    defaults: { _controller: LocalsBestUserBundle:Default:testRoute}
+
+notification_list:
+    path: /notifications
+    defaults: { _controller: LocalsBestNotificationBundle:Default:list}
+
+route_for_new_fields:
+    path: /account/new-fields/{username}
+    defaults: { _controller: LocalsBestUserBundle:Account:newFields, username: null}
+
+ajax_get_cities:
+    path: /ajax-get-cities
+    defaults: { _controller: LocalsBestUserBundle:Default:ajaxGetCities}
+
+datatable_transaction_limit:
+    path: /datatable/transactions
+    defaults: { _controller: LocalsBestUserBundle:Datatable:transactionsLimit }
+
+datatable_user_limit:
+    path: /datatable/users
+    defaults: { _controller: LocalsBestUserBundle:Datatable:usersLimit }
+
+datatable_clients_limit:
+    path: /datatable/clients
+    defaults: { _controller: LocalsBestUserBundle:Datatable:clientsLimit }
+
+datatable_contact_limit:
+    path: /datatable/contacts
+    defaults: { _controller: LocalsBestUserBundle:Datatable:contactsLimit }
+
+datatable_event_limit:
+    path: /datatable/events
+    defaults: { _controller: LocalsBestUserBundle:Datatable:eventsLimit }
+
+datatable_job_limit:
+    path: /datatable/jobs
+    defaults: { _controller: LocalsBestUserBundle:Datatable:jobsLimit }
+    
+datatable_shredding_documents_limit:
+    path: /datatable/shredding-documents
+    defaults: { _controller: LocalsBestUserBundle:Datatable:shreddingDocumentsLimit }
+
+datatable_non_received_documents_limit:
+    path: /datatable/non-received-documents
+    defaults: { _controller: LocalsBestUserBundle:Datatable:NonReceivedDocumentsLimit }
+
+team_list:
+    path: /team-list
+    defaults: { _controller: LocalsBestUserBundle:Team:list }
+
+invite_agent_to_team:
+    path: /invite-agent-to-team/{agentId}
+    defaults: { _controller: LocalsBestUserBundle:Team:invite }
+
+remove_agent_from_team:
+    path: /remove-agent-from-team/{agentId}
+    defaults: { _controller: LocalsBestUserBundle:Team:remove }
+
+excel_import:
+    path: /excel-import
+    defaults: { _controller: LocalsBestUserBundle:User:excelImport}
+
+language_import:
+    path: /language-import
+    defaults: { _controller: LocalsBestUserBundle:Default:languageImport}
+
+state_import:
+    path: /state-import
+    defaults: { _controller: LocalsBestUserBundle:Default:stateImport}
+
+city_import:
+    path: /city-import
+    defaults: { _controller: LocalsBestUserBundle:Default:cityImport}
+
+ambiance_import:
+    path: /ambiance-import/{count}
+    defaults: { _controller: LocalsBestUserBundle:Default:ambianceImport}
+
+agents_import:
+    path: /agents-import/{businessId}
+    defaults: { _controller: LocalsBestUserBundle:Import:importAgents }
+
+contacts_import:
+    path: /contacts-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importContacts }
+
+transactions_import:
+    path: /transactions-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importTransactions }
+
+transactions_parties_import:
+    path: /transactions-parties-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importTransactionParties }
+
+transactions_documents_import:
+    path: /transactions-documents-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importTransactionsDocuments }
+
+transactions_doc_types_import:
+    path: /transactions-doc-types-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importTransactionsDocTypes }
+
+transactions_notes_import:
+    path: /transactions-notes-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importTransactionsNotes }
+
+transactions_logs_import:
+    path: /transactions-logs-import
+    defaults: { _controller: LocalsBestUserBundle:Import:importTransactionsLogs }
+
+transaction_doc_count:
+    path: /transaction-doc-count/{transactionId}
+    defaults: { _controller: LocalsBestUserBundle:Default:docCount}
+
+
+ambiance_transaction_update:
+    path: /ambiance-transaction-update/{count}
+    defaults: { _controller: LocalsBestUserBundle:Default:ambianceUpdateTransactions}
+
+ambiance_agents_import:
+    path: /ambiance-agents-import
+    defaults: { _controller: LocalsBestUserBundle:Import:ambianceAgentsImport }
+
+ambiance_docs_import:
+    path: /ambiance-docs-import/{count}
+    defaults: { _controller: LocalsBestUserBundle:Default:ambianceDocsImport }
+    
+question_add:
+    path: /question/create
+    defaults: { _controller: LocalsBestUserBundle:Question:create }
+
+question_edit:
+    path: /question/{id}/edit
+    defaults: { _controller: LocalsBestUserBundle:Question:edit}
+
+question_remove:
+    path: /question/{id}/remove
+    defaults: { _controller: LocalsBestUserBundle:Question:remove}
+
+survey_index:
+    path: /surveys
+    defaults: { _controller: LocalsBestUserBundle:Survey:index }
+
+survey_create:
+    path: /surveys/create
+    defaults: { _controller: LocalsBestUserBundle:Survey:create }
+
+survey_view:
+    path: /surveys/{id}/view
+    defaults: { _controller: LocalsBestUserBundle:Survey:view }
+
+survey_result:
+    path: /surveys/{id}/result
+    defaults: { _controller: LocalsBestUserBundle:Survey:result }
+
+calendar_events:
+    path: /calendar-events
+    defaults: { _controller: LocalsBestUserBundle:Event:ajaxEvents }
+
+calendar_event_update:
+    path: /calendar-event-update
+    defaults: { _controller: LocalsBestUserBundle:Event:ajaxEventUpdate }
+
+get_entity:
+    path: /get-entity/{object}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Default:getEntity }
+
+user_increase_level:
+    path: /user-increase-level/{agentId}
+    defaults: { _controller: LocalsBestUserBundle:User:increaseLevel}
+
+user_decrease_level:
+    path: /user-decrease-level/{agentId}
+    defaults: { _controller: LocalsBestUserBundle:User:decreaseLevel}
+
+api_notes_list:
+    path: /api/v1/notes/list
+    defaults: { _controller: LocalsBestUserBundle:Note:apiList }
+
+api_hide_note:
+    path: /api/v1/note/hide
+    defaults: { _controller: LocalsBestUserBundle:Note:apiHideNote }
+
+association_row_index:
+    path:     /associations-rows/{type}/{username}
+    defaults: { _controller: LocalsBestUserBundle:AssociationRow:index, username: null }
+    requirements: { type: user|business }
+
+association_row_create:
+    path:     /association-row/{type}/create/{username}
+    defaults: { _controller: LocalsBestUserBundle:AssociationRow:create, username: null }
+    requirements: { type: user|business }
+
+association_row_edit:
+    path:     /association-row/{id}/edit/{username}
+    defaults: { _controller: LocalsBestUserBundle:AssociationRow:edit, username: null }
+
+association_row_delete:
+    path:     /association-row/{id}/delete/{username}
+    defaults: { _controller: LocalsBestUserBundle:AssociationRow:delete, username: null }
+
+subject_property_create:
+    path: /subject-property/{contactId}/create
+    defaults: { _controller: LocalsBestUserBundle:SubjectProperty:create }
+
+subject_property_delete:
+    path: /subject-property/{id}/delete
+    defaults: { _controller: LocalsBestUserBundle:SubjectProperty:delete }
+
+api_links_list:
+    path: /api/v1/links/list
+    defaults: { _controller: LocalsBestUserBundle:Link:index }
+
+link_create:
+    path:     /link-create
+    defaults: { _controller: LocalsBestUserBundle:Link:create }
+
+link_delete:
+    path:     /link-delete/{id}
+    defaults: { _controller: LocalsBestUserBundle:Link:delete }
+
+showing_vendors:
+    path: /directory/{businessSlug}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:directory }
+    
+ajax_session_save:
+    path: /session-update
+    defaults: { _controller: LocalsBestUserBundle:Document:sessionUpdate }
+    
+form_builder_page:
+    path: /form-builder
+    defaults: { _controller: LocalsBestUserBundle:FormBuilder:index }
+
+form_builder_save:
+    path: /form-save
+    defaults: { _controller: LocalsBestUserBundle:FormBuilder:save }
+
+form_builder_get:
+    path: /form-get/{id}
+    defaults: { _controller: LocalsBestUserBundle:FormBuilder:getForm }
+    
+firm_page:
+    path: /firm-page
+    defaults: { _controller: LocalsBestUserBundle:Firm:index }
+
+datatable_firm_limit:
+    path: /datatable/firm
+    defaults: { _controller: LocalsBestUserBundle:Datatable:firmLimit }
+
+firm_advance_search_view:
+    path:     /firm/advance-search
+    defaults: { _controller: LocalsBestUserBundle:Firm:advanceSearch}
+
+ajax_user_change_type:
+    path: /ajax-user-change-type/{userId}
+    defaults: { _controller: LocalsBestUserBundle:User:toggleUserType }
+
+transactions_non_received_toggle_scheduler_status:
+    path: /transactions/non-received/toggle-scheduler-status/{id}
+    defaults: { _controller: LocalsBestUserBundle:Transaction:toggleSchedulerStatus }
+
+transactions_non_received_docs_toggle_scheduler_status:
+    path: /transactions/non-received-docs/toggle-scheduler-status/{id}
+    defaults: { _controller: LocalsBestUserBundle:Transaction:toggleDocsSchedulerStatus }
+
+invite_paid_service:
+    path: /invite-paid-service
+    defaults: {_controller: LocalsBestUserBundle:Service:invitePaid}
+
+pay_form:
+    path: /payment/{token}
+    defaults : { _controller: LocalsBestUserBundle:Payment:form }
+
+ajax_mail_value_check:
+    path: /ajax-mail-check/{emailValue}
+    defaults: { _controller: LocalsBestUserBundle:Default:mailCheck }
+
+contacts_assign_window:
+    path: /contacts-assign-window
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Contact:assignWindow, }
+
+contacts_assign:
+    path: /contacts-assign
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:assignContacts, }
+
+contacts_single_assign:
+    path: /contact-single-assign
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:assignSingleContact, }
+
+contact_print:
+    path: /contacts-print
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:print }
+
+contacts_change_category_ajax:
+    path: /contacts-change-category-ajax/{contactId}
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:changeCategoryAjax, }
+
+contacts_change_type_ajax:
+    path: /contacts-change-type-ajax/{contactId}
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:changeTypeAjax, }
+
+contacts_change_is_active_ajax:
+    path: /contacts-change-is-active-ajax/{contactId}
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:changeIsActiveAjax, }
+
+contacts_assign_to_leader:
+    path: /contacts-assign-to-leader
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Contact:assignContactsToLeader }
+
+doc_rule_create:
+    path: /doc-rule/create
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:DocumentRule:create }
+
+doc_rule_delete:
+    path: /doc-rule/remove/{id}
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:DocumentRule:delete }
+
+doc_rule_update:
+    path: /doc-rule/{id}
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:DocumentRule:update }
+
+email_templates_list:
+    path: /email-templates
+    defaults: { _controller: LocalsBestUserBundle:EmailTemplate:index }
+
+email_templates_create:
+    path: /email-templates/new
+    defaults: { _controller: LocalsBestUserBundle:EmailTemplate:create }
+
+email_templates_delete:
+    path: /email-templates/delete/{id}
+    defaults: { _controller: LocalsBestUserBundle:EmailTemplate:delete }
+
+email_templates_edit:
+    path: /email-templates/{id}
+    defaults: { _controller: LocalsBestUserBundle:EmailTemplate:edit }
+
+products:
+    path: /products2
+    defaults: { _controller: LocalsBestUserBundle:Product:index }
+
+toggle_products_view:
+    path: /toggle-products-view
+    defaults: { _controller: LocalsBestUserBundle:Product:toggleProductsView }
+
+businesses_products:
+    path: /business-shop/{businessSlug}
+    defaults: { _controller: LocalsBestUserBundle:Product:businessShop }
+
+products_show:
+    path: /product/{slug}
+    defaults: { _controller: LocalsBestUserBundle:Product:show }
+
+products_cart:
+    path: /cart
+    defaults: { _controller: LocalsBestUserBundle:Product:cart }
+
+orders:
+    path: /orders
+    defaults: { _controller: LocalsBestUserBundle:Product:orders }
+
+order_details:
+    path: /order/{id}
+    defaults: { _controller: LocalsBestUserBundle:Product:orderDetails }
+
+products_checkout:
+    path: /shop-checkout
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Product:checkout }
+
+products_checkout_post:
+    path: /shop-checkout
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Product:checkoutPost }
+
+products_cart_add:
+    path: /add-to-cart
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Product:cartAdd }
+
+products_cart_remove:
+    path: /remove-from-cart/{id}
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Product:cartRemove }
+
+feedback_create:
+    path: /feedback-create/{productId}/{parentId}
+    defaults: { _controller: LocalsBestUserBundle:Feedback:create, parentId: null }
+
+product_image_delete:
+    path: /product-image-delete/{id}
+    defaults: { _controller: LocalsBestUserBundle:Product:imageDelete }
+
+sign_form:
+    path: /sign-form
+    defaults: { _controller: LocalsBestUserBundle:CustomForm:signForm }
+
+shredding_form:
+    path: /shredding-form/{userId}
+    defaults: { _controller: LocalsBestUserBundle:CustomForm:shreddingForm }
+
+custom_form_save:
+    path: /custom/{type}/save
+    defaults: { _controller: LocalsBestUserBundle:CustomForm:store }
+
+custom_shredding_pdf:
+    path: /custom/shredding/pdf
+    defaults: { _controller: LocalsBestUserBundle:CustomForm:shreddingPdf }
+
+custom_form_payment:
+    path: /custom/{type}/{id}/payment
+    defaults: { _controller: LocalsBestUserBundle:CustomForm:payment }
+
+custom_form_charge:
+    path: /custom/{type}/{id}/charge
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:CustomForm:chargeForm }
+
+business_search_permissions_update:
+    path: /search-permissioms-update
+    methods: POST
+    defaults: { _controller: LocalsBestUserBundle:Business:usersVisibilityUpdate }
+
+contact_business_info:
+    path: /contact/{id}/business-info
+    defaults: { _controller: LocalsBestUserBundle:Contact:businessInfo }
+    
+members_index:
+    path: /members
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Member:index }
+
+members_search_ajax:
+    path: /members-search
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Member:search }
+
+members_details:
+    path: /members/{id}
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Member:details }
+
+business_details:
+    path: /businesses/{slug}
+    methods: GET
+    defaults: { _controller: LocalsBestUserBundle:Business:details }
+
+working_cities_by_state:
+    path: /working-cities-by-state
+    defaults: { _controller: LocalsBestUserBundle:City:getWorkingCitiesByState }
+
+job_request:
+    path: /job/request
+    defaults: { _controller: LocalsBestUserBundle:Job:request }
+
+
+set_edit:
+    path: /business-set/{userId}/edit
+    defaults: { _controller: LocalsBestUserBundle:BusinessUserSet:edit }
+
+business_recipient_create:
+    path: /business-recipient/create
+    defaults: { _controller: LocalsBestUserBundle:BusinessRecipient:create }
+
+business_recipient_edit:
+    path: /business-recipient/{id}/edit
+    defaults: { _controller: LocalsBestUserBundle:BusinessRecipient:edit }
+
+business_recipient_delete:
+    path: /business-recipient/{id}/delete
+    defaults: { _controller: LocalsBestUserBundle:BusinessRecipient:delete }
+
+blank_docs_index:
+    path: /blank-documents
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:index }
+
+blank_docs_add:
+    path: /blank-documents/new
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:create }
+
+blank_docs_edit:
+    path: /blank-documents/{id}/edit
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:edit }
+
+blank_docs_show:
+    path: /blank-documents/{id}/view
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:show }
+
+blank_docs_download:
+    path: /blank-documents/{id}/download
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:download }
+
+blank_docs_download_zip:
+    path: /blank-documents/zip-download
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:downloadZip }
+
+blank_docs_delete:
+    path: /blank-documents/{id}/delete
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:delete }
+
+blank_docs_transaction_view:
+    path: /blank-documents/transaction-view
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:transactionView }
+
+masking_users_list_layout:
+    path: /masking
+    defaults: { _controller: LocalsBestUserBundle:User:masking }
+
+masking_users_list_ajax:
+    path: /users-for-masking
+    defaults: { _controller: LocalsBestUserBundle:User:usersForMasking }
+
+as_sign_update_inventory:
+    path: /as-sign/{userId}/update-inventory
+    defaults: { _controller: LocalsBestUserBundle:User:AsSignInventory }
+
+champion_update_size_of_the_bin:
+    path: /champion/{userId}/update-bin-size
+    defaults: { _controller: LocalsBestUserBundle:User:ChampionSizeOfTheBin }
+
+find_city:
+    path: /find-city
+    defaults: { _controller: LocalsBestUserBundle:City:findCity }
+
+custom_order:
+    path: /custom-order
+    defaults: { _controller: LocalsBestUserBundle:Default:customOrder}
+
+contact_us:
+    path: /contact-us
+    defaults: { _controller: LocalsBestUserBundle:Product:contactUs }
+
+find_email_template:
+    path: /find-email-template
+    defaults: { _controller: LocalsBestUserBundle:EmailTemplate:find }
+
+user_docs_send_email:
+    path: /user-docs-send-email
+    defaults: { _controller: LocalsBestUserBundle:User:userDocsSendEmail }
+    
+champion_clients_xls_download:
+    path: /clients-download
+    defaults: { _controller: LocalsBestUserBundle:Default:championXlsDownload }
+
+jobs_modal_form:
+    path: /job-modal/{type}/{id}
+    defaults: { _controller: LocalsBestUserBundle:Job:jobModal }
+
+vendor_slider_ajax1:
+    path:     /vendors/slidernew/{businessType}
+    defaults: { _controller: LocalsBestUserBundle:Vendor:sliderNew, businessType: null }
+
+job_add_new:
+    path:     /job/add/new/{objectType}/{objectId}
+    defaults: { _controller: LocalsBestUserBundle:Job:editJob, objectType: null, objectId: null}
+
+import-city:
+    path:     /import-city
+    defaults: { _controller: LocalsBestUserBundle:ImportCity:importCity}
+
+pdf_form:
+    path: /blank-documents/{id}/pdf_form
+    defaults: { _controller: LocalsBestUserBundle:BlankDocument:pdf }

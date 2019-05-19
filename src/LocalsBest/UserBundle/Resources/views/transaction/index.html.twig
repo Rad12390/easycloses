@@ -1,0 +1,356 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i> Transactions
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('system/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        div.table-responsive {
+            overflow-x: inherit !important;
+        }
+
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+        #example_length {
+            float: none;
+            text-align: left;
+        }
+
+        #example_filter {
+            float: none;
+        }
+
+        .dt-buttons {
+            margin-top: -4px !important;
+        }
+
+        .address-column {
+            min-width: 200px;
+        }
+
+        @media screen and (max-width: 480px) {
+            .address-column {
+                min-width: 150px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/r/bs/jszip-2.5.0,pdfmake-0.1.18,dt-1.10.9,b-1.0.3,b-colvis-1.0.3,b-html5-1.0.3,b-print-1.0.3,r-1.0.7/datatables.min.js"></script>
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        var stockData = '';
+        jQuery(document).ready(function () {
+		 //$.fn.dataTableExt.sErrMode = 'throw';
+            var dealsheet=' tess';
+            var dTable = $('#example').dataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                columns: [
+                    {
+                        orderable: false,
+                        className: "text-center"
+                    },
+                    null,
+                    null,
+                    {% if app.user.role.level < 7 %}
+                    null,
+                    {% endif %}
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    {
+                        orderable: false,
+                        className: "text-center"
+                    }
+                ],
+                {#order: [[ 10, "desc" ]],#}
+                ajax: {
+                    url: "/datatable/transactions?{{ params|raw }}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        dealsheet=JSON.parse(data.responseText);
+                        windowForLogout(data)
+                    }
+                },
+                dom: 'lf<"toolbar">Btrip',
+                buttons: [
+                    {
+                        extend: 'csv',
+                        exportOptions: {
+                            "columns": ":not(.no-export)",
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        exportOptions: {
+                            "columns": ":not(.no-export)",
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        orientation: "landscape",
+                        exportOptions: {
+                            "columns": ":not(.no-export)",
+                        },
+                        customize: function (doc) {
+                            doc.defaultStyle.fontSize = 8;
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            "columns": ":not(.no-export)",
+                        },
+                        customize: function (window) {
+                            var $body = $(window.document.body);
+                            $body.addClass("datatables-print");
+                        }
+                    },
+                    {
+                        text: 'Advanced Search',
+                        className: 'btn btn-primary advance-search'
+                    }
+                ]
+            });
+
+            $("div.toolbar").html('<button class="btn btn-sm btn-secondary pull-left" id="search-button"><span class="fa fa-search"></span> Search</button>');
+
+            setInterval(function() {
+
+                var jsons=dealsheet.dealSheet ;
+                var ArrayObject=[];
+
+                var c=0;
+                for (var i in jsons){
+                    ArrayObject.push(jsons[i]);
+                }
+                console.log(Array.from(ArrayObject));
+                stockData =  ArrayObject;
+            }, 3000);
+
+
+            $("a.advance-search").on('click', function(){
+				$('#ajax').modal({'remote': '{{ path('transaction_advance_search_view') }}?{{ params|raw }}'});
+            });
+
+            $('table#example').on('click', 'td', function(e) {
+                $('table#example tr.success').removeClass('success');
+                $(this).parent().addClass('success');
+            });
+
+            $(".dataTables_filter input")
+                .unbind() // Unbind previous default bindings
+                .bind("input", function (e) { // Bind for field changes
+                    // Search if enough characters, or search cleared with backspace
+                    if ( this.value == "" ) {
+                        // Call the API search function
+                        dTable.api().search(this.value).draw();
+                    }
+                })
+                .bind("keydown", function (e) { // Bind for enter key press
+                    // Search when user presses Enter
+                    if (e.keyCode == 13) {
+                        dTable.api().search(this.value).draw();
+                    }
+                });
+
+            $("#search-button").on("click", function() {
+                var query = $(".dataTables_filter input").val();
+                console.log(query);
+                dTable.api().search(query).draw();
+            });
+        });
+
+
+        function convertArrayOfObjectsToCSV(args) {
+            var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+            data = args.data || null;
+            if (data == null || !data.length) {
+                return null;
+            }
+
+            columnDelimiter = args.columnDelimiter || ',';
+            lineDelimiter = args.lineDelimiter || '\n';
+
+            keys = Object.keys(data[0]);
+
+            result = '';
+            result += keys.join(columnDelimiter);
+            result += lineDelimiter;
+
+            data.forEach(function(item) {
+                ctr = 0;
+                keys.forEach(function(key) {
+                    if (ctr > 0) result += columnDelimiter;
+
+                    result += item[key];
+                    ctr++;
+                });
+                result += lineDelimiter;
+            });
+
+            return result;
+        }
+
+        {#function downloadCSV(args) {
+            var data, filename, link;
+
+            var csv = convertArrayOfObjectsToCSV({
+                data: stockData
+            });
+            if (csv == null) return;
+
+            filename = args.filename || 'export.csv';
+
+            if (!csv.match(/^data:text\/csv/i)) {
+                csv = 'data:text/csv;charset=utf-8,' + csv;
+            }
+            data = encodeURI(csv);
+
+            link = document.createElement('a');
+            link.setAttribute('href', data);
+            link.setAttribute('download', filename);
+            link.click();
+        }#}
+        function downloadCSV(args) {
+            var data, filename, link;
+
+            var csv = convertArrayOfObjectsToCSV({
+                data: stockData
+            });
+            if (csv == null) return;
+
+            filename = args.filename || 'export.csv';
+
+            if (!csv.match(/^data:text\/csv/i)) {
+                csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            }
+           // data = encodeURI(csv);
+
+            link = document.createElement('a');
+            link.setAttribute('href', csv);
+            link.setAttribute('download', filename);
+            link.click();
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-exchange"></i>Transactions
+            </div>
+            <div class="actions">
+                {% if app.user.businesses[0].id == 50 %}
+                    {% if app.user.role.level == 4 or app.user.role.level == 5  %}
+                        <a href='#' class="btn  btn-danger" onclick='downloadCSV({ filename: "stock-data.csv" });'>Deal Sheet</a>
+                    {% endif %}
+                {% endif %}
+
+                {% if app.user.businesses[0].id == 54 or checker.forAddon('transactions clients page', app.user) %}
+                    <a class="btn  btn-danger" href="{{ path('firm_page') }}">
+                        Client List
+                    </a>
+                {% endif %}
+
+                {% if app.user.id in [30, 39, 68, 69, 70, 287, 519, 573, 574, 1986, 1991, 2009] or checker.forAddon('non received documents', app.user) %}
+                    <a class="btn  btn-danger" href="{{ path('transaction_non_received_documents') }}">
+                        Non Received Documents
+                    </a>
+                {% endif %}
+
+                {% if app.user.id in [39, 68, 70, 519, 573, 574, 1986, 2009] or checker.forAddon('non received listings', app.user) %}
+                    <a class="btn  btn-danger" href="{{ path('transaction_non_received_listings') }}">
+                        Non Received Listings
+                    </a>
+                {% endif %}
+
+                <div class="btn-group">
+                    <button class="btn  btn-danger dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                        Start New Transaction <i class="fa fa-angle-down"></i>
+                    </button>
+                    <ul class="dropdown-menu pull-right" role="menu">
+                        <li>
+                            <a href="{{ path('transaction_add_listing') }}">
+                                <i class="icon-plus"></i>
+                                <span> Create Listing{% if app.user.businesses[0].id != 54 %}/Landlord File{% endif %} </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ path('transaction_add_closing') }}">
+                                <i class="icon-plus"></i>
+                                <span> Create Buyer{% if app.user.businesses[0].id != 54 %}/Tenant File{% endif %} </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="portlet-body" style="padding-top: 10px;">
+            <div class="table-responsive">
+                <table style="width: 100%;" id="example" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th class='no-export no-sort'> </th>
+                            <th> Status </th>
+                            <th data-priority="1" class="address-column"> Street Address </th>
+                            <th> Type </th>
+                            {% if app.user.role.role != 'ROLE_AGENT' %}
+                                <th> Agent Name </th>
+                            {% endif %}
+                            <th> Agent Represents </th>
+                            <th> Exp/Closing Date </th>
+                            <th> Price </th>
+                            <th> Contact Name </th>
+                            <th> Mls Id </th>
+                            <th> Last Updated </th>
+                            <th> Created Date </th>
+                            <th class='no-export no-sort'> Actions </th>
+                        </tr>
+                    </thead>
+
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}	

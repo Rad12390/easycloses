@@ -1,0 +1,56 @@
+<div class="portlet box blue">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class="fa fa-question"></i> Documents Questions Rules
+        </div>
+        <div class="actions">
+            <a class="btn  btn-danger" href="{{ path('question_add') }}" id="questionAdd" data-target="#ajax" data-toggle="modal">
+                Add
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>File Type</th>
+                    <th>Agent Represent</th>
+                    <th>Property Type</th>
+                    <th>Status</th>
+                    <th>Transaction Type</th>
+                    <th>Question</th>
+                    <th>Document</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if questions|length > 0 %}
+                    {% for item in questions %}
+                        <tr>
+                            <td>{{ item.creating }}</td>
+                            <td>{{ item.represent }}</td>
+                            <td>{{ item.propertyType }}</td>
+                            <td>{{ item.status }}</td>
+                            <td>{{ item.transactionType }}</td>
+                            <td><i>{{ item.question }}</i></td>
+                            <td><b>{{ item.documentName }}</b></td>
+                            <td>
+                                <a href="{{ path('question_edit', {'id': item.id}) }}" class="btn btn-sm btn-warning" id="questionEdit" data-target="#ajax" data-toggle="modal">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <a href="{{ path('question_remove', {'id': item.id}) }}" onclick="return confirm('Are you sure?');" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8">You have not created any Yes/NO questions.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

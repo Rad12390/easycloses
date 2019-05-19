@@ -1,0 +1,216 @@
+{% extends "::empty.html.twig" %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="portlet box blue col-md-8 col-md-offset-2">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-briefcase"></i> {{ industryType.name }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-border">
+                            <thead>
+                                <tr>
+                                    <th>Network</th>
+                                    <th>Service Term</th>
+                                    <th>Set Up Fee</th>
+                                    <th>Membership Price</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ business.name }}</td>
+                                    <td>6 Months</td>
+                                    <td>${{ setupPrice }}</td>
+                                    <td>${{ price }}</td>
+                                    <td>${{ (price + setupPrice)|number_format(2, '.', ',') }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                   <th colspan="4">Order Total:</th>
+                                   <th>${{ (price + setupPrice)|number_format(2, '.', ',') }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <form method="post" action="{{ path('payment_charge', { 'token': token }) }}">
+                            <input type="hidden" name="charge_total" value="{{ (price + setupPrice)|number_format(2, '.', ',') }}">
+                            <input type="hidden" name="industry_type" value="{{ industryType.id }}">
+                            <input type="hidden" name="industry_group" value="{{ industryGroup.id }}">
+                            <input type="hidden" name="price_level" value="{{ priceLevel }}">
+                            <input type="hidden" name="business_network" value="{{ business.id }}">
+
+                            <div class="col-md-8 col-md-offset-2" style="margin-top:20px;">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input class="form-control placeholder-no-fix" required type="text" placeholder="First Name" name="first_name">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input class="form-control placeholder-no-fix" required type="text" placeholder="Last Name" name="last_name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="input-icon">
+                                        <i class="fa fa-envelope"></i>
+                                        <input class="form-control placeholder-no-fix" type="email" required placeholder="Email Address" id="user_email" name="user_email" value="{% if invite is not null %}{{ invite.recipient }}{% endif %}">
+                                        <span style="display: none;" id="help-block" class="help-block btn-danger"> This email address already used. Please use another email address. </span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-icon">
+                                        <i class="fa fa-credit-card"></i>
+                                        <input class="form-control placeholder-no-fix" type="text" autocomplete="cc-number" required placeholder="Credit Card Number" name="credit_card_number">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <select class="form-control" name="expiration_month" required id="expiration_month" autocomplete="cc-exp-month" data-placeholder="Month" tabindex="1">
+                                                <option value="">Month</option>
+                                                <option value="01">01</option>
+                                                <option value="02">02</option>
+                                                <option value="03">03</option>
+                                                <option value="04">04</option>
+                                                <option value="05">05</option>
+                                                <option value="06">06</option>
+                                                <option value="07">07</option>
+                                                <option value="08">08</option>
+                                                <option value="09">09</option>
+                                                <option value="10">10</option>
+                                                <option value="11">11</option>
+                                                <option value="12">12</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-control" name="expiration_year" required id="expiration_year" autocomplete="cc-exp-year" data-placeholder="Year" tabindex="1">
+                                                <option value="">Year</option>
+                                                <option value="2016">2016</option>
+                                                <option value="2017">2017</option>
+                                                <option value="2018">2018</option>
+                                                <option value="2019">2019</option>
+                                                <option value="2020">2020</option>
+                                                <option value="2021">2021</option>
+                                                <option value="2022">2022</option>
+                                                <option value="2023">2023</option>
+                                                <option value="2024">2024</option>
+                                                <option value="2025">2025</option>
+                                                <option value="2026">2026</option>
+                                                <option value="2027">2027</option>
+                                                <option value="2028">2028</option>
+                                                <option value="2029">2029</option>
+                                                <option value="2030">2030</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input class="form-control placeholder-no-fix col-md-4" required type="text" style="-webkit-text-security: disc;" autocomplete="cc-csc" placeholder="CVV2" name="cvv2">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="controls">
+                                        <textarea class="form-control" style="font-size: 11px;cursor: pointer;text-align: left;" rows="5" disabled="disabled">
+                                            {{ include('@LocalsBestUser/payment/_textarea-text.txt.twig') }}
+                                        </textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="mt-checkbox mt-checkbox-outline" id="term_check">
+                                        I have Read and Agree to Advertising Agreement, Terms &amp; Conditions, Privacy Policy
+                                        <input type="checkbox" value="accepted" required class="terms" id="terms" name="terms">
+                                        <span></span>
+                                    </label>
+                                </div>
+
+                                <div class="control-group">
+                                    <button type="submit" id="submit-btn" class="btn green pull-left ">
+                                        Submit Order <i class="m-icon-swapright m-icon-white"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="text-align:center;padding:10px;">
+        <span id="siteseal"><script type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=I88wEsizr7qcf3IHcr8vnSAYbfIeQfNdxEa9SYOqwR8MLQVi5XmxxdkoB"></script></span>
+        <img src="/images/visa.png">
+        <img src="/images/mastercard.png">
+        <img src="/images/americanexpress.png">
+    </div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2 well" style="background:#fbfef2;padding:0;">
+            <h2 style="text-align:center;color:#35aa47;">Need Assistance?     <i class="fa fa-phone" style="font-size: 26px;"></i> 1-888-740-0550 </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="portlet box green col-md-8 col-md-offset-2">
+            <div class="portlet-title">
+                <div class="caption"><i class="fa fa-question-circle"></i>FAQ</div>
+            </div>
+            <div class="portlet-body">
+                <p style="font-weight:bold;">Q: Will I get a Receipt? </p>
+                <p>A: Directly after you payment is made, a receipt will be emailed to you for your purchase.</p>
+                <hr>
+                <p style="font-weight:bold;">Q: Is my credit card number safe? </p>
+                <p>A: We use secure encryption to protect your credit card number. Further, we do not store credit card information online so your card number can NOT be found in our online database.</p>
+                <hr>
+                <p style="font-weight:bold;">Q: What is CVV2?</p>
+                <p>A: CVV2 is a number printed on your credit card to provide an additional deterrent against fraud. The user must be in possession of the credit card to get this number, it does not appear when the card is imprinted in the traditional manner. The photo below illustrates the location of the CVV2 number. We will not process online transactions without the CVV2 number.</p>
+                <div style="text-align:center;">
+                    <img src="/images/cc.gif">
+                </div>
+                <div class="well">
+                    <p style="font-weight:bold;font-style:italic">If you are using a Visa, Mastercard, or Discover</p>
+                    <p>Please provide the 3-digit verification number found on the back of your card. This is a non-embossed number printed on the signature panel on the back, immediately following the account number.
+                        This number is printed on your MasterCard &amp; Visa cards in the signature area of the back of the card. (it is the last 3 digits AFTER the credit card number in the signature area of the card).</p>
+                    <p style="font-weight:bold;font-style:italic">If you are using an American Express</p>
+                    <p>American Express cards show the cvv2 printed above and to the right of the imprinted card number on the front of the card. If you are using an American Express card, please provide the 4-digit verification number found on the front of your card. This is the non-embossed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {#<script>#}
+        {#$(document).ready(function(){#}
+            {#$("#user_email").on('blur', function(){#}
+                {#input = $(this);#}
+                {#$.ajax({#}
+                    {#method: "GET",#}
+                    {#url: "/ajax-mail-check/" + input.val(),#}
+                    {#dataType: "json",#}
+                    {#async: false,#}
+                    {#success:function(data){#}
+                        {#if(data.result == true) {#}
+                            {#$("#submit-btn").attr('disabled', true);#}
+                            {#$("#help-block").show();#}
+                        {#} else {#}
+                            {#$("#submit-btn").attr('disabled', false);#}
+                            {#$("#help-block").hide();#}
+                        {#}#}
+                    {#}#}
+                {#})#}
+            {#});#}
+
+            {#{% if invite is not null %}#}
+            {#$("#user_email").trigger('blur');#}
+            {#{% endif %}#}
+        {#});#}
+    {#</script>#}
+{% endblock %}

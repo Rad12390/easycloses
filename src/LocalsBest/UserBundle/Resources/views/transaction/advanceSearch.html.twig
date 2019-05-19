@@ -1,0 +1,167 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Advanced Search</h4>
+    </div>
+    <form class="form-horizontal" role="form" method="get">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">MLS:</label>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <input name="mls_number" type="text" class="form-control" placeholder="MLS">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if app.user.role.level < 7 %}
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Agent Name:</label>
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="text" name="agent_first_name" class="form-control" placeholder="First Name">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" name="agent_last_name" class="form-control" placeholder="Last Name">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">Street Address:</label>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <input name="street_address" type="text" class="form-control" placeholder="Street">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input name="city_address" type="text" class="form-control" placeholder="City">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input name="state_address" type="text" class="form-control" placeholder="State">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input name="zip_address" type="text" class="form-control" placeholder="ZIP">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">Contact Name:</label>
+                            <div class="col-md-9">
+                                <input name="contact_name" type="text" class="form-control" placeholder="Full Name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">From Date:</label>
+                            <div class="col-md-3">
+                                <input type="text" name="from" class="form-control date-picker" placeholder="Date From">
+                            </div>
+                            <label class="col-md-3 control-label">To Date:</label>
+                            <div class="col-md-3">
+                                <input type="text" name="to" class="form-control date-picker" placeholder="Date To">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">Sold Paid Date From:</label>
+                            <div class="col-md-3">
+                                <input type="text" name="sp_from" class="form-control date-picker" placeholder="SP Date From">
+                            </div>
+                            <label class="col-md-3 control-label">Sold Paid Date To:</label>
+                            <div class="col-md-3">
+                                <input type="text" name="sp_to" class="form-control date-picker" placeholder="SP Date To">
+                            </div>
+                        </div>
+
+                        {% if results|length > 0 %}
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Transaction Status:</label>
+                                <div class="col-md-9">
+                                    <div class="mt-checkbox-inline">
+                                        {% for result in results %}
+                                            <label class="mt-checkbox mt-checkbox-outline" style="margin-left: 0;">
+                                                {{ result.status|replace({'_': ' '}) }} ({{ result.total }})
+                                                <input name="status[]" type="checkbox" value="{{ result.status }}">
+                                                <span></span>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if docsResult|length > 0 %}
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Transaction Documents Statuses:</label>
+                                <div class="col-md-9">
+                                    {#<div class="form-group">#}
+                                        <div class="mt-checkbox-list">
+                                            {% for docResult in docsResult if docResult.docsStatus != '' and docResult.docsStatus != '#4d90fe' and docResult.docsStatus != '#000000' %}
+                                                <label class="mt-checkbox mt-checkbox-outline">
+                                                    <span class="badge" style="color: {{ docResult.docsStatus }}; background-color: {{ docResult.docsStatus }}; position: relative;"> 3 </span>
+                                                    {{ attribute(docsStatuses, docResult.docsStatus) }}
+                                                    <input type="checkbox" value="{{ docResult.docsStatus }}" name="docsStatus[]" />
+                                                    <span></span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    {#</div>#}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {#<div class="form-group">
+                            <label class="col-md-3 control-label">Doc Status:</label>
+                            <div class="col-md-9">
+
+                                <label class="checkbox-inline" style="margin-left: 0;">
+                                    <input type="checkbox"> Missing
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox"> Submitted
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox"> Approved
+                                </label>
+
+                            </div>
+                        </div>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            <button type="submit" id="save" class="btn btn-success"><i class="fa fa-check"></i> Search</button>
+        </div>
+    </form>
+
+    <script>
+        jQuery(document).ready(function () {
+            $('.date-picker').datepicker({
+                format: "mm/dd/yyyy",
+                orientation: "right",
+                autoclose: true
+            });
+        });
+    </script>
+</div>

@@ -1,0 +1,207 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    Cart
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function() {
+            $('.cart-item-plus').on('click', function(){
+                updateRowPrice(this)
+            });
+
+            $('.cart-item-minus').on('click', function(){
+                updateRowPrice(this)
+            });
+        });
+
+        function updateRowPrice(element) {
+            var quantity = $(element).parent().find('input.cart-quantity').val();
+            var sku = $(element).parent().find('input.cart-quantity').data('sku');
+
+            $.ajax({
+                'url': '{{ path('cart_qunatity_update') }}',
+                'method': 'POST',
+                'data': {
+                    'sku': sku,
+                    'quantity': quantity
+                }
+            });
+
+            var row = $(element).parent().parent();
+            var price = row.find('input.sku-price').val();
+            var priceFormat = new Intl.NumberFormat('en-US', {style: 'currency', 'currency': 'USD'}).format(price*quantity);
+            row.find('span#price-text').html(priceFormat);
+
+            refreshTotal();
+        }
+
+        function refreshTotal() {
+            rows = $('table.cart-table tbody tr');
+
+            rowsTotals = rows.map(function(){
+                var price =  $(this).find('input.sku-price').val();
+                var quantity =  $(this).find('input.cart-quantity').val();
+
+                return price*quantity;
+            }).get();
+
+            var total = rowsTotals.reduce(function(a, b) { return a + b; }, 0);
+            var totalFormat = new Intl.NumberFormat('en-US', {style: 'currency', 'currency': 'USD'}).format(total);
+
+            $('#sub-total-price').html(totalFormat);
+            $('#total-price').html(totalFormat);
+        }
+        $(".advance-search").on('click', function(){
+            var length= {{limited_sku|length}};
+            var package_array=[];
+            {% for sku in limited_sku %}
+                    {% set package_id= sku.sku.package.id %}
+                    {% set package_type= sku.sku.package.type %}
+                    var newModal= $('#ajax').clone().attr("id","ajax"+{{package_id}});
+                    $('body').append(newModal);
+                    package_array.push({{package_id}});
+                    $('#ajax'+{{package_id}}).modal({'remote': '{{ path('jobs_modal_form',{'type':'Package', 'id':package_id}) }}'});
+                    $(".job_modal").modal("hide");
+                    {% if loop.index == limited_sku|length %}
+                         $('#ajax'+{{package_id}}).addClass("last");
+                    {% endif %}
+            {% endfor %}
+                setTimeout(function(){ 
+                    for(var i=0;i<length;i++){
+                        if(i==0){
+                            $("#ajax"+package_array[i]).modal("show");
+                        }
+                    }
+                }, 500);
+               $(".package_array").val(package_array);
+               if(!length)
+                   $("form[name='checkout']").submit();
+            return false;
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    
+    <div class="container">
+        <div class="row">
+            <form name="checkout" method="post" action="{{ path('checkout') }}">
+                <div class="col-md-8">
+                    <table class="table cart-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Name</th>
+                                <th>QTY</th>
+                                <th>Options</th>
+                                <th>Price</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set totalAmount = 0 %}
+                        {% for key, item in skus %}
+                            {% set totalAmount = totalAmount + item.quantity*(item.sku.price.retailPrice ) %}
+                            <tr>
+                                <td class="cart-item-image">
+                                    {% if item.sku.package is not empty %}
+                                         <img style="width: 70px; height: 70px;" src="{{ vich_uploader_asset(item.sku.package   , 'file') }}" alt="{{ item.sku.title }}">
+                                    {% else %}
+                                        <img src="{{ asset('shop/img/70x70.png') }}" title="{{ item.sku.title }}" alt="{{ item.sku.title }}"/>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('sku_show', {id: item.sku.id})}}">
+                                        {{ item.sku.title }}
+                                        <input type="hidden" name="sku[{{ key }}][id]" value="{{ item.sku.id }}" />
+                                    </a>
+                                </td>
+                                <td class="cart-item-quantity">
+                                    <i class="fa fa-minus cart-item-minus"></i>
+                                    <input title="Quantity" type="text" name="sku[{{ key }}][quantity]" data-sku="{{ item.sku.id }}" class="cart-quantity" value="{{ item.quantity }}" />
+                                    <i class="fa fa-plus cart-item-plus"></i>
+                                </td>
+                                <td>
+                                    {% for option in item.sku.options %}
+                                        {{ option.title }}:
+                                        {% for value in option.optionsValues if item.options[option.id] is defined and value == item.options[option.id] %}
+                                            <b>{{ value }}</b><br>
+                                            <input name="sku[{{ key }}][options][{{ option.title }}]" value="{{ value }}" type="hidden">
+                                        {% endfor %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <input type="hidden" class="sku-price" value="{{ item.sku.price.retailPrice }}">
+                                    <span id="price-text">${{ (item.quantity * item.sku.price.retailPrice )|number_format }}</span>
+                                </td>
+                                <td class="cart-item-remove">
+                                    <a class="fa fa-times" href="{{ path('cart_remove', {id:item.sku.id}) }}"></a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center;">
+                                    <i>Empty Cart</i>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-3">
+                    <ul class="cart-total-list">
+                        <li>
+                            <span>Sub Total</span><span id="sub-total-price">${{ totalAmount|number_format }}</span>
+                        </li>
+                        <li>
+                            <span>Shipping</span><span>$0.00</span>
+                        </li>
+                        <li>
+                            <span>Taxes</span><span>$0.00</span>
+                        </li>
+                        <li>
+                            <span>Total</span><span id="total-price">${{ totalAmount|number_format }}</span>
+                        </li>
+                    </ul>
+
+                    {% if app.user %}
+                        {% if totalAmount > 0 %}
+                            <button class="btn btn-primary btn-lg advance-search" type="submit">
+                                Checkout
+                            </button>
+                        {% endif %}
+
+                        {% if totalAmount == 0 %}
+                            <button class="btn btn-primary btn-lg advance-search" type="submit">
+                                Get It
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <a class="btn btn-primary" href="{{ path('join') }}">Join</a>
+                        or
+                        <a class="btn btn-primary" href="{{ path('login') }}">Login</a>
+                    {% endif %}
+                    <br><br>
+                    <a class="btn btn-default" href="{{ path('ec_shop_main_page') }}">
+                        Back to Shop
+                    </a>
+                </div>
+            </form>
+        </div>
+        <div class="gap"></div>
+    </div>
+                        
+                        
+    <input type="hidden" class="package_array"/>               
+    <!--Modal popup for adding jobs per package--->
+    <div class="modal fade job_modal" id="ajax" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-updated" style="transform: none !important;">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+{% endblock %}

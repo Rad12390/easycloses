@@ -1,0 +1,7 @@
+parameters:
+#    locals_best_admin.example.class: LocalsBest\AdminBundle\Example
+
+services:
+#    locals_best_admin.example:
+#        class: %locals_best_admin.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

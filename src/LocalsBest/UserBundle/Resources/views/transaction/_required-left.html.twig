@@ -1,0 +1,16 @@
+<div class="btn-group" role="group">
+    <button type="button" {% if number == 0 %}disabled{% endif %} class="btn btn-sm btn-{% if resStatus == '' %}default{% else %}{{ resStatus }}{% endif %} dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        {{ number }}
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        {% for elem in result %}
+            <li role="presentation">
+                <a role="menuitem" tabindex="-1" href="javascript:;">
+                    <span id="doc-type-{{ elem.id }}" style="position: inherit;" class="badge badge-{{ elem.status }}"> &nbsp; </span>
+                    &nbsp;{{ elem.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

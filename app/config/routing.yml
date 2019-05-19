@@ -1,0 +1,54 @@
+locals_best_shop:
+    resource: "@LocalsBestShopBundle/Resources/config/routing.yml"
+    prefix:   /ec-shop
+
+locals_best_word_press_api:
+    resource: "@LocalsBestWordPressApiBundle/Resources/config/routing.yml"
+    prefix:   /wp-api/v1
+
+NelmioApiDocBundle:
+    resource: "@NelmioApiDocBundle/Resources/config/routing/swaggerui.xml"
+    prefix:   /wp-api/v1/doc
+
+locals_best_admin:
+    resource: "@LocalsBestAdminBundle/Resources/config/routing.yml"
+    prefix:   /admin
+
+nimble_imps_deploy:
+    resource: "@NimbleImpsDeployBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+locals_best_rest:
+    resource: "@LocalsBestRestBundle/Resources/config/routing.yml"
+    prefix:   /
+
+hwi_oauth_redirect:
+    resource: "@HWIOAuthBundle/Resources/config/routing/redirect.xml"
+    prefix:   /connect
+
+hwi_oauth_connect:
+    resource: "@HWIOAuthBundle/Resources/config/routing/connect.xml"
+    prefix:   /connect
+
+hwi_oauth_login:
+    resource: "@HWIOAuthBundle/Resources/config/routing/login.xml"
+    prefix:   /auth
+
+locals_best_user:
+    resource: "@LocalsBestMedAppUserBundle/Resources/config/routing.yml"
+
+locals_best_notification:
+    resource: "@LocalsBestNotificationBundle/Resources/config/routing.yml"
+
+login_facebook:
+    path: /auth/check-facebook
+
+login_twitter:
+    path: /auth/check-twitter
+
+login_linkedin:
+    path: /auth/check-linkedin
+
+uploads:
+    path: /uploads/

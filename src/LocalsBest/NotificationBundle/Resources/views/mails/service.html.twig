@@ -1,0 +1,9 @@
+Hello Admin,
+<br>
+{{ service.createdBy.username }} has reported an issue on {{ "now"|date("m/d/Y H:i") }}. The Type of issue is "{{ service.type }}" and Support Notes are :<br>
+<br>
+{{ service.note }}<br>
+<br>
+Created by {{ service.createdBy.fullName }} (Email: {{ service.createdBy.primaryEmail.email }}) from {{ service.owner.name }}, {{ service.createdBy.primaryPhone.number }}<br>
+<br>
+Thank You, Localsbest Concierge for Easycloses.com

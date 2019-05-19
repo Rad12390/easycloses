@@ -1,0 +1,155 @@
+/* here you can put your own css to customize and override the theme */
+
+/***
+Rounded Portlets
+***/
+::-webkit-scrollbar-track {
+    background-color: #cccccc !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #aaaaaa !important;
+}
+
+div.tagsinput input {
+    width: 100% !important;
+}
+
+tr.strong {
+    font-weight: bold;
+}
+
+.table-scrollable {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+
+#transaction_parties_wrapper.table-scrollable {
+    overflow-x: auto !important;
+}
+
+ul.right-aligned {
+    left: -188%;
+}
+
+.mark-important-star:hover i.inbox-started:before {
+    content: "\f005";
+}
+
+.todo-tasklist-item .mark-important-star {
+    display: none;
+}
+
+.todo-tasklist-item:hover .mark-important-star {
+    display: block;
+}
+
+i.inbox-started {
+    color: #ed4e2a;
+    font-size: large;
+}
+i.star-large {
+    font-size: large;
+}
+i.approved {
+    color: #3cc051;
+    font-size: larger;
+}
+i.rejected {
+    color: #CC2A41;
+    font-size: larger;
+}
+.circle-small {
+    width: 18px;
+    height: 18px;
+    border-radius: 50px!important;
+}
+.btn.black {
+    color: white;
+    text-shadow: none;
+    background-color: #555;
+}
+.btn.icn-only {
+    min-width: 14px;
+}
+.page-header.navbar .page-logo .logo-default {
+    margin: -1px 0 0 0!important;
+}
+
+.portlet-title .action-button {
+    float: right;
+    margin: 5px;
+}
+.bx-wrapper {
+    margin: 0 auto !important;
+}
+
+.bx-wrapper .bx-pager {
+    display: none;
+}
+
+.control-label label.required {
+    color: inherit;
+    font-size: inherit;
+    padding-left: inherit;
+}
+
+.page-sidebar-menu-closed li#logo-li{
+    width: 45px !important;
+    box-shadow: 0 0;
+}
+
+.page-sidebar-closed .page-sidebar .page-sidebar-menu > li#concierge {
+    display: block !important;
+}
+
+.page-sidebar-closed .page-sidebar .page-sidebar-menu.page-sidebar-menu-closed > li#concierge {
+    display: none !important;
+}
+
+div.dt-buttons {
+    float: right;
+}
+
+div.dataTables_filter label {
+    float: left;
+}
+.sku-button{
+    float: left;
+    margin-top: -40px;
+    margin-left: 340px;
+}
+label.colorblack.colorblack {
+    color: #333 !important;
+}
+
+#localsbest_shopbundle_item_submit_active{
+    background: #51a351;
+    color: #fff !important;
+}
+#localsbest_shopbundle_item_submit_active:hover{
+    background-color: #208992;
+    border-color: #14565c;
+}
+#localsbest_shopbundle_item_submit_draft:hover{
+    background: #e6e6e6;
+}
+td.comments {
+    width: 30%;
+}
+span.set-tooltip{
+    float: left;
+    margin-left: 345px;
+    margin-top: -35px;
+}
+.style-label{
+    font-weight: 600;
+}
+@media (min-width: 768px){
+.modal-updated {
+    width: 700px;
+}
+}
+span.select2.select2-container.select2-container--bootstrap{
+    width:100% !important;
+}

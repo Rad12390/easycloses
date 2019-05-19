@@ -1,0 +1,362 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: services.yml }
+    - { resource: doctrine_extensions.yml }
+
+
+nelmio_api_doc: ~
+
+parameters:
+    payment:
+        currency: USD
+        decimal: true
+        manager_percentage: 75
+
+framework:
+    #esi:             ~
+    translator:      { fallback: "%locale%" }
+    secret:          "%secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    templating:
+        engines: ['twig']
+        #assets_version: SomeVersionScheme
+    default_locale:  "%locale%"
+    trusted_proxies: ~
+    session:
+        save_path: "%kernel.root_dir%/sessions"
+        cookie_lifetime: 28800
+        gc_maxlifetime: 14400
+    fragments:       ~
+    http_method_override: true
+
+aws:
+    version: latest
+    region: %aws_region%
+    credentials:
+        key: %aws_key%
+        secret: %aws_secret_key%
+
+# Twig Configuration
+twig:
+    globals:
+        for_approve: "@localsbest.docs_for_approve"
+        resource_counter: "@localsbest.resource.counter"
+        vich_uploader_custom: "@localsbest.vich_uploader_custom"
+        checker: "@localsbest.checker"
+        tooltip_text: "@localsbest.tooltip_text"
+        temp_download_aws_folder: %temp_download_aws_folder%
+        button_text: "@localsbest.button_text"
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+    form_themes:
+        - '@LocalsBestCommon/form/fields.html.twig'
+    number_format:
+        decimals: 2
+        decimal_point: '.'
+        thousands_separator: ','    
+    cache: false
+
+# Assetic Configuration
+assetic:
+    debug:          false
+    use_controller: false
+    bundles:        [LocalsBestMedAppUserBundle,LocalsBestUserBundle, LocalsBestAdminBundle, LocalsBestNotificationBundle ]
+    #java: /usr/bin/java
+    filters:
+        cssrewrite: ~
+        #closure:
+        #    jar: "%kernel.root_dir%/Resources/java/compiler.jar"
+        #yui_css:
+        #    jar: "%kernel.root_dir%/Resources/java/yuicompressor-2.4.7.jar"
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        connections:
+            default:
+                driver:   "%database_driver%"
+                host:     "%database_host%"
+                port:     "%database_port%"
+                dbname:   "%database_name%"
+                user:     "%database_user%"
+                password: "%database_password%"
+                charset:  UTF8
+                server_version: '5.5'
+                mapping_types:
+                    enum: string
+
+            ntreis:
+                  driver:   %database2_driver%
+                  host:     %database2_host%
+                  port:     %database2_port%
+                  dbname:   %database2_name%
+                  user:     %database2_user%
+                  password: %database2_password%
+                  charset:  UTF8
+                  server_version: '5.5'
+                  mapping_types:
+                      enum: string
+
+            property_feeds:
+                  driver:   "%database_driver%"
+                  host:     "%database_host%"
+                  port:     "%database_port%"
+                  dbname:   "%database_feeds_name%"
+                  user:     "%database_user%"
+                  password: "%database_password%"
+                  server_version: '5.5'
+                  charset:  UTF8
+
+        # if using pdo_sqlite as your database driver, add the path in parameters.yml
+        # e.g. database_path: "%kernel.root_dir%/data/data.db3"
+        # path:     "%database_path%"
+        types:
+            PhoneTypeType: LocalsBest\MedAppUserBundle\Dbal\Types\PhoneTypeType
+            InviteStatusType: LocalsBest\MedAppUserBundle\Dbal\Types\InviteStatusType
+            DocumentStatusType: LocalsBest\MedAppUserBundle\Dbal\Types\DocumentStatusType
+            DocumentTypeType: LocalsBest\MedAppUserBundle\Dbal\Types\DocumentTypeType
+            PropertyTypeType: LocalsBest\MedAppUserBundle\Dbal\Types\PropertyTypeType
+            PropertyType: LocalsBest\MedAppUserBundle\Dbal\Types\PropertyTypeType
+            StatusType: LocalsBest\MedAppUserBundle\Dbal\Types\StatusType
+            ObjectTypeType: LocalsBest\MedAppUserBundle\Dbal\Types\ObjectTypeType
+            EventTypeType: LocalsBest\MedAppUserBundle\Dbal\Types\EventTypeType
+            QuestionType: LocalsBest\MedAppUserBundle\Dbal\Types\QuestionType
+
+    orm:
+        default_entity_manager:   default
+        entity_managers:
+            default:
+                connection:       default
+                mappings:
+                    LocalsBestShopBundle: ~
+                    LocalsBestMedAppUserBundle: ~
+                    LocalsBestUserBundle: ~
+                    LocalsBestNotificationBundle: ~
+                    LocalsBestCommonBundle: ~
+                    LocalsBestWordPressApiBundle:
+                filters:
+                    softdeleteable:
+                        class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+                        enabled: true
+                dql:
+                    string_functions:
+                        field: DoctrineExtensions\Query\Mysql\Field
+                        ifnull: DoctrineExtensions\Query\Mysql\IfNull
+                    datetime_functions:
+                        date: DoctrineExtensions\Query\Mysql\Date
+                        time: DoctrineExtensions\Query\Mysql\Time
+                        date_format: DoctrineExtensions\Query\Mysql\DateFormat
+                        from_unixtime: DoctrineExtensions\Query\Mysql\FromUnixtime
+                    numeric_functions:
+                        rand: DoctrineExtensions\Query\Mysql\Rand
+            ntreis:
+                connection:       ntreis
+                mappings:
+                    LocalsBestMedAppUserBundle: ~
+                    LocalsBestUserBundle: ~
+                    LocalsBestNotificationBundle: ~
+                    LocalsBestCommonBundle: ~
+                filters:
+                    softdeleteable:
+                        class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+                        enabled: true
+            property_feeds:
+                connection: property_feeds
+                mappings:
+                    LocalsBestMedAppUserBundle: ~
+                    LocalsBestUserBundle: ~
+
+        auto_generate_proxy_classes: "%kernel.debug%"
+
+# Swiftmailer Configuration
+swiftmailer:
+    transport: "%mailer_transport%"
+    host:      "%mailer_host%"
+    username:  "%mailer_user%"
+    password:  "%mailer_password%"
+    spool:     { type: memory }
+
+hwi_oauth:
+    resource_owners:
+        facebook:
+            type:           facebook
+            client_id:      %facebook_client_id%
+            client_secret:  %facebook_client_secret%
+            scope:          "email"
+#        twitter:
+#            type:           twitter
+#            client_id:      %twitter_client_id%
+#            client_secret:  %twitter_client_secret%
+#        linkedin:
+#            type:           linkedin
+#            client_id:      %linkedin_client_id%
+#            client_secret:  %linkedin_client_secret%
+            #scope:          r_basicprofile, r_emailaddress, r_fullprofile
+    firewall_names: [secured_area]
+
+knp_gaufrette:
+    stream_wrapper: ~
+    adapters:
+        documents:
+#            local:
+#                directory:  %kernel.root_dir%/../web/uploads
+#                create:     true
+            aws_s3:
+                service_id: ct_file_store_s3 #this needs to match the "service" you defined above
+                bucket_name: %transactions_bucket%
+                options:
+                    create: true
+                    acl: 'public-read'
+        transactions:
+            aws_s3:
+                service_id: ct_file_store_s3
+                bucket_name: %transactions_bucket%
+                options:
+                    create: true
+                    acl: 'public-read'
+        jobs:
+            aws_s3:
+                service_id: ct_file_store_s3
+                bucket_name: %jobs_bucket%
+                options:
+                    create: true
+                    acl: 'public-read'
+        users:
+            aws_s3:
+                service_id: ct_file_store_s3
+                bucket_name: %users_bucket%
+                options:
+                    create: true
+                    acl: 'public-read'
+
+        ec_shop:
+            aws_s3:
+                service_id: ct_file_store_s3
+                bucket_name: %users_bucket%
+                options:
+                    create: true
+                    acl: 'public-read'
+
+        products:
+            local:
+                directory:  '%kernel.root_dir%/../web/uploads/images/products'
+                create:     true
+        slider:
+            local:
+                directory:  '%kernel.root_dir%/../web/uploads/images/slider'
+                create:     true
+        social:
+            local:
+                directory:  '%kernel.root_dir%/../web/uploads/images/social'
+                create:     true
+    filesystems:
+        documents_fs:
+            adapter:    documents
+        transactions_fs:
+            adapter:    transactions
+        jobs_fs:
+            adapter:    jobs
+        users_fs:
+            adapter:    users
+        ec_shop_fs:
+            adapter:    ec_shop
+        product_fs:
+            adapter:    products
+        slider_fs:
+            adapter:    slider
+        social_fs:
+            adapter:    social
+
+vich_uploader:
+    db_driver: orm
+    storage:   gaufrette
+#    storage: vich_uploader.storage.gaufrette
+    twig: true
+    mappings:
+        product_image:
+            uri_prefix:         /uploads/images/products
+            upload_destination: product_fs
+            namer:              vich_uploader.namer_uniqid
+            inject_on_load:     false
+            delete_on_update:   true
+            delete_on_remove:   true
+        slider_image:
+            uri_prefix:         /uploads/images/slider
+            upload_destination: slider_fs
+            namer:              vich_uploader.namer_uniqid
+            inject_on_load:     true
+            delete_on_update:   true
+            delete_on_remove:   true
+        social_image:
+            uri_prefix:         /uploads/images/social
+            upload_destination: social_fs
+            namer:              vich_uploader.namer_uniqid
+            inject_on_load:     false
+            delete_on_update:   true
+            delete_on_remove:   true
+
+#        uploads:
+#            uri_prefix:         /uploads
+#            upload_destination: documents_fs
+#            directory_namer: directory_namer.user_path
+#            inject_on_load:     true
+        uploads:
+            uri_prefix: https://s3.amazonaws.com/%transactions_bucket% # you'll need this set to use the Vich URL generator
+            upload_destination: documents_fs
+            namer: namer.user_file
+            delete_on_remove: true
+            delete_on_update: true
+        transactions:
+            uri_prefix: https://s3.amazonaws.com/%transactions_bucket% # you'll need this set to use the Vich URL generator
+            upload_destination: transactions_fs
+            namer: namer.user_file
+            delete_on_remove: true
+            delete_on_update: true
+        blank_docs:
+            uri_prefix: https://s3.amazonaws.com/%transactions_bucket% # you'll need this set to use the Vich URL generator
+            upload_destination: transactions_fs
+            namer: namer.user_file
+            delete_on_remove: true
+            delete_on_update: true
+        jobs:
+            uri_prefix: https://s3.amazonaws.com/%jobs_bucket% # you'll need this set to use the Vich URL generator
+            upload_destination: jobs_fs
+            namer: namer.user_file
+            delete_on_remove: true
+            delete_on_update: true
+        users:
+            uri_prefix: https://s3.amazonaws.com/%users_bucket% # you'll need this set to use the Vich URL generator
+            upload_destination: users_fs
+            namer: namer.user_file
+            delete_on_remove: true
+            delete_on_update: true
+
+        ec_shop:
+            uri_prefix: https://s3.amazonaws.com/%users_bucket% # you'll need this set to use the Vich URL generator
+            upload_destination: ec_shop_fs
+            namer: namer.user_file
+            delete_on_remove: true
+            delete_on_update: true
+            inject_on_load: true
+
+knp_time: ~
+
+knp_menu:
+    # use "twig: false" to disable the Twig extension and the TwigRenderer
+    twig:
+        template: '@LocalsBestMedAppUser/menu.html.twig'
+    #  if true, enables the helper for PHP templates
+    templating: false
+    # the renderer to use, list is also available by default
+    default_renderer: twig
+
+jhg_nexmo:
+    api_key:    %nexmo_api_key%
+    api_secret: %nexmo_api_secret%
+    from_name:  %nexmo_from_name%

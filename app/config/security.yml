@@ -1,0 +1,91 @@
+security:
+    encoders:
+        LocalsBest\MedAppUserBundle\Entity\User:
+            algorithm: bcrypt
+        LocalsBest\MedAppUserBundle\Entity\Vendor:
+            algorithm: bcrypt
+
+    role_hierarchy:
+        ROLE_ADMIN:             ROLE_CUSTOMER_SERVIC
+        ROLE_CUSTOMER_SERVIC:   ROLE_NETWORK_MANAGER
+        ROLE_NETWORK_MANAGER:   ROLE_TECH_DIRECTOR
+        ROLE_TECH_DIRECTOR:     ROLE_MANAGER
+        ROLE_MANAGER:           [ROLE_ASSIST_MANAGER, ROLE_DOCS_APPROVER]
+        ROLE_ASSIST_MANAGER:    [ROLE_TEAM_LEADER, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_TEAM_LEADER:       ROLE_AGENT
+        ROLE_AGENT:             ROLE_VENDOR
+        ROLE_VENDOR:            ROLE_CLIENT
+        ROLE_CLIENT:            ROLE_USER
+
+    providers:
+        db_provider:
+            entity: { class: LocalsBestMedAppUserBundle:User}
+
+    firewalls:
+        public:
+            pattern:    ^/(_profiler|_wdt|css|js)
+            security:   false
+        secured_area:
+            pattern:   ^/                
+            anonymous: ~
+            switch_user: true
+            form_login:
+                login_path: login
+                check_path: login_check
+                remember_me: true
+                default_target_path: locals_best_user_homepage
+            remember_me:
+                secret: "%secret%"
+                lifetime: 180
+                always_remember_me: false
+                remember_me_parameter: _remember_me
+                path: /
+                domain: ~
+            logout:
+                path:   /logout
+                target: /login
+                invalidate_session: true
+            oauth:
+                resource_owners:
+                    facebook: "/auth/check-facebook"
+                    twitter: "login_twitter"
+                    linkedin: "login_linkedin"
+                login_path: /login
+                #failure_path: /login
+                oauth_user_provider:
+                    service: ib_user.oauth_user_provider
+
+    access_control:
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/terms-and-conditions, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/connect, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/recovery, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/reset-password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/new-register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/client-register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/deploy, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/directory, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/vendor/bio, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/join, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/checkout, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/charge, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/get-states-by-ind-type, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/get-businesses-by-state, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/ajax-get-plans, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/ajax-mail-check, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/payment, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/wp-api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/products, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/toggle-products-view, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/business-shop, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/product, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/shop-checkout, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/orders, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/cart, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/add-to-cart, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/remove-from-cart, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/custom-order, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/contact-us, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/, roles: ROLE_USER }

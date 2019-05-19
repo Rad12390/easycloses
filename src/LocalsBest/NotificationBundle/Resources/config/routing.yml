@@ -1,0 +1,7 @@
+notification_list:
+    path: /notifications
+    defaults: { _controller: LocalsBestNotificationBundle:Default:list}
+
+locals_best_notification_click:
+    path:     /notification/click/{id}
+    defaults: { _controller: LocalsBestNotificationBundle:Default:click }

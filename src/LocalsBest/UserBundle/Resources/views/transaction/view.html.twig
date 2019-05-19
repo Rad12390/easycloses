@@ -1,0 +1,1952 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.css') }}" />
+    <link href="{{ asset('system/global/plugins/dropzone/dropzone.min.css') }}?v=2" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('system/global/plugins/dropzone/basic.min.css') }}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/r/bs/jszip-2.5.0,pdfmake-0.1.18,dt-1.10.9,b-1.0.3,b-colvis-1.0.3,b-html5-1.0.3,b-print-1.0.3,r-1.0.7/datatables.min.css"/>
+    <link href="{{ asset('system/global/plugins/owl-carousel/assets/owl.carousel.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('system/global/plugins/slick/slick.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('system/global/plugins/slick/slick-theme.css') }}" rel="stylesheet" type="text/css"/>
+
+    <style type="text/css">
+        div.table-scrollable {
+            overflow-x: auto !important;
+        }
+
+        .dropzone_small, .dropzone_small *, .dropzone_small-previews, .dropzone_small-previews * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        .dropzone_small {
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.03);
+            min-height: 28px;
+            background: rgba(0,0,0,0.03);
+            padding: 1px;
+        }
+
+        .dropzone_small .dz-message {
+            text-align: center;
+            margin: 0.3em 0;
+        }
+
+        .dropzone_small.dz-drag-hover {
+            border-color: rgba(0, 58, 12, 0.17);
+            background: rgba(16, 155, 28, 0.36);
+        }
+
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('pages_old/scripts/form-samples.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-tags-input/jquery.tagsinput.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/dropzone/dropzone.min.js') }}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/r/bs/jszip-2.5.0,pdfmake-0.1.18,dt-1.10.9,b-1.0.3,b-colvis-1.0.3,b-html5-1.0.3,b-print-1.0.3,r-1.0.7/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/owl-carousel/owl.carousel.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/slick/slick.js') }}"></script>
+    <script src="{{ asset('system/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js') }}"
+            type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            $('.slick-slider').slick({
+                dots: false,
+                infinite: true,
+                speed: 300,
+                slidesToShow: 4,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                adaptiveHeight: true,
+                prevArrow: false,
+                nextArrow: false
+            });
+            
+            $("a.advance-search").on('click', function(){
+                $('#ajax').modal({'remote': '{{ path('jobs_modal_form',{'type':'Transaction', 'id':file.id}) }}'});
+            });
+        });
+
+        $(function () {
+            (function ($) {
+                $.each(['show', 'hide'], function (i, ev) {
+                    var el = $.fn[ev];
+                    $.fn[ev] = function () {
+                        this.trigger(ev);
+                        return el.apply(this, arguments);
+                    };
+                });
+            })(jQuery);
+
+            $("#documents").on('hide', function () {
+                window.location.reload();
+            });
+
+            $("#checkAllClosingsDocs").change(function () {
+                $("input:checkbox.forClosingDoc").prop('checked', $(this).prop("checked"));
+                if($(this).prop("checked")) {
+                    $("input:checkbox.forClosingDoc").parent().addClass('checked');
+                } else {
+                    $("input:checkbox.forClosingDoc").parent().removeClass('checked');
+                }
+            });
+
+            $("#checkAllJobs").change(function () {
+                $("input:checkbox.forJob").prop('checked', $(this).prop("checked"));
+                if($(this).prop("checked")) {
+                    $("input:checkbox.forJob").parent().addClass('checked');
+                } else {
+                    $("input:checkbox.forJob").parent().removeClass('checked');
+                }
+            });
+
+            $('#emailForClosings').on('click', function(){
+                documents = [];
+
+                jQuery.each( $('.forClosingDoc'), function( i, val ) {
+                    if( $(val).prop("checked") && $(val).val() != '') {
+                        documents.push($(val).val());
+                    }
+                });
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('email_attache_doc_view') }}",
+                    dataType: "html",
+                    data: {
+                        transactionId: {{ file.id }},
+                        documents: documents
+                    },
+                    success:function(data){
+                        $("#email .modal-content").html(data);
+                        $("#email").modal();
+                    },
+                    error: function (e) {
+                        alert(e.responseText);
+                    }
+                })
+            });
+
+            $('#blankDocsForClosings').on('click', function(){
+                documents = [];
+
+                jQuery.each( $('.forClosingDoc'), function( i, val ) {
+                    if( $(val).prop("checked") && $(val).val() != '') {
+                        documents.push($(val).val());
+                    }
+                });
+
+                var btn = $(this);
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('blank_docs_transaction_view') }}",
+                    dataType: "html",
+                    data: {
+                        transactionId: {{ file.id }},
+                        type: btn.data('type'),
+                        documents: documents
+                    },
+                    success:function(data){
+                        $("#email .modal-content").html(data);
+                        $("#email").modal();
+                    }
+                })
+            });
+
+            $('#blankDocsForListings').on('click', function(){
+                documents = [];
+
+                jQuery.each( $('.forListingDoc'), function( i, val ) {
+                    if( $(val).prop("checked") && $(val).val() != '') {
+                        documents.push($(val).val());
+                    }
+                });
+
+                var btn = $(this);
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('blank_docs_transaction_view') }}",
+                    dataType: "html",
+                    data: {
+                        transactionId: {{ file.id }},
+                        type: btn.data('type'),
+                        documents: documents
+                    },
+                    success:function(data){
+                        $("#email .modal-content").html(data);
+                        $("#email").modal();
+                    }
+                })
+            });
+
+            $("#checkAllListingsDocs").change(function () {
+                $("input:checkbox.forListingDoc").prop('checked', $(this).prop("checked"));
+                if($(this).prop("checked")) {
+                    $("input:checkbox.forListingDoc").parent().addClass('checked');
+                } else {
+                    $("input:checkbox.forListingDoc").parent().removeClass('checked');
+                }
+            });
+
+            $('#emailForListings').on('click', function(){
+                documents = [];
+
+                jQuery.each( $('.forListingDoc'), function( i, val ) {
+                    if( $(val).prop("checked") && $(val).val() != '') {
+                        documents.push($(val).val());
+                    }
+                });
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('email_attache_doc_view') }}",
+                    dataType: "html",
+                    data: {
+                        transactionId: {{ file.id }},
+                        documents: documents
+                    },
+                    success:function(data){
+                        $("#email .modal-content").html(data);
+                        $("#email").modal();
+                    },
+                    error: function (e) {
+                        alert(e.responseText);
+                    }
+                })
+            });
+
+            Dropzone.autoDiscover = false;
+
+            $('.listing_showingNote').addClass('hidden');
+
+        {% if listingId is not null%}
+            $('#tabs_div > ul > li > a').each(function (index, element) {
+                if (index === 0) {
+                    $(element).click(function () {
+                        $('.listing_showingNote').removeClass('hidden');
+                        $('.transaction_note').addClass('hidden');
+                    });
+                } else if (index === 2) {
+                    $(element).click(function () {
+                        $('.listing_showingNote').addClass('hidden');
+                        $('.transaction_note').removeClass('hidden');
+                    });
+                }
+            });
+        {% endif%}
+
+        {% if listingDocumentTypes|length >= 1 and listingId is not null %}
+            {% for documentType in listingDocumentTypes %}
+
+                $("div#upload_{{ documentType.id }}").dropzone({
+                    maxFiles: 1,
+                    init: function (file) {
+                        this.on("maxfilesexceeded", function (file) {
+                            alert('Please upload single file only.');
+                            this.removeAllFiles();
+                            this.removeFile(this.files[0]);
+                            return true;
+                        });
+                    },
+                    url: "{{ path('document_type_edit', {'objectId': listingId ,'typeId': documentType.id,'objectType': 'Listing','object': file.id })}}",
+                    method: "post",
+                    createImageThumbnails: false,
+                    maxFilesize: 25,
+                    dictDefaultMessage: "Upload or Drag",
+                    clickable: true,
+                    enqueueForUpload: true,
+                    paramName: "file",
+                    dictFallbackMessage: "",
+                    dictFallbackText: "",
+                    success: function (response) {
+                        var responseJSON = JSON.parse(response.xhr.response);
+
+                        if (responseJSON.status == false && responseJSON.message != '') {
+                            alert(responseJSON.message);
+                            this.removeAllFiles();
+                            this.removeFile(this.files[0]);
+                        } else {
+                            var file = responseJSON.file;
+                            var cell = $("div#upload_{{ documentType.id }}");
+
+                            cell.html("<a href=\"" + file.url + "\">" + file.name + "</a>");
+                            cell.parent().next().html(file.created);
+                            cell.parent().next().next().html(file.gearbox);
+                            cell.parent().prev().prev().find('span').attr('style', 'background-color: #ffb848; color: #ffb848');
+
+                            $("#portlet_tab2").load("{{ path('transaction_view', {'id': file.id}) }} #portlet_tab2");
+
+                            button = responseJSON.button;
+
+                            if( $('#actions button.purple').length == 0 ) {
+                                $('#actions').append(button);
+                            }
+                        }
+                    },
+                    error: function(file, response) {
+                        if($.type(response) === "string")
+                            var message = response; //dropzone sends it's own error messages in string
+                        else
+                            var message = response.message;
+                        file.previewElement.classList.add("dz-error");
+                        _ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
+                        _results = [];
+                        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                            node = _ref[_i];
+                            _results.push(node.textContent = message);
+                        }
+                        return _results;
+                    },
+                    accept: function(file, done) {
+                        var allowedTypes = ["application/pdf", "application/x-pdf", "image/jpeg", "image/png", "image/gif"];
+                        if ($.inArray(file.type, allowedTypes) === -1) {
+                            var error_msg = 'This program supports PDFS and Images. Please change your file type and try again';
+                            alert(error_msg);
+                            this.removeFile(file);
+                            done(error_msg);
+                        } else {
+                            done();
+                        }
+                    }
+                });
+            {% endfor%}
+        {% endif %}
+
+        {% if closingDocumentTypes|length >= 1 and closingId is not null %}
+            {% for documentType in closingDocumentTypes %}
+                $("div#upload_{{ documentType.id }}").dropzone({
+                    //acceptedFiles: 'application/pdf',
+                    maxFiles: 1,
+                    init: function (file) {
+                        this.on("maxfilesexceeded", function (file) {
+                            alert('Please upload single file only.');
+                            this.removeAllFiles();
+                            this.removeFile(this.files[0]);
+                            return true;
+                        });
+                    },
+                    url: "{{ path('document_type_edit', {'objectId': closingId ,'typeId': documentType.id,'objectType': 'Closing','object': file.id })}}",
+                    method: "post",
+                    createImageThumbnails: false,
+                    maxFilesize: 25,
+                    dictDefaultMessage: "Upload or Drag",
+                    clickable: true,
+                    enqueueForUpload: true,
+                    paramName: "file",
+                    //dictInvalidFileType: 'This program supports PDFS and Images. Please change your file type and try again',
+                    complete: function (response, done) {
+                        var responseJSON = JSON.parse(response.xhr.response);
+
+                        if(responseJSON.status == false && responseJSON.message != '') {
+                            alert(responseJSON.message);
+                            this.removeAllFiles();
+                            this.removeFile(this.files[0]);
+                        } else {
+                            var file = responseJSON.file;
+                            var cell = $("div#upload_{{ documentType.id }}");
+
+                            cell.html("<a href=\"" + file.url + "\">" + file.name + "</a>");
+                            cell.parent().next().html(file.created);
+                            cell.parent().next().next().html(file.gearbox);
+                            cell.parent().prev().prev().find('span').attr('style', 'background-color: #ffb848; color: #ffb848');
+
+                            $("#portlet_tab2").load("{{ path('transaction_view', {'id': file.id}) }} #portlet_tab2");
+
+                            button = responseJSON.button;
+
+                            if( $('#actions button.purple').length == 0 ) {
+                                $('#actions').append(button);
+                            }
+                        }
+                    },
+                    error: function(file, response) {
+                        if($.type(response) === "string")
+                            var message = response; //dropzone sends it's own error messages in string
+                        else
+                            var message = response.message;
+                        file.previewElement.classList.add("dz-error");
+                        _ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
+                        _results = [];
+                        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                            node = _ref[_i];
+                            _results.push(node.textContent = message);
+                        }
+                        return _results;
+                    },
+                    accept: function(file, done) {
+                        var allowedTypes = ["application/pdf", "application/x-pdf", "image/jpeg", "image/png", "image/gif"];
+                        if ($.inArray(file.type, allowedTypes) === -1) {
+                            var error_msg = 'This program supports PDFS and Images. Please change your file type and try again';
+                            alert(error_msg);
+                            this.removeFile(file);
+                            done(error_msg);
+                        } else {
+                            done();
+                        }
+                    }
+                });
+            {% endfor%}
+        {% endif %}
+            });
+    </script>
+
+    <style type="text/css">
+        {% if jobs|length < 1  %}
+            .customJobBody {
+                display: none!important;
+                visibility: hidden!important;
+            }
+        {% endif %}
+        {% if notes|length < 1  %}
+            .customNoteBody {
+                display: none!important;
+                visibility: hidden!important;
+            }
+        {% endif %}
+        {% if totalEvents|length < 1 %}
+            .customEventBody {
+                display: none!important;
+                visibility: hidden!important;
+            }
+        {% endif %}
+        {% if listingDocumentTypes|length < 1 %}
+            .customListingDocumentBody {
+                display: none!important;
+                visibility: hidden!important;
+            }
+        {% endif %}
+        {% if closingDocumentTypes|length < 1 %}
+            .customClosingDocumentBody {
+                display: none!important;
+                visibility: hidden!important;
+            }
+        {% endif %}
+
+        .mark-important-star:hover i.inbox-started:before {
+            content: "\f005";
+        }
+
+        .todo-tasklist-item .mark-important-star {
+            display: none;
+        }
+
+        .todo-tasklist-item:hover .mark-important-star {
+            display: block;
+        }
+
+        i.inbox-started {
+            color: #ed4e2a;
+            font-size: large;
+        }
+        i.star-large {
+            font-size: large;
+        }
+        i.approved {
+            color: #3cc051;
+            font-size: larger;
+        }
+        i.rejected {
+            color: #CC2A41;
+            font-size: larger;
+        }
+        .circle-small {
+            width: 21px;
+            height: 21px;
+            border-radius: 50px!important;
+        }
+        .btn.black {
+            color: white;
+            text-shadow: none;
+            background-color: #555;
+        }
+        .btn.icn-only {
+            min-width: 14px;
+        }
+
+    </style>
+
+    <script>
+        jQuery(document).ready(function () {
+            $('#datatable_example .download_all').click(function () {
+                var type = $(this).data('type');
+
+                $.post('{{ path('document_download', {'transactionId': file.id, 'fileType': null }) }}' + '/' + type, function (data) {
+                    console.log(data);
+                });
+
+                return false;
+            });
+
+            $('#review-click').on('click', function (event) {
+                var id = $(this).data('reviewid');
+                if ($(this).data('saved') == "0") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('review_important_ajax', {'objectId': file.id ,'objectType': objectType})}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            $("#noteBox").load("{{ path('transaction_view', {'id': file.id}) }} #noteBox");
+                        }
+
+                        return false;
+                    });
+                } else {
+                    $.ajax({
+                        dataType: "json",
+                        url: "{{ path('review_not_important_ajax', {'objectId': file.id ,'objectType': objectType})}}/" + id
+                    }).done(function (data) {
+                        if (data.code == 1) {
+                            $("#noteBox").load("{{ path('transaction_view', {'id': file.id}) }} #noteBox");
+                        }
+                        return false;
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            statusSelect = $(".status_change");
+            if(statusSelect.val() == 'Contract_fell_thru' {% if app.user.role.level > 4 %} || statusSelect.val() == 'Sold_Paid' {% endif %}) {
+                statusSelect.attr('disabled', 'disabled')
+            }
+
+            statusSelect.on('click', function () {
+                var status = $(this).val();
+                $(this).data('preStatus', status);
+            });
+            statusSelect.trigger('click');
+
+            statusSelect.on('change', function () {
+                var status = $(this).val();
+                access = true;
+
+                if (status == 'Contract_fell_thru') {
+                    access = confirm('Do you wish to change status to Contract Fell Thru?');
+                    if(!access) {
+                        $(this).val($(this).data('preStatus'))
+                    }
+                }
+
+                if(access) {
+                    var id = $(this).attr('data-id');
+                    var type = $(this).attr('data-type');
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{ path('transaction_status_change_ajax') }}/' + id + '/' + type + '/' + status,
+                        dataType: 'json',
+                        async:false
+                    });
+
+                    {#$("#transactionStatus").load("{{ path('transaction_view', {'id': file.id}) }} #transactionStatus");#}
+                    return window.location.replace("{{ path('transaction_view', {'id': file.id}) }}");
+                }
+            });
+
+//            $('div.customEventBody table tr:last td div.btn-group').addClass('dropup');
+
+            var table = $('#transaction_parties');
+            var oTable = table.dataTable({
+                responsive: true,
+                dom: 'Blfrtip',
+                buttons: [],
+                sDom: 'rt<"clear">',
+                aaSorting: [],
+                pageLength: 30
+            });
+
+            {% if type == 'Lease'%}
+                $("#transaction_status option[value='Sold_not_Paid']").remove();
+                $("#transaction_status option[value='Sold_Paid']").remove();
+
+                {% if (app.user.role.level > 5) %}
+                    $("#transaction_status option[value='Leased_Paid']").remove();
+                {% endif %}
+
+                $("#transaction_status option[value='Active_with_Contract']").remove();
+            {% else %}
+                $("#transaction_status option[value='Leased_not_Paid']").remove();
+                $("#transaction_status option[value='Leased_Paid']").remove();
+            {% endif %}
+
+            {% if app.user.role.level > 5 %}
+                $("#transaction_status option[value='Sold_Paid']").remove();
+            {% endif %}
+
+            $("#documents").draggable({
+                handle: ".modal-header"
+            });
+        });
+    </script>
+
+
+
+    <script type="text/javascript">
+        {% set transactionAdress   = file.fullAddress|split(',')  %}
+        var stockData = [
+            {
+
+                Property_street_address: "{{ transactionAdress[0]  |replace({',':' '})}}",
+                Property_City: "{{ transactionAdress[1]  |replace({',':' '}) }}",
+                Property_state: "{{ transactionAdress[2]  |replace({',':' '}) }}",
+                Property_zip: "{{ transactionAdress[3]  |replace({',':' '}) }}",
+                Property_Type: "{{ file.transactionProperty.property.type  |replace({',':' '}) }}",
+                Property_Year_Built: "{{ file.transactionProperty.yearBuilt |replace({',':' '}) }}",
+
+             {% if file.listing is not empty %}
+                {% set listingPrefix = 'landlord' in file.listing.represent|lower ? 'Landlord' : 'Listing' %}
+                Listing_Client_Type     :                 "{{ file.listing.represent |replace({',':' '}) }}",
+                Listing_Transaction_Type   :              "{{ file.listing.type |replace({',':' '}) }}",
+
+                Listing_{{ listingPrefix }}_1_Full_Name              : "{{file.listing.sellerContact.contactName |replace({',':' '}) }}",
+                Listing_{{ listingPrefix }}_1_Telephone_Number       : "{{file.listing.sellerContact.phone |replace({',':' '}) }}",
+                Listing_{{ listingPrefix }}_1_Email_Address          : "{{file.listing.sellerContact.email |replace({',':' '}) }}",
+                Listing_{{ listingPrefix }}_1_Street_Address         : "{{file.listing.sellerContact.address?file.listing.sellerContact.address.street |replace({',':' '}) }}",
+                Listing_{{ listingPrefix }}_1_City                   : "{{file.listing.sellerContact.address?file.listing.sellerContact.address.city |replace({',':' '}) }}",
+                Listing_{{ listingPrefix }}_1_State                  : "{{file.listing.sellerContact.address?file.listing.sellerContact.address.state |replace({',':' '}) }}",
+                Listing_{{ listingPrefix }}_1_Zip                    : "{{file.listing.sellerContact.address?file.listing.sellerContact.address.zip |replace({',':' '}) }}",
+
+                {% if file.listing.sellerContact2 is not null %}
+                    Listing_{{ listingPrefix }}_2_Full_Name              : "{{file.listing.sellerContact2.contactName |replace({',':' '}) }}",
+                    Listing_{{ listingPrefix }}_2_Telephone_Number       : "{{file.listing.sellerContact2.phone |replace({',':' '}) }}",
+                    Listing_{{ listingPrefix }}_2_Email_Address          : "{{file.listing.sellerContact2.email |replace({',':' '}) }}",
+                    Listing_{{ listingPrefix }}_2_Street_Address         : "{{file.listing.sellerContact2.address?file.listing.sellerContact2.address.street |replace({',':' '}) }}",
+                    Listing_{{ listingPrefix }}_2_City                   : "{{file.listing.sellerContact2.address?file.listing.sellerContact2.address.city |replace({',':' '}) }}",
+                    Listing_{{ listingPrefix }}_2_State                  : "{{file.listing.sellerContact2.address?file.listing.sellerContact2.address.state |replace({',':' '}) }}",
+                    Listing_{{ listingPrefix }}_2_Zip                    : "{{file.listing.sellerContact2.address?file.listing.sellerContact2.address.zip |replace({',':' '}) }}",
+                {% endif %}
+
+
+                Listing_agent_Full_Name              : "{{file.listing.listingAgentContact.contactName |replace({',':' '}) }}",
+                Listing_agent_Phone_Number              : "{{file.listing.listingAgentContact.phone |replace({',':' '}) }}",
+                Listing_agent_Email                     : "{{file.listing.listingAgentContact.email |replace({',':' '}) }}",
+                Listing_agent_Company                   : "{{file.listing.listingAgentContact.company |replace({',':' '}) }}",
+                Listing_Office_phone                            : "{{ file.listing?file.listing.listingOfficeContact.phone |replace({',':' '}) }}",
+                Listing_Office_email                            : "{{ file.listing?file.listing.listingOfficeContact.email |replace({',':' '}) }}",
+
+                {% if listingPrefix != 'Landlord' %}
+                    Seller_Attorney_Name                            : "{{ file.listing?file.listing.titleCompanyContact.contactName |replace({',':' '}) }}",
+                    Seller_Attorney_Phone                           : "{{ file.listing?file.listing.titleCompanyContact.phone |replace({',':' '}) }}",
+                    Seller_Attorney_Email                           : "{{ file.listing?file.listing.titleCompanyContact.email |replace({',':' '}) }}",
+                    Seller_Attorney_Company_Name                    : "{{ file.listing?file.listing.titleCompanyContact.company |replace({',':' '}) }}",
+                {% endif %}
+                Listing_price                        : "{{ file.listing?file.listing.moneyBox.contractPrice |replace({',':' '}) }}",
+                Listing__total_Commission                        : "{{ file.listing?file.listing.totalCommissions[0].value |replace({',':' '}) }}",
+                Listing__agent_Commission                        : "{{ file.listing?file.listing.agentCommissions[0].value |replace({',':' '}) }}",
+                Listing__buyer_agent_Commission                        : "{{ file.listing?file.listing.buyerAgentCommissions[0].value |replace({',':' '}) }}",
+
+                {% for event in file.listing.listingContacts %}
+                    Listing_event_name{{ loop.index0 }}                        : "{{ event.title |replace({',':' '}) }}",
+                    Listing_event_date{{ loop.index0 }}                        : "{{ event.time |date('m/d/Y') }}",
+                {% endfor %}
+             {% endif %}
+
+            {% if file.closing is not empty %}
+                {% set closingPrefix = 'tenant' in file.closing.represent|lower ? 'Tenant' : 'Buyer' %}
+                closing_Client_Type                     : "{{ file.closing?file.closing.represent |replace({',':' '}) }}",
+                closing_Transaction_Type                : "{{ file.closing?file.closing.type |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}_1_Full_Name               : "{{ file.closing?file.closing.buyerContact.contactName |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}_1_Telephone_Number        : "{{ file.closing?file.closing.buyerContact.phone |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}_1_Email_Address           : "{{ file.closing?file.closing.buyerContact.email |replace({',':' '}) }}",
+                {% if file.closing is not empty %}
+                    Closing_{{ closingPrefix }}_1_Street_Address          : "{{ file.closing.buyerContact.address?file.closing.buyerContact.address.street |replace({',':' '}) }}",
+                    Closing_{{ closingPrefix }}_1_City                    : "{{ file.closing.buyerContact.address?file.closing.buyerContact.address.city |replace({',':' '}) }}",
+                    Closing_{{ closingPrefix }}_1_State                   : "{{ file.closing.buyerContact.address?file.closing.buyerContact.address.state |replace({',':' '}) }}",
+                    Closing_{{ closingPrefix }}_1_Zip                     : "{{ file.closing.buyerContact.address?file.closing.buyerContact.address.zip |replace({',':' '}) }}",
+
+
+                    Listing_{{ closingPrefix }}_2_Full_Name              : "{{file.closing.buyerContact2?file.closing.buyerContact2.contactName |replace({',':' '}) }}",
+                    Listing_{{ closingPrefix }}_2_Telephone_Number       : "{{file.closing.buyerContact2?file.closing.buyerContact2.phone |replace({',':' '}) }}",
+                    Listing_{{ closingPrefix }}_2_Email_Address          : "{{file.closing.buyerContact2?file.closing.buyerContact2.email |replace({',':' '}) }}",
+                    Listing_{{ closingPrefix }}_2_Street_Address         : "{{file.closing.buyerContact2?file.closing.buyerContact2.address?file.closing.buyerContact2.address.street |replace({',':' '}) }}",
+                    Listing_{{ closingPrefix }}_2_City                   : "{{file.closing.buyerContact2?file.closing.buyerContact2.address?file.closing.buyerContact2.address.city |replace({',':' '}) }}",
+                    Listing_{{ closingPrefix }}_2_State                  : "{{file.closing.buyerContact2?file.closing.buyerContact2.address?file.closing.buyerContact2.address.state |replace({',':' '}) }}",
+                    Listing_{{ closingPrefix }}_2_Zip                    : "{{file.closing.buyerContact2?file.closing.buyerContact2.address?file.closing.buyerContact2.address.zip |replace({',':' '}) }}",
+                {% endif %}
+                Closing_{{ closingPrefix }}s_Agent_Name               : "{{ file.closing?file.closing.buyersAgentContact.contactName |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}s_Agent_Phone_Number       : "{{ file.closing?file.closing.buyersAgentContact.phone |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}s_Agent_Email              : "{{ file.closing?file.closing.buyersAgentContact.email |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}s_Agent_Company            : "{{ file.closing?file.closing.buyersAgentContact.company |replace({',':' '}) }}",
+
+                Closing_{{ closingPrefix }}_Office_Phone_Number       : "{{ file.closing?file.closing.buyersOfficeContact.phone |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}_Office_Email              : "{{ file.closing?file.closing.buyersOfficeContact.email |replace({',':' '}) }}",
+                Closing_{{ closingPrefix }}_Office_Company            : "{{ file.closing?file.closing.buyersOfficeContact.company |replace({',':' '}) }}",
+                {% if closingPrefix== 'Buyer' %}
+                    Closing_{{ closingPrefix }}_Attorney_Name             : "{{ file.closing?file.closing.sellerattorneyCompanyContact.contactName |replace({',':' '}) }}",
+                    Closing_{{ closingPrefix }}_Attorney_Phone_Number     : "{{ file.closing?file.closing.sellerattorneyCompanyContact.phone |replace({',':' '}) }}",
+                    Closing_{{ closingPrefix }}_Attorney_Email            : "{{ file.closing?file.closing.sellerattorneyCompanyContact.email |replace({',':' '}) }}",
+                    Closing_{{ closingPrefix }}_Attorney_Company_Name     : "{{ file.closing?file.closing.sellerattorneyCompanyContact.company |replace({',':' '}) }}", 
+                {% endif %}
+                    
+                    Seller_Attorney_Name                            : "{{ file.closing?file.closing.titleCompanyContact.contactName |replace({',':' '}) }}",
+                    Seller_Attorney_Phone                           : "{{ file.closing?file.closing.titleCompanyContact.phone |replace({',':' '}) }}",
+                    Seller_Attorney_Email                           : "{{ file.closing?file.closing.titleCompanyContact.email |replace({',':' '}) }}",
+                    Seller_Attorney_Company_Name                    : "{{ file.closing?file.closing.titleCompanyContact.company |replace({',':' '}) }}",
+
+                Closing_Contract_Price                  : "{{ file.closing?file.closing.moneyBox.contractPrice |replace({',':' '}) }}",
+                Closing__payment_type                                 : "{{ file.closing?file.closing.moneyBox.paymentType |replace({',':' '}) }}",
+                Closing__agent_Commission_advanced                    : "{{ file.closing?file.closing.getAdvancedCommissionBox |replace({',':' '}) }}",
+                Closing__buyer_agent_Commission                       : "{{ file.closing?file.closing.buyerAgentCommissions[0].value |replace({',':' '}) }}",
+
+                {% for event in file.closing.closingContacts %}
+                    closing_event_name_{{ loop.index0 }}                        : "{{ event.title  |replace({',':' '}) }}",
+                    closing_event_date_{{ loop.index0 }}                        : "{{ event.time  |date('m/d/Y') }}",
+                {% endfor %}
+            {% endif %}
+
+            },
+        ];
+
+        function convertArrayOfObjectsToCSV(args) {
+            var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+            data = args.data || null;
+            if (data == null || !data.length) {
+                return null;
+            }
+
+            columnDelimiter = args.columnDelimiter || ',';
+            lineDelimiter = args.lineDelimiter || '\n';
+
+            keys = Object.keys(data[0]);
+
+            result = '';
+            result += keys.join(columnDelimiter);
+            result += lineDelimiter;
+
+            data.forEach(function(item) {
+                ctr = 0;
+                keys.forEach(function(key) {
+                    if (ctr > 0) result += columnDelimiter;
+
+                    result += item[key];
+                    ctr++;
+                });
+                result += lineDelimiter;
+            });
+
+            return result;
+        }
+
+        function downloadCSV(args) {
+            var data, filename, link;
+
+            var csv = convertArrayOfObjectsToCSV({
+                data: stockData
+            });
+            if (csv == null) return;
+
+            filename = args.filename || 'export.csv';
+
+            if (!csv.match(/^data:text\/csv/i)) {
+                csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            }
+           // data = encodeURI(csv);
+
+            link = document.createElement('a');
+            link.setAttribute('href', csv);
+            link.setAttribute('download', filename);
+            link.click();
+        }
+    </script>
+{% endblock %}
+
+{% block title %}
+    {{ file.name|capitalize }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('transaction_index') }}">Transactions</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        {{ file.fullAddress }}
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="row" style="margin-bottom: 10px;">
+            {% if file.transactionStatus == 'Sold_Paid' or file.transactionStatus == 'Leased_Paid' %}
+                <div class="col-md-12" id="actions">
+                    <div class="alert alert-warning alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                        <p>
+                            <i class="fa-lg fa fa-warning"></i> <b>{{ file.transactionStatus|replace({'_': ' '}) }}</b> files may not be edited. Please contact your brokerage for assistance.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="col-md-5 util-btn-margin-bottom-5" id="actions">
+                {% if file.transactionStatus != 'Sold_Paid' or app.user.role.level == 1 %}
+                    {% if (listingId is defined and listingId is not null) and (closingId is defined and closingId is not null) %}
+                        <div class="btn-group">
+                            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Edit Transaction</button>
+                            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a class="" href="{{ path('transaction_edit_listing', {'id': file.id}) }}">
+                                        Edit Listing
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="" href="{{ path('transaction_edit_closing', {'transaction': file.id, 'closing': file.closing.id}) }}">
+                                        Edit Closing
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    {% elseif listingId is defined and listingId is not null %}
+                        <a class="btn btn-warning " href="{{ path('transaction_edit_listing', {'id': file.id}) }}">
+                            <i class="fa fa-edit"></i> Edit Listing
+                        </a>
+                    {% elseif closingId is defined and closingId is not null %}
+                        <a class="btn btn-warning" href="{{ path('transaction_edit_closing', {'transaction': file.id, 'closing': file.closing.id}) }}">
+                            <i class="fa fa-edit"></i> Edit Closing
+                        </a>
+                    {% endif %}
+                {% endif %}
+                {% if app.user.businesses[0].id == 50 %}
+                 {% if app.user.role.level == 4 or app.user.role.level == 5  %}
+                    <a href='#' class="btn blue" onclick='downloadCSV({ filename: "stock-data.csv" });'>Excel Deal Sheet</a>
+                  {% endif %}
+                {% endif %}
+
+
+                {% if file.transactionStatus != 'Sold_Paid' or app.user.role.level == 1 %}
+                    {% if listingId is defined and listingId is not null and closingId is null %}
+                        {% if file.listing.represent == 'Seller'%}
+                            <a class="btn {% if app.user.businesses[0].id == 50 %}btn-danger{% else %}btn-warning{% endif %}" href="{{ path('transaction_edit_closing_by_type', {'transaction': file.id ,'type': 'Buyer'}) }}" >
+                                <i class="fa fa-money"></i> {% if app.user.businesses[0].id == 50 %}Add Contract File to Listing{% else %}Add Buyer{% endif %}
+                            </a>
+                        {% elseif file.listing.represent == 'Landlord'%}
+                            <a class="btn {% if app.user.businesses[0].id == 50 %}btn-danger{% else %}btn-warning{% endif %}" href="{{ path('transaction_edit_closing_by_type', {'transaction': file.id ,'type': 'Tenant'}) }}" >
+                                <i class="fa fa-money"></i> {% if app.user.businesses[0].id == 50 %}Add Lease File to Listing{% else %}Add Tenant{% endif %}
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                {% if( app.user.businesses[0].id == 15 ) %}
+                    <a href="https://forms.formsimplicity.com/index/signin" target="_blank" class="btn purple" >Form Simplicity</a>
+                {% endif %}
+
+                {% if( app.user.businesses[0].id == 50 ) %}
+
+                    {% if file.closing is not null %}
+                        {% if file.closing.represent == 'Seller' or file.closing.represent == 'Buyer' or file.closing.represent == 'Buyer&Seller' %}
+                            {% set helpType = 'Sold' %}
+                        {% else %}
+                            {% set helpType = 'Leased' %}
+                        {% endif %}
+                    {% else %}
+                        {% if file.listing.represent == 'Seller' or file.listing.represent == 'Buyer' or file.listing.represent == 'Buyer&Seller' %}
+                            {% set helpType = 'Sold' %}
+                        {% else %}
+                            {% set helpType = 'Leased' %}
+                        {% endif %}
+                    {% endif %}
+
+                    {% if file.closing is not null %}
+                        {% if app.user.role.level == 4 or app.user.role.level == 5 or app.user.isDocumentApprover == true %}
+                            <a onclick="return confirm('Are you sure you want to mark this transaction as {{ helpType }} Paid?')" href="{{ path('transaction_status_change_ajax', {'id': file.id, 'type': 'Transaction', 'status': helpType~'_Paid'}) }}" class="btn btn-primary"><i class="fa fa-check-square-o"></i> Mark As {{ helpType }} Paid</a>
+                        {% endif %}
+                        <a onclick="return confirm('We recommend adding the final closing documents on the closing day itself. Do you want to include the final closing documents now?')" href="{{ path('transaction_status_change_ajax', {'id': file.id, 'type': 'Transaction', 'status': helpType~'_not_Paid'}) }}" class="btn btn-danger">
+                            <i class="fa fa-file"></i> Add Final Closing Docs
+                        </a>
+                    {% endif %}
+                    <a href="http://crrliagents.com/" target="_blank" class="btn purple" ><i class="fa fa-folder-open"></i> Blank CRR Forms</a>
+                {% endif %}
+
+                {% if( app.user.businesses[0].id == 52 ) %}
+                    {% if file.closing is not null %}
+                        {% if file.closing.represent == 'Seller' or file.closing.represent == 'Buyer' or file.closing.represent == 'Buyer&Seller' %}
+                            {% set helpType = 'Sold' %}
+                        {% else %}
+                            {% set helpType = 'Leased' %}
+                        {% endif %}
+                    {% else %}
+                        {% if file.listing.represent == 'Seller' or file.listing.represent == 'Buyer' or file.listing.represent == 'Buyer&Seller' %}
+                            {% set helpType = 'Sold' %}
+                        {% else %}
+                            {% set helpType = 'Leased' %}
+                        {% endif %}
+                    {% endif %}
+                    {% if file.closing is not null %}
+                        <a onclick="return confirm('We recomended adding  the final closing documents on the day of closing only. Are you want to include the final closing documents')" href="{{ path('transaction_status_change_ajax', {'id': file.id, 'type': 'Transaction', 'status': helpType~'_not_Paid'}) }}" class="btn btn-danger">
+                            <i class="fa fa-file"></i> Add Final Closing Docs
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if file.transactionStatus != 'Sold_Paid' or app.user.role.level == 1 %}
+                    <a href="{{ path('split_pdf_display', {'id': file.id}) }}" data-target="#ajax" data-toggle="modal" class="btn btn-primary split_pdf " id="{{ file.id }}" >
+                        <i class="fa fa-file-pdf-o"></i> PDF Splitter
+                    </a>
+                {% endif %}
+
+                <a href="{{ path('transaction_show_on_map', {'address': file.fullAddress}) }}" data-target="#ajax" data-toggle="modal" class="btn blue" >
+                    Show  Map
+                </a>
+
+                {% set docStatus = true %}
+                {% set approveDocs = false %}
+
+                {% for documentType in closingDocumentTypes %}
+                    {%  if( documentType.document is null and documentType.isRequired == 1 ) %}
+                        {% set docStatus = false %}
+                    {% endif %}
+
+                    {% if (documentType.document is not null and documentType.approved == 0) %}
+                        {% set approveDocs = true %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if (listingDocumentTypes|length > 0) %}
+                    {% for documentType in listingDocumentTypes %}
+                        {%  if( documentType.document is null and documentType.isRequired == 1 ) %}
+                            {% set docStatus = false %}
+                        {% endif %}
+
+                        {% if (documentType.document is not null and documentType.approved == 0) %}
+                            {% set approveDocs = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if (approveDocs == true and ( app.user.isDocumentApprover == true or app.user.role.level == 4 ))  %}
+                    <button type="button" class="btn purple pull-right" href="{{ path('ajax_documents', {'transactionId': file.id}) }}" data-target="#documents" data-toggle="modal">Documents</button>
+                {% endif %}
+
+
+                {% if (closingId is defined and closingId is not null and ( docStatus == true or file.cdaUse == 1 ) and (app.user.businesses[0].id == 23 or checker.forAddon('cda payment system', app.user)))  %}
+                    <a class="btn green pull-right" style="margin-right: 4px;" href="{{ path('pay_me', {'transactionId': file.id}) }}" {#data-target="#ajax" data-toggle="modal"#} >
+                        {% if file.cdaUse == 0 %}$ Pay Me{% else %}View CDA{% endif %}
+                    </a>
+                {% endif %}
+
+            </div>
+            <div class="col-md-7">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div  style="background-color: #f3e97a; border: 1px solid black; float: left; width: 100%; padding-top: 5px;">
+                            <div class="col-xs-4">
+                                {% if (type == 'Lease') %}
+                                    {% set statusName = 'Lease' %}
+                                {% else %}
+                                    {% set statusName = 'Sold' %}
+                                {% endif %}
+
+                                {% if app.user.businesses[0].id != 50 %}
+                                    <select {% if app.user.role.level > 5 and file.transactionStatus == 'Sold_not_Paid' %}disabled{% endif %} data-preStatus="" class="status_change form-control placeholder-no-fix" id="transaction_status" data-id="{{ file.id }}" data-type="Transaction">
+                                        {% if closingId is not null and listingId is not null %}
+                                            <option {% if file.transactionStatus == 'Pending'%} selected {% endif %} value="Pending">Pending</option>
+
+                                            {% if app.user.businesses[0].id == 15 and (app.user.role.level != 7 or file.transactionStatus == 'Active_with_Contract') %}
+                                                <option {% if file.transactionStatus == 'Active_with_Contract'%} selected {% endif %} value="Active_with_Contract">Active with Contract</option>
+                                            {% endif %}
+                                            <option {% if file.transactionStatus == 'Contract_fell_thru'%} selected {% endif %} value="Contract_fell_thru">Contract fell thru</option>
+                                            <option {% if file.transactionStatus == 'Leased_not_Paid'%} selected {% endif %} value="Leased_not_Paid">Leased not Paid</option>
+                                            <option {% if file.transactionStatus == 'Leased_Paid'%} selected {% endif %} value="Leased_Paid">Leased Paid</option>
+
+                                            {% if (app.user.businesses[0].id == 54) %}
+                                                {% if app.user.role.level < 6 or file.transactionStatus == 'Sold_not_Paid' %}
+                                                    <option {% if file.transactionStatus == 'Sold_not_Paid'%} selected {% endif %} value="Sold_not_Paid">Sold not Paid</option>
+                                                {% endif %}
+                                            {% else %}
+                                                <option {% if file.transactionStatus == 'Sold_not_Paid'%} selected {% endif %} value="Sold_not_Paid">Sold not Paid</option>
+                                            {% endif %}
+
+                                            {% if app.user.role.level != 7 or file.transactionStatus == 'Sold_Paid' %}
+                                                <option {% if file.transactionStatus == 'Sold_Paid'%} selected {% endif %} value="Sold_Paid">Sold Paid</option>
+                                            {% endif %}
+                                        {% elseif closingId is not null and listingId is null %}
+                                            <option {% if file.transactionStatus == 'Pending'%} selected {% endif %} value="Pending">Pending</option>
+                                            {% if app.user.businesses[0].id == 15 and (app.user.role.level != 7 or file.transactionStatus == 'Active_with_Contract') %}
+                                                <option {% if file.transactionStatus == 'Active_with_Contract'%} selected {% endif %} value="Active_with_Contract">Active with Contract</option>
+                                            {% endif %}
+                                            <option {% if file.transactionStatus == 'Contract_fell_thru'%} selected {% endif %} value="Contract_fell_thru">Contract fell thru</option>
+                                            <option {% if file.transactionStatus == 'Leased_not_Paid'%} selected {% endif %} value="Leased_not_Paid">Leased not Paid</option>
+                                            <option {% if file.transactionStatus == 'Leased_Paid'%} selected {% endif %} value="Leased_Paid">Leased Paid</option>
+
+                                            {% if (app.user.businesses[0].id == 54) %}
+                                                {% if app.user.role.level < 6  or file.transactionStatus == 'Sold_not_Paid' %}
+                                                    <option {% if file.transactionStatus == 'Sold_not_Paid'%} selected {% endif %} value="Sold_not_Paid">Sold not Paid</option>
+                                                {% endif %}
+                                            {% else %}
+                                                <option {% if file.transactionStatus == 'Sold_not_Paid'%} selected {% endif %} value="Sold_not_Paid">Sold not Paid</option>
+                                            {% endif %}
+
+                                            {% if app.user.role.level != 7 or file.transactionStatus == 'Sold_Paid' %}
+                                                <option {% if file.transactionStatus == 'Sold_Paid'%} selected {% endif %} value="Sold_Paid">Sold Paid</option>
+                                            {% endif %}
+                                            {% if (app.user.businesses[0].id not in [50, 54]) %}
+                                                <option {% if file.transactionStatus == 'Rejected_Offer'%} selected {% endif %} value="Rejected_Offer">Rejected Offer</option>
+                                            {% endif %}
+                                        {% elseif closingId is null and listingId is not null %}
+                                            <option {% if file.transactionStatus == 'Active'%} selected {% endif %} value="Active">Active</option>
+                                            <option {% if file.transactionStatus == 'Withdrawn'%} selected {% endif %} value="Withdrawn">Withdrawn</option>
+                                            <option {% if file.transactionStatus == 'Expired'%} selected {% endif %} value="Expired">Expired</option>
+                                            <option {% if file.transactionStatus == 'Temporarily_Off_Market'%} selected {% endif %} value="Temporarily_Off_Market">Temporarily Off Market</option>
+                                        {% endif %}
+                                    </select>
+                                {% else %}
+                                    <p style="margin: 8px 40px">{{ file.transactionStatus|replace({'_': ' '}) }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-xs-4">
+                                {% if file.listing is defined and file.listing is not null and file.closing is null %}
+                                    <p style="margin-bottom: 6px;"> {{ file.listing.represent }}</p>
+                                {% elseif file.closing is defined and file.closing is not null %}
+                                    <p style="margin-bottom: 6px;">{{ file.closing.represent }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-xs-4">
+                                {% if file.listing is defined and file.listing is not null and file.closing is null %}
+                                    <p style="margin-bottom: 6px;"> {{ file.listing.moneyBox.contractPrice }}</p>
+                                {% elseif file.closing is defined and file.closing is not null %}
+                                    <p style="margin-bottom: 6px;">{{ file.closing.moneyBox.contractPrice }}</p>
+                                {% endif %}
+                            </div>
+                            {% if file.transactionProperty.mlsNumber is not null and file.transactionProperty.mlsNumber != '' %}
+                                <div class="col-xs-4">
+                                    <p style="margin-bottom: 6px;">#{{ file.transactionProperty.mlsNumber }}</p>
+                                </div>
+                            {% endif %}
+                            <div class="col-xs-4">
+                                <p style="margin-bottom: 6px;">
+                                    {% if file.listing is defined and file.listing is not null and file.closing is null %}
+                                        {{ file.listing.type|replace({'_': ' '}) }}
+                                    {% elseif file.closing is defined and file.closing is not null %}
+                                        {{ file.closing.type|replace({'_': ' '}) }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-xs-4">
+                                <p style="margin-bottom: 6px;">
+                                    {% if file.listing is defined and file.listing is not null and file.closing is null %}
+                                        {{  file.transactionProperty.property.type|replace({'_': ' '}) }}
+                                    {% elseif file.closing is defined and file.closing is not null %}
+                                        {{ file.transactionProperty.property.type|replace({'_': ' '}) }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="portlet box blue" id="noteBox">
+                <div class="portlet-title">
+                    <div class="actions">
+                        {% set objectType = 'LocalsBestUserBundle:Transaction' %}
+                        <a class="transaction_note btn btn-sm  btn-danger" href="{{ path('note_add', {'id': file.id ,'type': objectType}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">
+                            Add</a>
+                        {% if listingId is not null %}
+                            {% set type = 'LocalsBestUserBundle:Listing' %}
+                            <a class="btn btn-sm  btn-danger listing_showingNote" href="{{ path('note_add', {'id': file.id ,'type': type}) }}" data-target="#ajax" data-toggle="modal" style="color: white;">
+                                Add</a>
+                        {% endif %}
+                    </div>
+                    <div id="tabs_div">
+                        <ul class="nav nav-tabs" style="background: none; margin: 0; float: left; display: inline-block; border: 0; };">
+                            {% if listingId is not null %}
+                                <li class="">
+                                    <a style="color: #555;" href="#portlet_tab3" data-toggle="tab" aria-expanded="true">
+                                        Showing
+                                    </a>
+                                </li>
+                            {% endif%}
+                            <li class="">
+                                <a style="color: #555;" href="#portlet_tab2" data-toggle="tab" aria-expanded="false">
+                                    Logs
+                                </a>
+                            </li>
+                            <li class="active">
+                                <a style="color: #555;" href="#portlet_tab1" data-toggle="tab" aria-expanded="false">
+                                    Notes
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="portlet_tab1">
+                            <div {% if notes|length > 4 %}class="scroller" style="height: 302px;">{% endif %}
+                                <ul class="chats">
+                                    {% if notes|length >= 1 %}
+                                        {% for note in notes %}
+                                            {{ include ('@LocalsBestCommon/note/single.html.twig', {note: note, transactionStatus: file.transactionStatus}) }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="portlet_tab2">
+                            <div {% if file.logs|length > 7 %}class="scroller" style="height: 302px;"{% endif %}>
+                                <table class="customTable table table-bordered table-condensed table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if logs|length >= 1 %}
+                                        {% for log in logs %}
+                                            <tr>
+                                                <td style="padding-left:5px;">
+                                                    {{ log.createdBy.fullname }}
+                                                </td>
+                                                <td style="padding-left:5px;">
+                                                    {{ log.log }}
+                                                </td>
+                                                <td>
+                                                    {{ log.created|date('m-d-Y H:i:s') }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="portlet_tab3">
+                            <ul class="chats">
+                                {% if listingId is not null and showingNotes|length >= 1 %}
+                                    {% for note in showingNotes %}
+                                        {{ include ('@LocalsBestCommon/note/single.html.twig',{note: note}) }}
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portlet box blue" id="partyBox">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-navicon"></i>Transaction Parties
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-sm  btn-danger" href="{{ path('transaction_contact_add', { 'transactionId': file.id } ) }}" style="color: white;" id="contactAdd" data-target="#ajax" data-toggle="modal">
+                            Add
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body no-more-tables">
+                    <div id="transaction_parties_wrapper" class="dataTables_wrapper no-footer">
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12"></div>
+                                <div class="col-md-6 col-sm-12"></div>
+                            </div>
+                            <table class="table table-striped table-bordered table-condensed table-hover table-full-width cf" id="transaction_parties" style="font-size:15px; width: 100%;">
+                                <thead class="cf">
+                                    <tr>
+                                        <!-- <th style="width:24px;"></th> -->
+                                        <th>Role</th>
+                                        <th>Contact</th>
+                                        <th>Company Name</th>
+                                        <th>Contact Number</th>
+                                        <th>Contact Email</th>
+                                        <th>Company Number</th>
+                                        <th>Company Email</th>
+                                        {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                            <th></th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if seller.contactName is defined and seller.contactName is not null %}
+                                        <tr>
+                                            <td data-title="Role">{% if (file.closing is not null and file.closing.represent == 'Tenant') or (file.listing is not null and file.listing.represent == 'Landlord') %} Landlord {% else %}Seller {% endif %}</td>
+                                            <td data-title="Contact Name">{{ seller.contactName }}</td>
+                                            <td data-title="Company">{% if seller.company is not null %} {{ seller.company  | raw }} {% endif %}</td>
+                                            <td data-title="Phone Number">{%if seller.phone is not null%}{{ seller.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if seller.email is not null%}{{seller.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if seller.companyPhone is not null%}{{seller.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if seller.companyEmail is not null%}{{seller.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': seller.id }) }}" data-role="Seller" data-target="#ajax" data-toggle="modal">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if listingAgent.contactName is defined and listingAgent.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">Listing Agent</td>
+                                            <td data-title="Contact Name">{{ listingAgent.contactName }}</td>
+                                            <td data-title="Company">{% if listingAgent.company is not null %}{{ listingAgent.company | raw }}{% endif %}</td>
+                                            <td data-title="Phone Number">{%if listingAgent.phone is not null%}{{ listingAgent.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if listingAgent.email is not null%}{{listingAgent.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if listingAgent.companyPhone is not null%}{{listingAgent.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if listingAgent.companyEmail is not null%}{{listingAgent.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': listingAgent.id }) }}" data-role="Listing Agent" data-target="#ajax" data-toggle="modal">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if listingOffice.contactName is defined and listingOffice.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">Listing Office</td>
+                                            <td data-title="Contact Name">{{ listingOffice.contactName }}</td>
+                                            <td data-title="Company">{% if listingOffice.company is not null %}{{ listingOffice.company | raw }}{% endif %}</td>
+                                            <td data-title="Phone Number">{%if listingOffice.phone is not null%}{{ listingOffice.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if listingOffice.email is not null%}{{listingOffice.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if listingOffice.companyPhone is not null%}{{listingOffice.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if listingOffice.companyEmail is not null%}{{listingOffice.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': listingOffice.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Listing Office">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if seller2.contactName is defined and seller2.contactName is not null %}
+                                        <tr>
+                                            <td data-title="Role">{% if (file.closing is not null and file.closing.represent == 'Tenant') or (file.listing is not null and file.listing.represent == 'Landlord') %} Landlord 2 {% else %}Seller 2 {% endif %}</td>
+                                            <td data-title="Contact Name">{{ seller2.contactName }}</td>
+                                            <td data-title="Company">{% if seller2.company is not null %} {{ seller2.company  | raw }} {% endif %}</td>
+                                            <td data-title="Phone Number">{%if seller2.phone is not null%}{{ seller2.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if seller2.email is not null%}{{seller2.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if seller2.companyPhone is not null%}{{seller2.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if seller2.companyEmail is not null%}{{seller2.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': seller2.id }) }}" data-role="Seller2" data-target="#ajax" data-toggle="modal">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if buyer.contactName is defined and buyer.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">{% if (file.closing is not null and (file.closing.represent == 'Tenant' or file.closing.represent == 'Landlord&Tenant')) or (file.listing is not null and file.listing.represent == 'Landlord') %} Tenant {% else %} Buyer {% endif %}</td>
+                                            <td data-title="Contact Name">{{ buyer.contactName }}</td>
+                                            <td data-title="Company">{% if buyer.company is not null %}{{ buyer.company | raw }}{% endif %}</td>
+                                            <td data-title="Phone Number">{%if buyer.phone is not null%}{{ buyer.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if buyer.email is not null%}{{buyer.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if buyer.companyPhone is not null%}{{buyer.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if buyer.companyEmail is not null%}{{buyer.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': buyer.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Buyer">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if buyerAgent.contactName is defined and buyerAgent.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">{% if (file.closing is not null and (file.closing.represent == 'Tenant' or file.closing.represent == 'Landlord&Tenant')) or (file.listing is not null and file.listing.represent == 'Landlord') %} Tenant Agent {% else %} Buyers Agent {% endif %}</td>
+                                            <td data-title="Contact Name">{{ buyerAgent.contactName }}</td>
+                                            <td data-title="Company">{% if buyerAgent.company is not null %}{{ buyerAgent.company | raw }}{% endif %}</td>
+                                            <td data-title="Phone Number">{%if buyerAgent.phone is not null%}{{ buyerAgent.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if buyerAgent.email is not null%}{{buyerAgent.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if buyerAgent.companyPhone is not null%}{{buyerAgent.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if buyerAgent.companyEmail is not null%}{{buyerAgent.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': buyerAgent.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Buyers Agent">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if buyerOffice.contactName is defined and buyerOffice.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">{% if (file.closing is not null and (file.closing.represent == 'Tenant' or file.closing.represent == 'Landlord&Tenant')) or (file.listing is not null and file.listing.represent == 'Landlord') %} Tenant Office {% else %} Buyers Office {% endif %}</td>
+                                            <td data-title="Contact Name">{{ buyerOffice.contactName }}</td>
+                                            <td data-title="Company">{% if buyerOffice.company is not null %}{{ buyerOffice.company | raw }}{% endif %}</td>
+                                            <td data-title="Phone Number">{%if buyerOffice.phone is not null%}{{ buyerOffice.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if buyerOffice.email is not null%}{{buyerOffice.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if buyerOffice.companyPhone is not null%}{{buyerOffice.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if buyerOffice.companyEmail is not null%}{{buyerOffice.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': buyerOffice.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Buyers Office">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if buyer2.contactName is defined and buyer2.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">{% if (file.closing is not null and (file.closing.represent == 'Tenant' or file.closing.represent == 'Landlord&Tenant')) or (file.closing is not null and file.closing.represent == 'Landlord') %} Tenant 2 {% else %} Buyer 2 {% endif %}</td>
+                                            <td data-title="Contact Name">{{ buyer2.contactName }}</td>
+                                            <td data-title="Company">{% if buyer2.company is not null %}{{ buyer2.company | raw }}{% endif %}</td>
+                                            <td data-title="Phone Number">{%if buyer2.phone is not null%}{{ buyer2.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if buyer2.email is not null%}{{buyer.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if buyer2.companyPhone is not null%}{{buyer2.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if buyer2.companyEmail is not null%}{{buyer2.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': buyer2.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Buyer2">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if escrowCompany.contactName is defined and escrowCompany.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">Escrow Company</td>
+                                            <td data-title="Contact Name">{{ escrowCompany.contactName }}</td>
+                                            <td data-title="Company">{%if escrowCompany.company is not null%}{{escrowCompany.company}}{%endif%}</td>
+                                            <td data-title="Phone Number">{%if escrowCompany.phone is not null%}{{ escrowCompany.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if escrowCompany.email is not null%}{{escrowCompany.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if escrowCompany.companyPhone is not null%}{{escrowCompany.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if escrowCompany.companyEmail is not null%}{{escrowCompany.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': escrowCompany.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Escrow Company">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if lender.contactName is defined and lender.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">Lender</td>
+                                            <td data-title="Contact Name">{{ lender.contactName }}</td>
+                                            <td data-title="Company">{%if lender.company is not null%}{{lender.company}}{%endif%}</td>
+                                            <td data-title="Phone Number">{%if lender.phone is not null%}{{ lender.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if lender.email is not null%}{{lender.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if lender.companyPhone is not null%}{{lender.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if lender.companyEmail is not null%}{{lender.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': lender.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Lender">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if homeInspector.contactName is defined and homeInspector.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">Home Inspector</td>
+                                            <td data-title="Contact Name">{{ homeInspector.contactName }}</td>
+                                            <td data-title="Company">{%if homeInspector.company is not null%}{{homeInspector.company}}{%endif%}</td>
+                                            <td data-title="Phone Number">{%if homeInspector.phone is not null%}{{ homeInspector.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if homeInspector.email is not null%}{{homeInspector.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if homeInspector.companyPhone is not null%}{{homeInspector.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if homeInspector.companyEmail is not null%}{{homeInspector.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': homeInspector.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Home Inspector">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% if homeInsurance.contactName is defined and homeInsurance.contactName is not null %}
+                                        <tr>
+                                            <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                            <td data-title="Role">Home Insurance</td>
+                                            <td data-title="Contact Name">{{ homeInsurance.contactName }}</td>
+                                            <td data-title="Company">{%if homeInsurance.company is not null%}{{homeInsurance.company}}{%endif%}</td>
+                                            <td data-title="Phone Number">{%if homeInsurance.phone is not null%}{{ homeInsurance.phone }}{%endif%}</td>
+                                            <td data-title="Email">{%if homeInsurance.email is not null%}{{homeInsurance.email}}{%endif%}</td>
+                                            <td data-title="Company Phone">{%if homeInsurance.companyPhone is not null%}{{homeInsurance.companyPhone}}{%endif%}</td>
+                                            <td data-title="Company Email">{%if homeInsurance.companyEmail is not null%}{{homeInsurance.companyEmail}}{%endif%}</td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fa fa-gear"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': homeInsurance.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Home Insurance">
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+
+
+                                    {% if (app.user.businesses[0].id == 50) %}
+                                        {% if (listingTitleCompany is not null) %}
+                                            {% if listingTitleCompany.contactName is defined and listingTitleCompany.contactName is not empty %}
+                                            <tr>
+                                                <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                                <td data-title="Role">Sellers Attorney</td>
+                                                <td data-title="Contact Name">{{ listingTitleCompany.contactName }}</td>
+                                                <td data-title="Company">{%if listingTitleCompany.company is not null%}{{listingTitleCompany.company}}{%endif%}</td>
+                                                <td data-title="Phone Number">{%if listingTitleCompany.phone is not null%}{{ listingTitleCompany.phone }}{%endif%}</td>
+                                                <td data-title="Email">{%if listingTitleCompany.email is not null%}{{listingTitleCompany.email}}{%endif%}</td>
+                                                <td data-title="Company Phone">{%if listingTitleCompany.companyPhone is not null%}{{listingTitleCompany.companyPhone}}{%endif%}</td>
+                                                <td data-title="Company Email">{%if listingTitleCompany.companyEmail is not null%}{{listingTitleCompany.companyEmail}}{%endif%}</td>
+                                                {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                                <i class="fa fa-gear"></i>
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                <li>
+                                                                    <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': listingTitleCompany.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Title Company">
+                                                                        Edit
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                            {% else %}
+                                                {% if closingTitleCompany.contactName is defined and closingTitleCompany.contactName is not empty %}
+                                                <tr>
+                                                <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                                <td data-title="Role">Sellers Attorney</td>
+                                                <td data-title="Contact Name">{{ closingTitleCompany.contactName }}</td>
+                                                <td data-title="Company">{%if closingTitleCompany.company is not null%}{{closingTitleCompany.company}}{%endif%}</td>
+                                                <td data-title="Phone Number">{%if closingTitleCompany.phone is not null%}{{ closingTitleCompany.phone }}{%endif%}</td>
+                                                <td data-title="Email">{%if closingTitleCompany.email is not null%}{{closingTitleCompany.email}}{%endif%}</td>
+                                                <td data-title="Company Phone">{%if closingTitleCompany.companyPhone is not null%}{{closingTitleCompany.companyPhone}}{%endif%}</td>
+                                                <td data-title="Company Email">{%if closingTitleCompany.companyEmail is not null%}{{closingTitleCompany.companyEmail}}{%endif%}</td>
+                                                {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                                <i class="fa fa-gear"></i>
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                <li>
+                                                                    <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': closingTitleCompany.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Title Company">
+                                                                        Edit
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                            {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                        {% if (buyerAttorney is not null) %}
+                                            {% if buyerAttorney.contactName is defined and buyerAttorney.contactName is not empty %}
+                                            <tr>
+                                                <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                                <td data-title="Role">Buyers Attorney</td>
+                                                <td data-title="Contact Name">{%if buyerAttorney.contactName is not null%}{{ buyerAttorney.contactName }}{%endif%}</td>
+                                                <td data-title="Company">{%if buyerAttorney.company is not null%}{{buyerAttorney.company}}{%endif%}</td>
+                                                <td data-title="Phone Number">{%if buyerAttorney.phone is not null%}{{ buyerAttorney.phone }}{%endif%}</td>
+                                                <td data-title="Email">{%if buyerAttorney.email is not null%}{{buyerAttorney.email}}{%endif%}</td>
+                                                <td data-title="Company Phone">{%if buyerAttorney.companyPhone is not null%}{{buyerAttorney.companyPhone}}{%endif%}</td>
+                                                <td data-title="Company Email">{%if buyerAttorney.companyEmail is not null%}{{buyerAttorney.companyEmail}}{%endif%}</td>
+                                                {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                                <i class="fa fa-gear"></i>
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                <li>
+                                                                    <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': buyerAttorney.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Title Company">
+                                                                        Edit
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% else %}
+                                       
+                                        {% if listingTitleCompany.contactName is defined and listingTitleCompany.contactName is not null %}
+                                            <tr>
+                                                <!-- <td><button class="btn tooltips mini blue" rel="tooltip" title="More Info" data-placement="top"><i class="icon-plus"></i></button></td> -->
+                                                <td data-title="Role">Title Company</td>
+                                                <td data-title="Contact Name">{{ listingTitleCompany.contactName }}</td>
+                                                <td data-title="Company">{%if listingTitleCompany.company is not null%}{{listingTitleCompany.company}}{%endif%}</td>
+                                                <td data-title="Phone Number">{%if listingTitleCompany.phone is not null%}{{ listingTitleCompany.phone }}{%endif%}</td>
+                                                <td data-title="Email">{%if listingTitleCompany.email is not null%}{{listingTitleCompany.email}}{%endif%}</td>
+                                                <td data-title="Company Phone">{%if listingTitleCompany.companyPhone is not null%}{{listingTitleCompany.companyPhone}}{%endif%}</td>
+                                                <td data-title="Company Email">{%if listingTitleCompany.companyEmail is not null%}{{listingTitleCompany.companyEmail}}{%endif%}</td>
+                                                {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                                <i class="fa fa-gear"></i>
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                <li>
+                                                                    <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': listingTitleCompany.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Title Company">
+                                                                        Edit
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if transactionContacts is not null and transactionContacts|length >= 1 %}
+                                        {% for transactionContact in transactionContacts %}
+                                            <tr>
+                                                <td data-title="Role">{{ transactionContact.role}}</td>
+                                                <td data-title="Contact Name">{{ transactionContact.contactName}}</td>
+                                                <td data-title="Company">{%if transactionContact.company is not null%}{{transactionContact.company}}{%endif%}</td>
+                                                <td data-title="Phone Number">{%if transactionContact.phone is not null%}{{ transactionContact.phone }}{%endif%}</td>
+                                                <td data-title="Email">{%if transactionContact.email is not null%}{{transactionContact.email}}{%endif%}</td>
+                                                <td data-title="Company Phone">{%if transactionContact.companyPhone is not null%}{{transactionContact.companyPhone}}{%endif%}</td>
+                                                <td data-title="Company Email">{%if transactionContact.companyEmail is not null%}{{transactionContact.companyEmail}}{%endif%}</td>
+                                                {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                                <i class="fa fa-gear"></i>
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                <li>
+                                                                    <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': transactionContact.id }) }}" data-target="#ajax" data-toggle="modal" data-role="Title Company">
+                                                                        Edit
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <tr class="hidden newContactBox">
+                                        <td data-title="Role"><input id="contactRole" placeholder="role" type="text" class="form-control input-small"></td>
+                                        <td data-title="Contact Name"><input id="contactName" type="text" placeholder="contact" class="form-control input-small"></td>
+                                        <td data-title="Company"><input id="companyName" type="text" placeholder="company" class="form-control input-small"></td>
+                                        <td data-title="Phone Number"><input id="contactNumber" type="text" placeholder="phone" class="form-control input-small"></td>
+                                        <td data-title="Email"><input id="contactEmail" type="text" placeholder="email" class="form-control input-small"></td>
+                                        <td data-title="Company Phone"><input id="companyNumber" type="text" placeholder="company phone" class="form-control input-small"></td>
+                                        <td data-title="Company Email"><input id="companyEmail" type="text" placeholder="company email" class="form-control input-small"></td>
+                                        <td><input type="hidden" id="contactType"><input type="hidden" id="contactId"><a href="javascript:;" class="btn btn-primary" id="submitContact">Save </a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col-md-5 col-sm-12"></div>
+                                <div class="col-md-7 col-sm-12"></div>
+
+                            </div>
+
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+
+            {{ render(controller( 'LocalsBestUserBundle:Advertisement:index', {'route': app.request.get('_route'), 'transaction': file})) }}
+
+            <div class="portlet box blue">
+                
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-suitcase"></i> Jobs
+                        </div>
+                        <div class="actions">
+    {#                        <a class="btn btn-sm  btn-danger" href="{{ path('job_add_object', {'objectId': file.id, 'objectType': objectType}) }}">#}
+                               <a class="btn btn-sm  btn-danger advance-search"/>
+                                Add
+                               </a>
+                        </div>
+                    </div>
+                
+                <div class="portlet-body customJobBody">
+                    <table class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                        <input id="checkAllJobs" type="checkbox" class="group-checkable">
+                                        <span></span>
+                                    </label>
+                                </th>
+                                <th> Status </th>
+                                <th> Company Name </th>
+                                <th> Type </th>
+                                <th> Due Date </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td>
+                                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                            <input name="job" value="{{ job.id }}" type="checkbox" class="group-checkable forJob">
+                                            <span></span>
+                                        </label>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge" style="{% if job.status.status is not null%} background-color: {{ job.status.color }}; color: {{ job.status.color }};{% endif%}"> 3 </span>
+                                    </td>
+                                    <td > {{ job.vendor.businesses[0].name }} </td>
+                                    <td> <a href="{{ path('job_view', {'id': job.id}) }}" >{{ job.orderType }}</a> </td>
+                                    <td>{{ job.dueDate|date('m/d/Y') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xs-12" style="padding-bottom: 2px;">    
+                  <a href="{{ path('download_all_document', {'transactionId': file.id }) }}" data-toggle="tooltip" title="Download all documents associated with this transaction" class="btn btn-default pull-right">
+                      <span class="glyphicon glyphicon-download-alt"></span>
+                      Download All
+                  </a>
+              </div>
+            </div>
+
+            {% if file.closing is not null %}
+                {% include '@LocalsBestUser/transaction/blocks/_transaction-document-type-portlet.html.twig' with {'transaction': file, 'file': file.closing, 'type': 'closing', 'nrds': ndrsClosing} %}
+            {% endif %}
+
+            {% if file.listing is not null %}
+                {% include '@LocalsBestUser/transaction/blocks/_transaction-document-type-portlet.html.twig' with {'transaction': file, 'file': file.listing, 'type': 'listing', 'nrds': ndrsClosing} %}
+            {% endif %}
+
+            <div class="portlet blue box" id="eventBox">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-calendar"></i> Events
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-sm  btn-danger" href="{{ path('event_add_object', {'objectId': file.id, 'objectType': objectType}) }}" style="color: white;">
+                            Add
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body customEventBody">
+                    <table class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th> Type </th>
+                                <th> Title </th>
+                                <th> Due Date </th>
+                                <th> Alert </th>
+                                {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                    <th></th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if totalEvents|length >= 1  %}
+                                {% for event in totalEvents %}
+                                    {% if event is not null %}
+                                    {% if event.time is not null %}
+                                    <tr>
+                                        <td class="text-center">
+                                            {{ event.colorCircle|raw }}
+                                        </td>
+                                        <td>
+                                            {{ event.type }}
+                                        </td>
+                                        <td>
+                                            {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                                <a href="{{ path('event_edit_object', {'objectId': file.id, 'objectType': objectType, 'slug': event.slug}) }}" >
+                                                    <strong>{{ event.title }}</strong>
+                                                </a>
+                                            {% else %}
+                                                <strong>{{ event.title }}</strong>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ event.time|date('m/d/Y') }} {#({{ time_diff(event.time)}} )#}</td>
+                                        <td>{% if event.alerts|length > 0 %}<i class="icon-bell"></i>{% endif %}</td>
+                                        {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fa fa-gear"></i>
+                                                        <span class="caret"></span>
+                                                    </button>
+
+                                                    {% if app.user.role.level < 5 %}
+                                                        <ul class="dropdown-menu pull-right" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('event_remove', {'id': event.id}) }}">
+                                                                    <i class="fa fa-times"></i> Remove
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    {% elseif app.user.role.level == 7 and event.createdBy == app.user and event.isRequired == false %}
+                                                        <ul class="dropdown-menu pull-right" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('event_remove', {'id': event.id}) }}">
+                                                                    <i class="fa fa-times"></i> Remove
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    {% else %}
+                                                        <ul class="dropdown-menu pull-right" role="menu">
+                                                            <li>
+                                                                <a href="{{ path('event_remove', {'id': event.id}) }}">
+                                                                    <i class="fa fa-times"></i> Remove
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endif%}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            {% if deposits|length >= 1 and closingId is not null %}
+                                {% for deposit in deposits %}
+                                    <tr>
+                                        <td></td>
+                                        <td>Deposit</td>
+                                        <td><strong>{{ deposit.amount }}</strong></td>
+                                        <td>{{ deposit.date|date('m/d/Y') }}</td>
+                                        <td>{% if deposit.depositAlert == 1 %}<i class="icon-bell"></i>{% endif %}</td>
+                                        {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                                            <td></td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="documents" role="basic" aria-hidden="true" style="display: none; padding-right: 15px; width: 99%; right: auto; overflow-y: hidden !important;">
+        <div class="modal-dialog modal-full" style="transform: none !important;">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="email" role="basic" aria-hidden="true" style="display: none; padding-right: 15px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function approve(docTypeId){
+            $.ajax({
+                method: "GET",
+                url: "/ajax-documents/{{ file.id }}/" + docTypeId,
+                dataType: "json",
+                async: false,
+                success:function(data){
+                    if(data.last == true) {
+                        $('#documents').modal('hide');
+                    } else {
+                        $("#documents .modal-content").html(data.html);
+                    }
+                }
+            })
+        }
+
+        function nextDocument(docTypeId, direction){
+            $.ajax({
+                method: "GET",
+                url: "/skip-ajax-documents/{{ file.id }}/" + docTypeId + "/" + direction,
+                dataType: "json",
+                async: false,
+                success:function(data){
+                    if(data.last == true) {
+                        $('#documents').modal('hide');
+                    } else {
+                        $("#documents .modal-content").html(data.html);
+                    }
+                }
+            })
+        }
+    </script>
+{% endblock %}

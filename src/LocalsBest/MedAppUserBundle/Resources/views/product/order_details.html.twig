@@ -1,0 +1,78 @@
+{% extends '::shop-layout.html.twig' %}
+
+{% block title %}
+    Orders
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <aside class="sidebar-left">
+                    <ul class="nav nav-pills nav-stacked nav-arrow">
+                        <li class="active">
+                            <a>Orders History</a>
+                        </li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-9">
+                        <table class="table table-order">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Name</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in paymentRows %}
+                                    <tr>
+                                        <td class="table-order-img">
+                                            <a href="{{ path('products_show', {'slug': item.product.slug}) }}">
+                                                {% if item.product.images is not empty %}
+                                                    <img src="{{ vich_uploader_asset(item.product.images.first, 'imageFile', 'LocalsBest\\UserBundle\\Entity\\ProductImage') }}" alt="{{ item.product.title }}" title="{{ item.product.title }}">
+                                                {% else %}
+                                                    <img src="/shop/img/70x70.png" alt="{{ item.product.title }}" title="{{ item.product.title }}"/>
+                                                {% endif %}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('products_show', {'slug': item.product.slug}) }}">
+                                                {{ item.product.title }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {{ item.quantity }}
+                                        </td>
+                                        <td>
+                                            ${{ (item.price + item.setupFee)|number_format }}
+                                        </td>
+                                        <td>
+                                            <label class="label label-{% if item.status == 'success' %}success{% else %}danger{% endif %}">
+                                                {{ item.status|capitalize }}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="gap"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

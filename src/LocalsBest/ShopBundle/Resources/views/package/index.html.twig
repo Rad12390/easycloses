@@ -1,0 +1,62 @@
+{% extends '::base.html.twig' %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Packages
+    </li>
+{% endblock %}
+
+{% block content -%}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-plane"></i> Packages
+                <span>{{ tooltip_text.getText('Packages','header')|raw }}</span>
+            </div>
+            <div class="actions">
+                <a class="btn red" href="{{ path('packages_new') }}">
+                    <i class="fa fa-plus"></i> Create New
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Qty</th>
+                            <th>Status</th>
+                            {% if app.user.role.level == 1 %}
+                                <th>Business</th>
+                                <th>User</th>
+                            {% endif %}
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for entity in entities %}
+                        <tr>
+                            <td>{{ entity.title }}</td>
+                            <td>{{ entity.quantity }}</td>
+                            <td>{{ entity.statusText }}</td>
+                            {% if app.user.role.level == 1 %}
+                                <td>{{ entity.createdBy.businesses.first.name }}</td>
+                                <td>{{ entity.createdBy.fullName }}</td>
+                            {% endif %}
+                            <td>{% if entity.createdAt %}{{ entity.createdAt|date('m/d/Y H:i') }}{% endif %}</td>
+                            <td>
+                                <a class="btn btn-info btn-xs" href="{{ path('packages_show', { 'id': entity.id }) }}">show</a>
+                                <a class="btn btn-warning btn-xs" href="{{ path('packages_edit', { 'id': entity.id }) }}">edit</a>
+                                <a class="btn btn-success btn-xs" href="{{ path('packages_new', { 'copy_of': entity.id }) }}">copy</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

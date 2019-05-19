@@ -1,0 +1,49 @@
+<!-- Begin: life time stats -->
+<div class="portlet box blue">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class="fa fa-cogs"></i> Email Templates <span class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="right" title="After email campaign started mail will be sent on 7/10/17 day. After 17 days mail will be sent on a weekly basis."><b> ? </b></span>
+        </div>
+        <div class="actions">
+            {% if checker.forAddon('customers', app.user) %}
+                <a class="btn red" data-toggle="tab" href="#business_recipients">
+                    <i class="fa fa-mail-reply-all"></i> Recipients
+                </a>
+            {% endif %}
+            <a class="btn red" href="{{ path('email_templates_create') }}">
+                <i class="icon-plus"></i> Add Template
+            </a>
+        </div>
+    </div>
+
+    <div class="portlet-body">
+        <table id="example" class="table table-bordered table-striped table-condensed">
+            <thead class="flip-content">
+                <tr>
+                    <th> Category </th>
+                    <th> Number </th>
+                    <th> Title </th>
+                    <th> </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for template in templates %}
+                    <tr>
+                        <td> {{ template.category }} </td>
+                        <td> {{ template.templateNumber }} </td>
+                        <td> {{ template.emailTitle }} </td>
+                        <td>
+                            <a href="{{ path('email_templates_edit', {'id': template.id}) }}" class="btn btn-xs btn-warning">
+                                <i class="fa fa-edit"></i> Edit
+                            </a>
+
+                            <a onclick="return confirm('Are you sure?')" href="{{ path('email_templates_delete', {'id': template.id}) }}" class="btn btn-xs btn-danger">
+                                <i class="fa fa-trash-o"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

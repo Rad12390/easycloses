@@ -1,0 +1,85 @@
+{% extends '::ec-shop-layout.html.twig' %}
+
+{% block title %}
+    Checkout
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+
+    <style>
+        .btn-xlarge {
+            padding: 18px 28px;
+            font-size: 50px;
+            line-height: normal;
+            /*-webkit-border-radius: 8px;*/
+            /*-moz-border-radius: 8px;*/
+            /*border-radius: 8px;*/
+        }
+    </style>
+{% endblock %}
+
+{% block content -%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <aside class="sidebar-left">
+                    <div class="box clearfix">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>QTY</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% set total=0%}
+                                {% for item in order.shopItems %}
+                                    {% set total= total + item.sku.price.retailPrice|number_format * item.quantity %}
+                                    <tr>
+                                        <td>{{ item.title }}</td>
+                                        <td>${{ item.sku.price.retailPrice|number_format }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ item.sku.price.retailPrice|number_format * item.quantity }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <ul class="cart-total-list text-center mb0">
+                            <li>
+                                <span>Sub Total</span>
+                                <span>${{ total|number_format }}</span>
+                            </li>
+                            <li>
+                                <span>Shipping</span>
+                                <span>$0.00</span>
+                            </li>
+                            <li>
+                                <span>Taxes</span>
+                                <span>$0.00</span>
+                            </li>
+                            <li>
+                                <span>Total</span>
+                                <span>${{ total|number_format }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12">
+                        {% if order.total == 0 %}
+                            {{ include('@LocalsBestShop/order/_get-free-block.html.twig') }}
+                        {% else %}
+                            {{ include('@LocalsBestShop/order/_credit-card-block.html.twig') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="gap"></div>
+    </div>
+{% endblock %}

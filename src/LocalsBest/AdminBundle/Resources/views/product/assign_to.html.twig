@@ -1,0 +1,13 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme assign_form 'bootstrap_3_layout.html.twig' %}
+
+{% block content -%}
+    <h1>Product Assign To</h1>
+
+    {{ form(assign_form) }}
+
+    <a class="btn btn-default" href="{{ path('admin_products') }}">
+        Back to the list
+    </a>
+{% endblock %}

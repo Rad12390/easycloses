@@ -1,0 +1,143 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Jobs & Quotes{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Jobs & Quotes
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}" />
+
+    <style>
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            var table = $('#example');
+            {% if app.user.businesses.0.id == 173 %}
+                var oTable = table.dataTable({
+                    columnDefs: [{
+                        "orderable": false,
+                        "targets": [0, 4, 6, 8, 9]
+                    }],
+                    pageLength: 50,
+                    order: [
+                    ],
+                    dom: 'lfrtip',
+                    processing: true,
+                    responsive: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ path('datatable_job_limit') }}",
+                        type: 'GET',
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.redirect) {
+                                alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                            }
+                        },
+                        complete: function(data) {
+                            windowForLogout(data)
+                        }
+                    },
+                    searchDelay: 800
+                } );
+            {% else %}
+                var oTable = table.dataTable({
+                    columnDefs: [{
+                        "orderable": false,
+                        "targets": [0, 9]
+                    }],
+                    order: [
+                    ],
+                    dom: 'lfrtip',
+                    processing: true,
+                    responsive: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ path('datatable_job_limit', {'user_id': user_id}) }}",
+                        type: 'GET',
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.redirect) {
+                                alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                            }
+                        },
+                        complete: function(data) {
+                            windowForLogout(data)
+                        }
+                    },
+                    searchDelay: 800
+                } );
+            {% endif %}
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+   
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-suitcase"></i>Jobs & Quotes
+            </div>
+            <div class="actions">
+                <a class="btn  btn-danger" href="{{ path('job_add') }}">
+                    <i class="icon-plus"></i> Add Job
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <table style="width: 100%;" id="example" class="table table-bordered table-striped">
+                <thead class="flip-content">
+                    <tr>
+                        {% if app.user.businesses.0.id == 173 %}
+                            <th></th>
+                            <th > Status </th>
+                            <th > Order Type </th>
+                            <th> Client Name </th>
+                            <th> Business Name </th>
+                            <th > Street Address </th>
+                            <th> Notes </th>
+                            <th> Order Date </th>
+                            <th> Last Updated </th>
+                            <th > Actions </th>
+                        {% else %}
+                            <th></th>
+                            <th > Status </th>
+                            <th > Due Date </th>
+                            <th > Order Type </th>
+                            <th > Street Address </th>
+                            <th> Business Name </th>
+                            <th> Client Name </th>
+                            <th> Industry </th>
+                            <th> Last Updated </th>
+                            <th > Actions </th>
+                        {% endif %}
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+{% endblock %}	

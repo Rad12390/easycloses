@@ -1,0 +1,287 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Search{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        hr {
+            margin: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="/plugins/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+
+    <script>
+        $(function () {
+            $(".business_info").slimScroll({
+                height: '250px'
+            });
+
+            {% if upperStaff|length > 6 %}
+                $(".contacts_list").slimScroll({
+                    height: '350px'
+                });
+            {% endif %}
+
+            $(".scroll_box").slimScroll({
+                height: '200px'
+            });
+
+            $('.toggle-staff-table').on('click', function (){
+                $('.staff-table').toggle();
+            })
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-4">
+                    <ul class="ver-inline-menu tabbable margin-bottom-10">
+                        <li>
+                            {% if business.filename is not null and business.filename is not empty %}
+                                <img src="{{ vich_uploader_asset(business, 'file') }}" style="margin: 0 auto;" class="img-responsive img-thumbnail" alt="{{ business.name }}">
+                            {% else %}
+                                <img src="/images/empty-vendor.png" style="margin: 0 auto;" class="img-responsive img-thumbnail" alt="{{ business.name }}">
+                            {% endif %}
+
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-8">
+                    <div class="profile-info">
+                        <h4>{{ business.name}}</h4>
+                        <p><b>Address City:</b> {{ business.address.city }}<br/></p>
+                        <p><b>Contact Information:</b><br/></p>
+                        {% if business.contact is not null %}
+                            {% for phone in business.contact.phones %}
+                                {% if phone|length > 1 %}
+                                    <ul class="list-inline">
+                                        <li>
+                                            {% if phone.type =='M' %}
+                                            <span class="glyphicon glyphicon-phone"></span>
+                                        {% elseif phone.type =='H' %}
+                                            <span class="glyphicon glyphicon-phone-alt"></span>
+                                        {% elseif phone.type =='O' %}
+                                            <span class="glyphicon glyphicon-earphone"></span>
+                                            {% endif %}&nbsp;{{ phone.number }}&nbsp;(optional)
+                                        </li>
+                                    </ul>
+                                {% else %}
+                                    <p>
+                                        {% if phone.type =='M' %}
+                                        <span class="glyphicon glyphicon-phone"></span>
+                                    {% elseif phone.type =='H' %}
+                                        <span class="glyphicon glyphicon-phone-alt"></span>
+                                    {% elseif phone.type =='O' %}
+                                        <span class="glyphicon glyphicon-earphone"></span>
+                                        {% endif %}&nbsp;{{ phone.number }}
+                                    </p>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% for email in business.contact.emails %}
+                                {% if email|length > 1 %}
+                                    <ul class="list-inline">
+                                        <li>
+                                            <span class="glyphicon glyphicon-envelope"></span>&nbsp;{{ email.email }}&nbsp;(optional)
+                                        </li>
+                                    </ul>
+                                {% else %}
+                                    <p>
+                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;<a href="#">{{ email.email }} </a>
+                                    </p>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+                        <p>
+                            <b>Industry Types:</b><br>
+                            {% if business.types|length > 0 %}
+                                {% for t_ype in business.types %}
+                                    {{ t_ype.name}} <br>
+                                {% endfor %}
+                            {% endif %}<br/>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    {% if business.aboutMe is not null %}
+                        {% for bio in business.aboutMe %}
+                            {% if bio.aboutMe|length > 0 %}
+                                <hr>
+                                <div class="business_info">
+                                    {{ bio.aboutMe|raw }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="portlet box blue" id="noteBox">
+                        <div class="portlet-title">
+                            <div class="caption">Notes</div>
+                            <div class="actions">
+                                <a class="btn btn-sm  btn-danger" href="{{ path('note_add', { 'id': business.owner.id ,'type': 'LocalsBestUserBundle:User' }) }}" data-target="#ajax" data-toggle="modal">Add</a>
+                            </div>
+                        </div>
+                        <div class="portlet-body">
+                            <div class="scroll_box">
+                                <ul class="chats">
+                                    {% if notes|length >= 1 %}
+                                        {% for note in notes %}
+                                            {{ include ('@LocalsBestCommon/note/single.html.twig', { note: note }) }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portlet box blue" id="closingDocument">
+                        <div class="portlet-title">
+                            <div class="caption"><i class="icon-edit"></i>User Docs</div>
+                            <div class="actions">
+                                <a class="btn  red" href="{{ path('user_document_add', {'id': business.owner.id })}}" style="color: white;" data-target="#ajax" data-toggle="modal">Add</a>
+                            </div>
+                        </div>
+                        <div class="portlet-body no-more-tables customClosingDocumentBody">
+                            <div class="scroll_box">
+                                {% if userDocuments|length >= 1 and userDocuments is not null %}
+                                <div class="table-responsive">
+                                    <table class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf doc_vault doc_vault_listing" id="document_vault">
+                                        <thead class="cf">
+                                        <tr>
+                                            <th style="width:250px;">File Name</th>
+                                            <th>Date</th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for document in userDocuments %}
+                                            <tr class="odd gradeX doc closing required " id="1253955_1392118" style="height:20px;">
+                                                <td><a href="{{ path('document_view', {'slug': document.slug}) }}" >{{ document.fileName }}</a></td>
+                                                <td>{{ document.created|date('m-d-Y H:i') }}</td>
+                                                <td>
+                                                    {% if app.user == document.createdBy %}
+                                                        {% set t='777' %}
+                                                        {% set shareID = 0 %}
+                                                        {% for share in document.shares %}
+                                                            {% if( share.user.id == user.id and document.id == share.objectId and share.objectType == 'LocalsBestUserBundle:DocumentUser' ) %}
+                                                                {% set t='22' %}
+                                                                {% set shareID = share.id %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% if(t == '777') %}
+                                                            <form style="float: left;" action="/documents/share/{{ document.slug }}" method="POST" enctype="multipart/form-data" name="shareValue">
+                                                                <input id="selectedusers" type="hidden" class="hidden" name="shares" value="{{ user.username }}">
+                                                                <input id="sharedUserReadReciepts" type="hidden" class="hidden" name="readReciepts" value=",">
+                                                                <input id="sharedUserFurtherActions" type="hidden" class="hidden" name="furtherActions" value=",">
+                                                                <input type="hidden" class="hidden" name="shareFor" value="1">
+                                                                <button type="submit" class="btn btn-xs" id="share_btn">Share</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <button class="btn btn-xs yellow share_btn_remove" data-removeid="{{ shareID }}" data-username="{{ user.username }}" data-saved="1"><i class="fa fa-ban"></i></button>
+                                                        {% endif %}
+                                                        <a onclick="return confirm('Are you sure you want to delete file?')" href="{{ path('user_document_delete', {'slug': document.slug}) }}" class="btn btn-xs red"><i class="fa fa-trash-o"></i></a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor%}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 15px;">
+        <div class="col-md-12">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">Contacts</div>
+                </div>
+                <div class="portlet-body">
+                    <div class="row">
+                        <div class="col-md-12 contacts_list">
+                            {% for user in upperStaff %}
+                                <div class="col-md-2 space-mobile border_shadow" style="min-height:200px;">
+                                    <div style="border: 1px solid; text-align: center; background-color:#fff;" class="well">
+                                        <div style="text-align: center;">
+                                            <h5 style="font-size: 10px;">
+                                                <strong>{{ user.role.name }}</strong><br>
+                                            </h5>
+                                        </div>
+                                        <hr>
+                                        <div class="img_contain" style="height: 105px; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-align: center; -webkit-align-items: center; -webkit-box-align: center; align-items: center;">
+                                            <img src="{{ vich_uploader_asset(user, 'file') }}" alt="" style="max-width:100%; max-height:90px; margin: 0 auto;">
+                                        </div>
+                                        <hr>
+                                        <div style="text-align: center;">
+                                            <h5 style="font-size: 10px;">
+                                                <a href="{{ path('members_details', {id: user.id}) }}">{{ user.fullName }}</a>
+                                                <hr>
+                                                {{ user.contact.phones[0].number }}
+                                                <hr>
+                                                {{ user.contact.emails[0].email }}
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="text-center">
+                <button class="btn btn-primary toggle-staff-table" style="margin-bottom: 15px;">See all company staff</button>
+            </div>
+            <table class="table staff-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in lowStaff %}
+                        <tr>
+                            {#TODO: add user photo#}
+                            <td></td>
+                            <td><a href="{{ path('members_details', {'id': user.id}) }}">{{ user.firstName }} {{ user.lastName }}</a></td>
+                            <td>{{ user.contact.phones[0].number }}</td>
+                            <td>{{ user.contact.emails[0].email }}</td>
+                            <td>{{ user.role.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

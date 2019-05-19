@@ -1,0 +1,144 @@
+@font-face {
+  font-family: 'Romantically';
+  src: url('font/Romantically.otf');
+}
+@font-face {
+  font-family: 'Sweet Cookie';
+  src: url('font/Sweet Cookie.ttf');
+}
+@font-face {
+  font-family: 'AnthoniSignature';
+  src: url('font/AnthoniSignature.ttf');
+}
+@font-face {
+  font-family: 'Shorelines Script Bold';
+  src: url('font/Shorelines Script Bold.otf');
+}
+.header {
+  color: #b9c8e0;
+  background-color: #1d365d !important;
+  height: 72px;
+  position: relative;
+}
+.header .fa-home {
+  font-size: 30px;
+  line-height: 72px;
+}
+.header h1 {
+  line-height: 72px;
+}
+.header .header-title {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.nav-tabs .nav-link.active {
+  background-color: rebeccapurple;
+  color: whitesmoke;
+}
+.section-header {
+  background: #ADA996;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #EAEAEA, #DBDBDB, #F2F2F2, #ADA996);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #EAEAEA, #DBDBDB, #F2F2F2, #ADA996);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  margin-top: 20px;
+}
+.review-name-container {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 24px;
+}
+.review-name-container .label-initials {
+  margin-left: 115px;
+}
+.create-sign h3 {
+  display: inline;
+  cursor: pointer;
+}
+.create-sign span {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+.create-sign #can-container {
+  position: relative;
+  text-align: center;
+  margin-top: 27px;
+}
+.create-sign #can-container #can {
+  border: 1px solid #000;
+}
+.create-sign #can-container #btn_clear {
+  float: right;
+  margin-left: -149px;
+}
+.create-sign .signature-display-container {
+  text-align: center;
+  margin-top: 27px;
+  height: 305px;
+}
+.create-sign .signature-display-container .sel-font {
+  font-size: 35px;
+  cursor: pointer;
+  text-shadow: 2px 2px 5px #151414;
+}
+.create-sign .signature-display-container .vertical-center {
+  line-height: 300px;
+}
+.button-container {
+  text-align: right;
+}
+.overlay-action,
+.overlay-sign,
+.overlay-next {
+  font-size: 18px;
+}
+.label-admit {
+  margin-right: 30px;
+  font-size: 18px;
+}
+td,
+th {
+  font-size: 15px !important;
+}
+td.name {
+  color: #4087e2;
+  font-family: bold;
+  font-size: 20px !important;
+}
+.editing {
+  display: inline-block;
+  vertical-align: middle;
+  background: red;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.published {
+  display: inline-block;
+  vertical-align: middle;
+  background: yellow;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #818231;
+}
+.signed {
+  display: inline-block;
+  vertical-align: middle;
+  background: green;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.approved {
+  display: inline-block;
+  vertical-align: middle;
+  background: blue;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}

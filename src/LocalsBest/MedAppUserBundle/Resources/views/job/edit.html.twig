@@ -1,0 +1,1242 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    {%if jobId is not null%}
+        Edit Job
+    {%else%}
+        Create Job
+    {%endif%}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('job_index') }}">Jobs & Quotes</a>
+    </li>
+    {% if jobId is not null %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Edit Job for "{{ jobProperty }}"
+        </li>
+    {% else %}
+        <li>
+            <i class="fa fa-circle"></i>
+            Create Job {% if transactionProperty is not null %}for Transaction "{{ transactionProperty }}"{% endif %}
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/typeahead/typeahead.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.css') }}" />
+
+    <style type="text/css">
+        .create_job .control-group.error input, .input-group.error input, .control-group.error select, .control-group.error textarea, .control-group.error radio {
+            border-color: red;
+            background: rgb(250, 255, 189);
+        }
+        .create_job .control-group.success input, .input-group.success input, .control-group.success select, .control-group.success textarea, .control-group.success radio {
+            border-color: #468847;
+        }
+        .radio input[type=radio], .radio-inline input[type=radio], .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox] {
+            margin-left: -10px !important;
+        }
+        tr.contact_error .contact_status{
+            color:rgb(255, 0, 0);
+        }
+        tr.contact_success .contact_status{
+            color:rgb(0, 128, 0);
+        }
+        
+        .img_contain {
+            max-width: 100px;
+            margin: 0 auto;
+        }
+        
+        ul.thumbnails {
+            padding: 0;
+            width: 1000%;
+        }
+        
+        .thumbnails .vendor-box {
+            width: 225px;
+            display: inline-block;
+            float: left;
+            margin: 5px;
+        }
+        
+        
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/handlebars.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/typeahead/typeahead.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('plugins_old/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-validation/js/jquery.validate.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.min.js') }}"></script>
+
+    <script type="text/javascript">
+        var usersRestPath = "{{ path('rest_user_getall')}}?type=&query=%QUERY";
+        function checkContactRow(selector) {
+            var row = selector;
+
+            //var asterisk = selector.children().first();
+
+            row.children().each(function (index, td) {
+                td = $(td);
+                if (td.find('input:enabled.validate-for-row').val() == '') {
+                    row.addClass('contact_error');
+                    row.removeClass('contact_success');
+                    return false;
+                }
+                row.removeClass('contact_error');
+                row.addClass('contact_success');
+            });
+        }
+        
+        function updateJobCategory() {
+            var category = $('#job_industryType').val();
+                
+            var bestPictures = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: "{{ path('rest_user_getall')}}?type=" + category +  "&query=%QUERY"
+            });
+            bestPictures.initialize();
+
+            {% verbatim %}
+                bestPictures.initialize();
+
+                var typeHeadValue = $('.remote .typeahead');
+
+                typeHeadValue.typeahead('destroy');
+                typeHeadValue.typeahead(null, {
+                    name: 'best-pictures',
+                    displayKey: 'username',
+                    source: bestPictures.ttAdapter(),
+                    templates: {
+                        suggestion: Handlebars.compile([
+                            '<div class="media">',
+                            '<div class="pull-left">',
+                            '<div class="media-object">',
+                            '<img src="{{ profilepic }}" width="50" height="50"/>',
+                            '</div>',
+                            '</div>',
+                            '<div class="media-body">',
+                            '<h4 class="media-heading">{{type}}</h4>',
+                            '<p>{{businessName}}</p>',
+                            '</div>',
+                            '</div>'
+                        ].join(''))
+                    }
+                }).on('typeahead:selected', function (e, item) {
+                    targetValue = $(e.target).closest('td').next();
+                    targetValue.find('input').val(item.contactName);
+                    targetValue.next().find('input').val(item.phone);
+                    targetValue.next().next().find('input').val(item.email);
+                });
+            {% endverbatim %}
+        }
+        
+        jQuery(document).ready(function () {
+            $("#business").on('click', '#render_business .order_quote_btn', function() {
+                jobType = $("#job_orderType").val();
+                vendor = $(this).find('input').val();
+
+                if(jobType == 'Order' && vendor == 2326) {
+                    var form = $('form').serialize();
+                    window.location.replace("/sign-form?" + form);
+                }
+
+                if( jobType == "Order") {
+                    $.ajax({
+                        type: "GET",
+                        url: "/form-get/" + vendor,
+                        dataType: "html",
+                        success: function(data) {
+                            vendorForm = $("#vendorForm");
+                            vendorForm.html('');
+                            vendorForm.append(data);
+
+                            $('.date-picker').datepicker({
+                                format: "mm/dd/yyyy",
+                                rtl: false,
+                                todayHighlight: true,
+                                orientation: "right",
+                                autoclose: true
+                            });
+                        }
+                    });
+
+                    $("#sign-form").show();
+                }
+            });
+
+            {% if jobUser.businesses[0].id == 15 %}
+                $(".phone").inputmask("999.999.9999");
+            {% else %}
+                $(".phone").inputmask("(999) 999-9999");
+            {% endif %}
+
+            //Uppercase for state field
+            $('#job_jobProperty_property_address_state').keyup(function() {
+                $(this).val($(this).val().toUpperCase());
+            });
+
+            showMoreVendorsValue = $("#show-more-vendors");
+            showMoreVendorsValue.click(function(){
+                $(".vendor-box:nth-child(n+5)").css('display', 'inline-block');
+                $(this).attr('disabled','disabled');
+            });
+            
+            $('#job_industryType, #job_orderType').change(function () {
+                $("#vendorForm").html('');
+                jobIndustryTypeValue = $("#job_industryType");
+                if (jobIndustryTypeValue.val() === "" || $("#job_orderType").val() === "") {
+                    $("#vendor_slider_wrapper h4").text("Please select the Job type and Order type to fetch matching Vendors");
+                    return false;
+                }
+                vendorValue = $("#vendor_slider_wrapper");
+                vendorValue.html("<h2>Loading</h2>");
+                vendorValue.load("{{ path('vendor_slider_ajax') }}/" + jobIndustryTypeValue.val(),
+                    {
+                        {% if selectedVendor is not null %}
+                            vendor_id: {{ selectedVendor }}
+                        {% endif %}
+                    },
+                    function( response, status, xhr ) {
+//                        $('.bxslider').bxSlider({
+//                            infiniteLoop: false,
+//                            slideWidth: 330,
+//                            slideMargin: 10,
+//                            adaptiveHeight: true
+//                        });
+
+                        showMoreVendorsValue.removeAttr('disabled');
+
+                        $("div .bx-loading").hide();
+
+                        if ( status === "error" ) {
+                            response = JSON.parse(response);
+                            $( "#vendor_slider_wrapper" ).html(response.message);
+                            showMoreVendorsValue.attr('disabled','disabled');
+                        }
+
+                        {% if selectedVendor is not null %}
+                            $("#job_vendors_{{ selectedVendor }}").trigger('click');
+                        {% endif %}
+                    }
+                );
+                updateJobCategory();
+
+                updateEventName();
+            });
+
+            $("#job_orderType").change(function(){
+                //$(".label-jobtype").text($(this).val());
+                updateEventName();
+            });
+            {% if industryType is not null %}
+            $("#job_industryType").val("{{ industryType }}");
+            $("#job_industryType").trigger("change");
+            {% endif %}
+            {% if jobType is not null %}
+            $("#job_orderType").val("{{ jobType }}");
+                $("#job_orderType").trigger("change");
+            {% endif %}
+            $('.portlet-body').on('change', 'input[name="job[vendors][]"]', function(){
+                jobOrderValue = $("#job_orderType");
+                if (jobOrderValue.val() === 'Order') {
+                    console.log(jobOrderValue);
+                    if ($('input[name="job[vendors][]"]:checked').length >= 1) {
+//                        alert('One company Limit on Job Orders');
+                        $('input[name="job[vendors][]"]:not(:checked)').parent().parent().hide();
+                    } else {
+                        $('input[name="job[vendors][]"]').parent().parent().show();
+                    }
+                }
+
+                if (jobOrderValue.val() === 'Quote') {
+                    if ($('input[name="job[vendors][]"]:checked').length >= 4) {
+//                        alert('Four Company Limit on Quotes');
+                        $('input[name="job[vendors][]"]:not(:checked)').parent().parent().hide();
+                    } else {
+                        $('input[name="job[vendors][]"]').parent().parent().show();
+                    }
+                }
+            });
+
+            {#$('#party_job_contacts_0').removeClass('hidden');
+            $('#party_job_contacts_1').removeClass('hidden');
+            $('#party_job_contacts_2').removeClass('hidden');
+            $('#party_job_contacts_3').removeClass('hidden');#}
+
+            exampleTBodyTrValue = $("#example tbody tr");
+            exampleTBodyTrValue.each(function () {
+                checkContactRow($(this));
+            });
+
+            $("#example input").on('keyup keypress blur change', function () {
+                checkContactRow($(this).closest('tr'));
+            });
+
+            {% if isEdit == false %}
+                $('#job_contacts_0_role').val('Client');
+                $('#job_contacts_1_role').val('Created by');
+                //$('#job_contacts_2_role').val('Concierge');
+                //$('#job_contacts_3_role').val('Vendor Selected');
+                {% if jobUser.role.level == 8 %}
+                    {% if jobUser.clientBusiness is not null and jobUser.businesses.0.id == 173 %}
+                        var companyName = "{{ jobUser.clientBusiness.name }}";
+                    {% else %}
+                        var companyName = "-";
+                    {% endif %}
+                {% else %}
+                    {% for business in jobUser.businesses %}
+                        {% if business.id == app.session.get('current_business') %}
+                            var companyName = "{{ business.name }}";
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                jobContactsContactName1 = $('#job_contacts_1_contactName');
+                jobContactsContactName1.val("{{ jobUser.firstname }} {{ jobUser.lastname }}");
+
+                jobContactsPhone1 = $('#job_contacts_1_phone');
+                jobContactsPhone1.val("{{ jobUser.primaryPhone.number }}");
+
+                jobContactsEmail1 = $('#job_contacts_1_email');
+                jobContactsEmail1.val("{{ jobUser.primaryEmail.email }}");
+
+                $('#job_contacts_1_company').val(companyName);
+            {% else %}
+                {% for business in jobUser.businesses %}
+                    {% if business.id == app.session.get('current_business') %}
+                        var companyName = "{{ business.name }}";
+                    {% endif %}
+                {% endfor %}
+                jobContactsContactName1 = $('#job_contacts_1_contactName');
+
+                jobContactsPhone1 = $('#job_contacts_1_phone');
+
+                jobContactsEmail1 = $('#job_contacts_1_email');
+            {% endif %}
+
+            $('#job_contacts_0_contactName').val($('#job_contacts_0_contactName').val().replace(/&amp;/g, '&'));
+
+            if($('#job_contacts_0_company').length) {
+                $('#job_contacts_0_company').val($('#job_contacts_0_company').val().replace(/&amp;/g, '&'));
+            }
+
+            if($('#job_contacts_1_company').length) {
+                $('#job_contacts_1_company').val($('#job_contacts_1_company').val().replace(/&amp;/g, '&'));
+            }
+
+            if($('#job_contacts_2_company').length) {
+                $('#job_contacts_2_company').val($('#job_contacts_2_company').val().replace(/&amp;/g, '&'));
+            }
+
+            jobContactsContactName0 = $('#job_contacts_0_contactName');
+            if (jobContactsContactName0.val() != '') {
+                jobContactsContactName0.closest('.control-group').addClass('success');
+            } else {
+                jobContactsContactName0.closest('.control-group').addClass('error');
+                jobContactsContactName0.closest('.control-group').removeClass('success');
+            }
+
+            jobContactsPhone0 = $('#job_contacts_0_phone');
+            if (jobContactsPhone0.val() != '') {
+                jobContactsPhone0.closest('.control-group').addClass('success');
+            } else {
+                jobContactsPhone0.closest('.control-group').addClass('error');
+                jobContactsPhone0.closest('.control-group').removeClass('success');
+            }
+
+            jobContactsEmail0 = $('#job_contacts_0_email');
+            if (jobContactsEmail0.val() != '') {
+                jobContactsEmail0.closest('.control-group').addClass('success');
+            } else {
+                jobContactsEmail0.closest('.control-group').addClass('error');
+                jobContactsEmail0.closest('.control-group').removeClass('success');
+            }
+
+            if (jobContactsContactName1.val() != '') {
+                jobContactsContactName1.closest('.control-group').addClass('success');
+            } else {
+                jobContactsContactName1.closest('.control-group').addClass('error');
+                jobContactsContactName1.closest('.control-group').removeClass('success');
+            }
+
+            if (jobContactsPhone1.val() != '') {
+                jobContactsPhone1.closest('.control-group').addClass('success');
+            } else {
+                jobContactsPhone1.closest('.control-group').addClass('error');
+                jobContactsPhone1.closest('.control-group').removeClass('success');
+            }
+
+            if (jobContactsEmail1.val() != '') {
+                jobContactsEmail1.closest('.control-group').addClass('success');
+            } else {
+                jobContactsEmail1.closest('.control-group').addClass('error');
+                jobContactsEmail1.closest('.control-group').removeClass('success');
+            }
+            {#if ($('#job_contacts_2_contactName').val() != '')
+            {
+                $('#job_contacts_2_contactName').closest('.control-group').addClass('success');
+            } else {
+                $('#job_contacts_2_contactName').closest('.control-group').addClass('error');
+                $('#job_contacts_2_contactName').closest('.control-group').removeClass('success');
+            }
+            if ($('#job_contacts_2_phone').val() != '')
+            {
+                $('#job_contacts_2_phone').closest('.control-group').addClass('success');
+            } else {
+                $('#job_contacts_2_phone').closest('.control-group').addClass('error');
+                $('#job_contacts_2_phone').closest('.control-group').removeClass('success');
+            }
+            if ($('#job_contacts_2_email').val() != '')
+            {
+                $('#job_contacts_2_email').closest('.control-group').addClass('success');
+            } else {
+                $('#job_contacts_2_email').closest('.control-group').addClass('error');
+                $('#job_contacts_2_email').closest('.control-group').removeClass('success');
+            }
+            if ($('#job_contacts_3_contactName').val() != '')
+            {
+                $('#job_contacts_3_contactName').closest('.control-group').addClass('success');
+            } else {
+                $('#job_contacts_3_contactName').closest('.control-group').addClass('error');
+                $('#job_contacts_3_contactName').closest('.control-group').removeClass('success');
+            }
+            if ($('#job_contacts_3_phone').val() != '')
+            {
+                $('#job_contacts_3_phone').closest('.control-group').addClass('success');
+            } else {
+                $('#job_contacts_3_phone').closest('.control-group').addClass('error');
+                $('#job_contacts_3_phone').closest('.control-group').removeClass('success');
+            }
+            if ($('#job_contacts_3_email').val() != '')
+            {
+                $('#job_contacts_3_email').closest('.control-group').addClass('success');
+            } else {
+                $('#job_contacts_3_email').closest('.control-group').addClass('error');
+                $('#job_contacts_3_email').closest('.control-group').removeClass('success');
+            }#}
+
+            $('.date-picker').datepicker({
+                format: "mm/dd/yyyy",
+                todayHighlight: true,
+                rtl: false,
+                orientation: "right",
+                autoclose: true
+            });
+
+            $(".form_meridian_datetime").datetimepicker({
+                isRTL: false,
+                format: "mm/dd/yyyy H:ii P",
+                showMeridian: true,
+                todayHighlight: true,
+                autoclose: true,
+                pickerPosition: "bottom-left",
+                todayBtn: true
+            });
+
+            // event alert box checked
+            showEventAlert = $('.show-event-alert');
+            showEventAlert.each(function () {
+                if ($(this).is(":checked")) {
+                    $(this).closest('tr').next().find('.alert_event').removeClass('hidden');
+                } else {
+                    $(this).closest('tr').next().find('.alert_event').addClass('hidden');
+                }
+
+            });
+
+            jobEventsTitle0 = $('#job_events_0_title');
+            jobEventsTime0 = $('#job_events_0_time');
+
+            if (jobEventsTitle0.val() == '') {
+                jobEventsTitle0.val('Job Due Date');
+            }
+
+            jobEventsTitle0.prop('required', true);
+            jobEventsTime0.prop('required', true);
+
+            if (jobEventsTitle0.val() != '') {
+                jobEventsTitle0.closest('.input-group').addClass('success');
+            } else {
+                jobEventsTitle0.closest('.input-group').addClass('error');
+                jobEventsTitle0.closest('.input-group').removeClass('success');
+            }
+            if (jobEventsTime0.val() != '') {
+                jobEventsTime0.closest('.input-group').addClass('success');
+            } else {
+                jobEventsTime0.closest('.input-group').addClass('error');
+                jobEventsTime0.closest('.input-group').removeClass('success');
+            }
+
+            $('.btn-add').on('click', function (event) {
+                var collectionHolder = $('#' + $(this).attr('data-target'));
+                var prototype = collectionHolder.attr('data-prototype');
+                var form = prototype.replace(/__name__/g, collectionHolder.children().length);
+
+                collectionHolder.append(form);
+
+                $(".form_meridian_datetime").datetimepicker({
+                    isRTL: false,
+                    format: "mm/dd/yyyy H:ii P",
+                    showMeridian: true,
+                    autoclose: true,
+                    pickerPosition: "bottom-left",
+                    todayBtn: true
+                });
+
+                $('.date-picker').datepicker({
+                    format: "mm/dd/yyyy",
+                    todayHighlight: true,
+                    rtl: false,
+                    orientation: "right",
+                    autoclose: true
+                });
+
+                var test = $("input[type=checkbox]:not(.toggle, .make-switch, .icheck), input[type=radio]:not(.toggle, .star, .make-switch, .icheck)");
+                if (test.size() > 0) {
+                    test.each(function () {
+                        if ($(this).parents(".checker").size() === 0) {
+                            $(this).show();
+                        }
+                    });
+                }
+
+                updateJobCategory();
+
+                return false;
+            });
+            $('.portlet-body').on('click', '.btn-remove', function (event) {
+                var name = $(this).attr('data-related');
+                $('*[data-content="' + name + '"]').remove();
+
+                return false;
+            });
+
+            // Event alert
+
+            showEventAlert.on('click', function () {
+                if ($(this).is(":checked")) {
+                    $(this).closest('tr').next().find('.alert_event').removeClass('hidden');
+                } else {
+                    $(this).closest('tr').next().find('.alert_event').addClass('hidden');
+                }
+            });
+
+            $('.add-event-alert').on('click', function () {
+
+                if ($(this).closest('tr').next().find('.alert_event').hasClass('hidden')) {
+                    $(this).closest('tr').next().find('.alert_event').removeClass('hidden');
+                } else {
+                    var collectionHolder = $(this).closest('tr').next().find('tbody');
+                    var row = $(this).closest('tr.event-row');
+
+                    var newRowHtml = row.data('prototype').replace(/__name__/g, collectionHolder.children().length);
+                    collectionHolder.append(newRowHtml);
+
+                    $(".form_meridian_datetime").datetimepicker({
+                        isRTL: false,
+                        format: "mm/dd/yyyy H:ii P",
+                        showMeridian: true,
+                        autoclose: true,
+                        pickerPosition: "bottom-left",
+                        todayBtn: true
+                    });
+
+                    $('.date-picker').datepicker({
+                        todayHighlight: true,
+                        format: "mm/dd/yyyy",
+                        rtl: false,
+                        orientation: "right",
+                        autoclose: true
+                    });
+
+                    var test = $("input[type=checkbox]:not(.toggle, .make-switch, .icheck), input[type=radio]:not(.toggle, .star, .make-switch, .icheck)");
+
+                    if (test.size() > 0) {
+                        test.each(function () {
+                            if ($(this).parents(".checker").size() === 0) {
+                                $(this).show();
+                            }
+                        });
+                    }
+                }
+
+                return false;
+            });
+
+            var form1 = $('#create_form');
+            var error1 = $('.alert-error', form1);
+            var success1 = $('.alert-success', form1);
+            //console.log('validating');
+            $(form1).validate({
+                onkeyup: function (element) {
+                    $(element).valid();
+                },
+                onfocusout: function (element) {
+                    $(element).valid();
+                },
+                errorElement: 'span',
+                errorClass: 'help-inline',
+                focusInvalid: false,
+                invalidHandler: function (event, validator) { //display error alert on form submit
+                    $(validator.errorList[0].element).focus();
+                    success1.hide();
+                    error1.show();
+                    $('html, body').animate({ scrollTop: $('#create_form').offset().top }, 'fast');
+                    alert('You have missed one or more required fields. Enter the missing information and try to save the job again.');
+                },
+                highlight: function (element) {
+                    var row = $(element).closest("tr").attr("id");
+                    rowVariable = $('#' + row);
+                    rowVariable.find(".required").each(function () {
+                        var input = $(this).val();
+                        if (input == '') {
+                            rowVariable.find(".required_icon_table").css("color", "red");
+                            rowVariable.find(".get_quote").removeClass('hide');
+                        }
+                    });
+                    $(element).closest('.control-group').addClass('error');
+                    $(element).closest('.input-group').addClass('error');
+                    $(element).siblings(".required_icon").css("color", "red");
+
+                },
+                unhighlight: function (element) {
+                    $(element).closest('.control-group').removeClass('error');
+                    $(element).closest('.input-group').removeClass('error');
+                    $(element).closest('.control-group').removeClass('optional');
+                    $(element).closest('.control-group').addClass('success');
+                    $(element).closest('.input-group').addClass('success');
+                    $(element).find(".required_icon").css("color", "green");
+                    $(element).siblings(".required_icon").css("color", "green");
+                    var row = $(element).closest("tr").attr("id");
+                    rowVariable = $('#' + row);
+                    rowVariable.find(".required").each(function () {
+                        var input = $(this).val();
+                        if (input == '') {
+                            rowVariable.find(".required_icon_table").css("color", "red");
+                            rowVariable.find(".get_quote").removeClass('hide');
+                        } else {
+                            rowVariable.find(".required_icon_table").css("color", "green");
+                            rowVariable.find(".get_quote").addClass('hide');
+                        }
+                    });
+                },
+                success: function (label) {
+                    label.addClass('valid');
+                    //console.log('success!');
+                    //$(element).siblings(".required_icon").css("color", "green");
+                },
+                errorPlacement: function (error, element) {
+                },
+                ignore: ".donotvalidate",
+                submitHandler: function (form) {
+
+                    {% if jobId is null %}
+                        var arr = $.map($("input[name='job[vendors][]']:checked"), function(e) {
+                            return +e.value;
+                        });
+
+                        if (!arr.length) {
+                            alert('You must select at least one vendor to continue');
+                            return false;
+                        }
+                    {% endif %}
+
+                    success1.show();
+                    error1.hide();
+                    $('button:submit').attr("disabled", true);
+
+                    form.submit();
+                }
+            });
+
+            exampleTBodyTrValue.each(function () {
+                checkContactRow($(this));
+            });
+        });
+        
+        function updateEventName()
+        {
+            var eventName = "";
+            
+            if ($("#job_industryType").val() !== "") {
+                eventName = $("#job_industryType option:selected").text();
+                
+                if ($("#job_orderType").val() !== "") {
+                    eventName += " " + $("#job_orderType option:selected").text();
+                }
+            }
+            
+            if (eventName !== "") {
+                $("#job_events_0_title").val(eventName);
+            }
+        }
+
+        $(function () {
+
+            $("#job_jobProperty_property_address_zip").on('keyup blur change', function () {
+                var zip = $(this).val();
+                var zip_regex = /^[0-9]+$/;
+                jobPropertyAddressZip = $('#job_jobProperty_property_address_zip');
+                if (!zip.match(zip_regex) || (zip.length) < 1 || (zip.length) > 5) {
+                    jobPropertyAddressZip.closest('.control-group').removeClass('success');
+                    jobPropertyAddressZip.closest('.control-group').addClass('error');
+                    $('#zip-error').html('Enter 5 Numbers');
+                    jobPropertyAddressZip.focus();
+                    return false;
+                }
+                else {
+                    jobPropertyAddressZip.closest('.control-group').removeClass('error');
+                    jobPropertyAddressZip.closest('.control-group').addClass('success');
+                    $('#zip-error').addClass('hidden');
+                    return true;
+                }
+            });
+            $("#job_jobProperty_property_address_state").on('keyup blur change', function () {
+                var state = $(this).val();
+                var state_regex = /^[a-zA-Z]+$/;
+                jobPropertyAddressState = $('#job_jobProperty_property_address_state');
+                if (!state.match(state_regex) || (state.length) < 1 || (state.length) > 2) {
+                    jobPropertyAddressState.closest('.control-group').removeClass('success');
+                    jobPropertyAddressState.closest('.control-group').addClass('error');
+                    $('#state-error').html('Enter 2 Letters');
+                    jobPropertyAddressState.focus();
+                    return false;
+                }
+                else {
+                    jobPropertyAddressState.closest('.control-group').removeClass('error');
+                    jobPropertyAddressState.closest('.control-group').addClass('success');
+                    $('#state-error').addClass('hidden');
+                    return true;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% macro event_widget_prototype(widget, remove_text) %}
+    {% import _self as forms %}
+    {% if widget.vars.prototype is defined %}
+        {% set form = widget.vars.prototype %}
+        {% set name = widget.vars.prototype.vars.name %}
+    {% else %}
+        {% set form = widget %}
+        {% set name = widget.vars.full_name %}
+    {% endif %}
+
+    {% set randomId = random() %}
+
+    <tr class="event-row" data-id="{{widget.vars.id}}" data-content="{{widget.vars.id}}_{{ name }}" data-target="post_event_alert_{{ randomId }}" data-prototype="{{  forms.event_alert_prototype(form.alerts.vars.prototype)|e }}">
+        <td>
+            <div class="input-group">
+                {{ form_widget(form.title) }}
+            </div>
+        </td>
+        <td>
+            <div class="input-group date date-picker" data-date-format="yyyy-mm-dd">
+                {{ form_widget(form.time) }}
+                <span class="input-group-btn">
+                    <button class="btn default" type="button"><i class="fa fa-calendar"></i></button>
+                </span>
+                <span id="name-error" class="help-block help-block-error" style="display: none;">
+                    This field is required.
+                </span>
+            </div>
+        </td>
+        <td>
+            <a href="#" class="add-event-alert">
+                <i class="icon-plus"></i> Add
+            </a>
+        </td>
+    </tr>
+    <tr class="event-alerts-row">
+        <td colspan="4">
+            <table class="table table-striped alert_event hidden">
+                <thead>
+                    <tr>
+                        <th width="45%"></th>
+                        <th width="55%"></th>
+                        <th width="5%"></th>
+                        <th width="15%"></th>
+                    </tr>
+                </thead>
+                <tbody id="post_event_alert_{{ randomId }}">
+                    {% for widget in form.alerts.children %}
+                        {{ forms.event_alert_prototype(widget, 'Remove alert') }}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </td>
+    </tr>
+{% endmacro %}
+
+{% macro event_alert_prototype(widget, remove_text) %}
+    {% if widget.vars.prototype is defined %}
+        {% set form = widget.vars.prototype %}
+        {% set name = widget.vars.prototype.vars.name %}
+    {% else %}
+        {% set form = widget %}
+        {% set name = widget.vars.full_name %}
+    {% endif %}
+
+    <tr data-content="{{widget.vars.id}}_{{ name }}">
+        <td width="35%">
+            <div class="checkbox-inline">
+                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                    email
+                    {{ form_widget(form.email) }}
+                    <span></span>
+                </label>
+                {% if checker.forAddon('notification settings text', app.user) %}
+                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                        text
+                        {{ form_widget(form.phone) }}
+                        <span></span>
+                    </label>
+                {% endif %}
+            </div>
+        </td>
+        <td width="45%">
+            <div class="input-group date form_meridian_datetime" data-date-start-date="+0d" data-date-start-time="T15:25:00Z">
+                {{ form_widget(form.date) }}
+                <span class="input-group-btn">
+                    <button class="btn default date-reset" type="button"><i class="fa fa-times"></i></button>
+                </span>
+                <span class="input-group-btn">
+                    <button class="btn default date-set" type="button"><i class="fa fa-calendar"></i></button>
+                </span>
+            </div>
+        </td>
+        <td width="5%">
+
+        </td>
+        <td width="15%">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-gear"></i>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right" role="menu" style="left: -190%;">
+                    <li>
+                        <a data-related="{{widget.vars.id}}_{{ name }}" class="btn-remove">
+                            <i class="fa fa-times"></i> Remove Alert
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+{% endmacro %}
+
+{% macro contact_widget_prototype(widget, remove_text) %}
+    {% if widget.vars.prototype is defined %}
+        {% set form = widget.vars.prototype %}
+        {% set name = widget.vars.prototype.vars.name %}
+    {% else %}
+        {% set form = widget %}
+        {% set name = widget.vars.full_name %}
+    {% endif %}
+
+    {% set randomId = random() %}
+
+    <tr id="party_{{widget.vars.id}}" class="contact-row {#hidden#}" data-id="{{widget.vars.id}}" data-content="{{widget.vars.id}}_{{ name }}" >
+        <td data-title="Role" id="0">
+            <i class="fa fa-asterisk contact_status seller" style="font-size: 9px; z-index: 3;position: absolute; margin-top: -10px; margin-left: -10px;"></i>
+
+            <span class="contact_type">{{ form_widget(form.role) }}</span>
+        </td>
+        <td data-title="Contact">
+            <div class="control-group">
+                <div class="controls">
+                    {{ form_widget(form.contactName, { 'attr': {'class': 'form-control placeholder-no-fix required validate-for-row'} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.contactName) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Phone Number">
+            <div id="" class="control-group ">
+                <div class="controls">
+                    {{ form_widget(form.phone, { 'attr': {'class': 'form-control placeholder-no-fix ajax-phone required validate-for-row phone'} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.phone) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Email">
+            <div id="" class="control-group ">
+                <div class="controls">
+                    {{ form_widget(form.email, { 'attr': {'class': 'form-control placeholder-no-fix ajax-email required validate-for-row'} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.email) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Company">
+            {{ form_widget(form.company) }}
+            <span class="help-block">
+                {{ form_errors(form.company) }}
+            </span>
+        </td>
+        <td data-title="Choice">
+            {{ form_widget(form.contactBy, { 'attr': {'class': 'form-control placeholder-no-fix ajax-email required validate-for-row'} }) }}
+            <span class="help-block">
+                {{ form_errors(form.contactBy) }} 
+            </span>
+        </td>
+    </tr>
+
+{% endmacro %}
+
+{% macro vendor_widget_prototype(widget, remove_text) %}
+    {% if widget.vars.prototype is defined %}
+        {% set form = widget.vars.prototype %}
+        {% set name = widget.vars.prototype.vars.name %}
+    {% else %}
+        {% set form = widget %}
+        {% set name = widget.vars.full_name %}
+    {% endif %}
+
+    {% set randomId = random() %}
+
+    <tr class="vendor-row" data-id="{{widget.vars.id}}" data-content="{{widget.vars.id}}_{{ name }}" >
+        <td data-title="Role">
+            <div class="control-group remote ">
+                <div class="controls">
+                    {{ form_widget(form.role, { 'attr': {'class': 'form-control placeholder-no-fix typeahead ','placeholder': 'Select One'} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.role) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Contact">
+            <div class="control-group">
+                <div class="controls">
+                    {{ form_widget(form.contactName, { 'attr': {'class': 'form-control placeholder-no-fix'} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.contactName) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Phone Number">
+            <div id="remote-seller-phone" class="control-group ">
+                <div class="controls">
+                    {{ form_widget(form.phone, { 'attr': {'class': 'form-control placeholder-no-fix ajax-phone '} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.phone) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Email">
+            <div id="remote-seller-email" class="control-group ">
+                <div class="controls">
+                    {{ form_widget(form.email, { 'attr': {'class': 'form-control placeholder-no-fix ajax-email '} }) }}
+                    <span class="help-block">
+                        {{ form_errors(form.email) }} 
+                    </span>
+                </div>
+            </div>
+        </td>
+        <td data-title="Company">
+            {{ form_widget(form.company) }}
+            <span class="help-block">
+                {{ form_errors(form.company) }}
+            </span>
+        </td>
+        <td data-title="Choice">
+            {{ form_widget(form.contactBy, { 'attr': {'class': 'form-control placeholder-no-fix ajax-email '} }) }}
+            <span class="help-block">
+                {{ form_errors(form.contactBy) }} 
+            </span>
+        </td>
+</tr>
+
+{% endmacro %}
+
+{% block content %}
+    {% import _self as forms %}
+    {% if jobId is not null %}
+        <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-9">
+                <a class="btn btn-warning " href="{{ path('job_view', {'id': jobId}) }}">
+                    <i class="icon-action-undo"></i> Back to job
+                </a>
+            </div>
+        </div>
+    {% endif %}
+    <div class="form create_job">
+        {{ form_start(form, { 'attr': {'novalidate': 'novalidate','class': 'form-bordered form-horizontal create_form', 'id': 'create_form'} }) }}
+
+        {% if transactionId is not null %}
+            <input type="hidden" name="transactionId" value="{{ transactionId }}">
+        {% endif %}
+
+        {% if jobId is not null %}
+            <input type="hidden" name="job[vendors][]" value="{{ job.vendor.id }}">
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="fa fa-info-circle"></i> Job Info</div>
+                    </div>	
+                    <div class="portlet-body gradient-bg">	
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="control-group {% if (form.vars.value.industryType is defined and form.vars.value.industryType is not empty) or (industryType is not null) %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if (form.vars.value.industryType is defined and form.vars.value.industryType is not empty) or (industryType is not null) %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.industryType) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.industryType) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="control-group {% if (form.vars.value.orderType is defined and form.vars.value.orderType is not empty) or (jobType is not null) %}success{% else %}error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if (form.vars.value.orderType is defined and form.vars.value.orderType is not empty) or (jobType is not null) %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.orderType) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.orderType) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- col-md-3 -->
+            <div class="col-md-9">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="icon-home"></i> Job Address</div>						
+                    </div>	
+                    <div class="portlet-body gradient-bg">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="control-group {% if form.vars.value.jobProperty.property.address.street is defined and form.jobProperty.property.address.street.vars.errors|length == 0 %}success{% else %}error{% endif %} {% if form.jobProperty.property.address.street.vars.errors|length %}has-error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.jobProperty.property.address.street is defined and form.jobProperty.property.address.street.vars.errors|length == 0 %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.jobProperty.property.address.street) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.jobProperty.property.address.street) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_widget(form.jobProperty.mlsBoard) }}
+                                <span class="help-block">
+                                    {{ form_errors(form.jobProperty.mlsBoard) }} 
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="control-group {% if form.vars.value.jobProperty.property.address.city is defined and form.jobProperty.property.address.city.vars.errors|length == 0 %}success{% else %}error{% endif %} {% if form.jobProperty.property.address.city.vars.errors|length %}has-error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.jobProperty.property.address.city is defined and form.jobProperty.property.address.city.vars.errors|length == 0 %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.jobProperty.property.address.city) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.jobProperty.property.address.city) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="control-group {% if form.vars.value.jobProperty.property.address.state is defined and form.jobProperty.property.address.state.vars.errors|length == 0 %}success{% else %}error{% endif %} {% if form.jobProperty.property.address.state.vars.errors|length %}has-error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.jobProperty.property.address.state is defined and form.jobProperty.property.address.state.vars.errors|length == 0 %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.jobProperty.property.address.state) }}
+                                        <span class="help-block" id="state-error">
+                                            {{ form_errors(form.jobProperty.property.address.state) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="control-group {% if form.vars.value.jobProperty.property.address.zip is defined and form.jobProperty.property.address.zip.vars.errors|length == 0 %}success{% else %}error{% endif %} {% if form.jobProperty.property.address.zip.vars.errors|length %}has-error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.jobProperty.property.address.zip is defined and form.jobProperty.property.address.zip.vars.errors|length == 0 %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.jobProperty.property.address.zip) }}
+                                        <span class="help-block" id="zip-error">
+                                            {{ form_errors(form.jobProperty.property.address.zip) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="control-group {% if form.vars.value.jobProperty.property.type is defined and form.jobProperty.property.type.vars.errors|length == 0 %}success{% else %}error{% endif %} {% if form.jobProperty.property.type.vars.errors|length %}has-error{% endif %}">
+                                    <div class="controls">
+                                        <i class="fa fa-asterisk required_icon" style="{% if form.vars.value.jobProperty.property.type is defined and form.jobProperty.property.type.vars.errors|length == 0 %}color:rgb(0, 128, 0);{% else %}color:rgb(255, 0, 0);{% endif %}margin-top: -3px; margin-left: -3px; position: absolute; font-size: 9px; z-index: 3;"></i>
+                                        {{ form_widget(form.jobProperty.property.type) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.jobProperty.property.type) }} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 optional_year">
+                                <div class="control-group">
+                                    <div class="controls">
+                                        {{ form_widget(form.jobProperty.yearBuilt) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.jobProperty.yearBuilt) }} 
+                                        </span>
+                                    </div>
+                                </div>  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- col-md-9 -->
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="fa fa-database"></i>Businesses</div>
+                    </div>	
+                    <div class="portlet-body" id="business">
+                        <div id="vendor_slider_wrapper" class="dataTables_wrapper form-inline no-footer">
+                            <h4>Please select the Job type and Order type to fetch matching Vendors</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="fa fa-comments"></i>Notes</div>
+                    </div>
+                    <div class="portlet-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <textarea name="note" class="form-control" rows="4" placeholder="Enter notes about this job."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6" id="sign-form">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="icon-edit"></i>Job Questionnaires</div>
+                    </div>
+                    <div class="portlet-body" id="vendorForm">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="fa fa-navicon"></i>Job Parties</div>
+                    </div>	
+                    <div class="portlet-body no-more-tables ">
+                        <div id="trans_contacts_wrapper" class="dataTables_wrapper no-footer">
+                            <table id="example" class="display table table-hover table-bordered table-condensed cf trans_contacts dataTable no-footer" cellspacing="0" width="100%" style="margin-bottom: 0 !important;">
+                                <thead class="cf">
+                                    <tr role="row">
+                                        <th style="width: 260px;" class="sorting_asc" rowspan="1" colspan="1" aria-label=" Contact Role"><i class="icon-key table_form_icon"></i> Contact Role</th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1" aria-label=" Contact"><i class="icon-user table_form_icon"></i> Contact</th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1" aria-label=" Phone #"><i class="icon-phone table_form_icon"></i> Phone #</th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1" aria-label=" Email"><i class="icon-envelope-alt table_form_icon"></i> Email</th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1" aria-label=" Company"><i class="icon-envelope-alt table_form_icon"></i> Company</th>
+                                        <th style="width: 190px;" class="sorting" rowspan="1" colspan="1" aria-label=" Contact By"><i class="icon-envelope-alt table_form_icon"></i> Contact By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="post_contact" data-prototype="{{ forms.contact_widget_prototype(form.contacts, 'Remove contact')|escape }}">
+                                    {% for widget in form.contacts.children %}
+                                        {{ forms.contact_widget_prototype(widget, 'Remove contact') }}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption"><i class="fa fa-calendar"></i> Events</div>
+                        <div class="actions">
+                            <div class="btn-group">
+                                <a class="btn btn-danger  btn-add" data-target="post_event">
+                                    <i class="icon-plus"></i> Add
+                                </a>
+                            </div>
+                        </div>
+                    </div>	
+                    <div class="portlet-body gradient-bg">
+                        <div class="form-group">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="35%">Event Name </th>
+                                        <th width="45%">Due Date</th>
+                                        <th width="15%"></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="post_event" data-prototype="{{ forms.event_widget_prototype(form.events, 'Remove event')|escape }}">
+                                    {% for widget in form.events.children %}
+                                        {{ forms.event_widget_prototype(widget, 'Remove event') }}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-actions" style="text-align:center;">
+                    <button type="submit" class="btn btn-success" id="listing-submit"><i class="fa fa-check"></i> Save Job</button>
+
+                </div>
+            </div>
+        </div>
+        <div class="hidden">
+            {{ form_widget(form._token) }}
+            {{ form_end(form, {'render_rest': false}) }}
+        </div>
+    </div>
+{% endblock %}

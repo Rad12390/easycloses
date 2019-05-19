@@ -1,0 +1,133 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    Create Address
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('users_profile') }}">Profile</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Create Address
+    </li>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            $("#property-add").click(function (e) {
+                var zip = $('#property_address_zip').val();
+                var state = $('#property_address_state').val();
+                var zip_regex = /^[0-9]+$/;
+                var state_regex = /[^a-zA-Z]/g;
+
+                errorBlock = $('#errorDiv');
+
+                if ((state.length) < 1 || (state.length) > 2) {
+                    errorBlock.html('*state should only be 2 digits and Letter only');
+                    errorBlock.removeClass('hidden');
+                    $("#property_address_state").focus();
+                    return false;
+                } else if (!zip.match(zip_regex) || zip.length == 0) {
+                    errorBlock.html('*zipcode should only be 5 digits and number only');
+                    errorBlock.removeClass('hidden');
+                    $("#property_address_state").focus();
+                    return false;
+                } else {
+                    errorBlock.addClass('hidden');
+                    return true;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="icon-home"></i> Property Information
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div id="errorDiv" class="Metronic-alerts alert alert-danger fade in hidden">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                                    <i class="fa-lg fa fa-warning"></i>
+                                </div>
+                                <span class="help-block hide "></span>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        {#{{ form_label(form.title) }}#}
+                                        <label for="property_title">Business Name</label>
+                                        {{ form_widget(form.title) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.title) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        {{ form_widget(form.address) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.address) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        {{ form_label(form.type) }}
+                                        {{ form_widget(form.type) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.type) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        {{ form_label(form.format) }}
+                                        {{ form_widget(form.format) }}
+                                        <span class="help-block">
+                                            {{ form_errors(form.format) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label class="mt-checkbox mt-checkbox-outline">
+                                            Show to public
+                                            <input type="checkbox" id="property_isPublic" name="property[isPublic]" {% if property.isPublic == true %}checked{% endif %} class="form-control placeholder-no-fix" value="1">
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <a class="btn btn-default" href="{{ path('users_profile_edit', {'username': username}) }}#personal_property"><i class="fa fa-arrow-left"></i> Back </a>
+                                        <input type="reset" class="btn btn-default" name="Reset">
+                                        <button class="btn btn-success" id="property-add"><i class="fa fa-check"></i> Save</button>
+                                    </div>
+                                </div>
+                            {{ form_end(form, {'render_rest': false}) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

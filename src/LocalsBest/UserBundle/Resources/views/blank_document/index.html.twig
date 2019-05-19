@@ -1,0 +1,92 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Blank Documents{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i> Blank Documents
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+
+    <script>
+        $(document).ready(function(){
+         
+            $(".table").DataTable({
+                "order": [],
+                "columnDefs": [ {
+                    "targets"  : 'no-sort',
+                    "orderable": false
+                }]
+            });
+        });
+    </script>
+ <style>
+a.btn.btn-sm-esign.btn-danger {
+    padding: 3px 8px;
+}
+    </style>    
+{% endblock %}
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-file-o"></i> Blank Documents
+            </div>
+
+            {% if app.user.role.level <= 5 %}
+                <div class="actions">
+                    <a class="btn  btn-danger" href="{{ path('blank_docs_add') }}">
+                        <i class="icon-plus"></i> Add Blank Document
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="portlet-body">
+            <table class="table table-bordered">
+                <thead>
+                <tr role="row" class="heading">
+                    <th> Title </th>
+                    <th> Type </th>
+                    <th class="no-sort"> Actions </th>
+                </tr>
+                </thead>
+                  <tbody>
+                        {% for item in blankDocs %}
+                        <tr>
+                        <td> {{ item.title }} </td>
+                        <td> {{ item.type|capitalize }} </td>
+                        <td>
+                            <a title="View Blank Document" class="btn btn-sm btn-info" href="{{ path('blank_docs_show', {'id': item.id}) }}" >
+                                <i class="fa fa-eye"></i>
+                            </a>
+
+                            <a title="Download Blank Document" class="btn btn-sm btn-primary" href="{{ path('blank_docs_download', {'id': item.id}) }}" >
+                                <i class="fa fa-download"></i>
+                            </a>
+                            
+                            {% if app.user.role.level <= 5 %}
+                                <a title="Delete Blank Document" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');" href="{{ path('blank_docs_delete', {'id': item.id}) }}" >
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- End: life time stats -->
+
+{% endblock %}

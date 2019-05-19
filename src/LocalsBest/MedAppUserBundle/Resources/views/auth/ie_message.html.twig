@@ -1,0 +1,29 @@
+{% extends "::blank.html.twig" %}
+
+{% block title %}
+    Login 
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 ">
+            <!-- BEGIN Portlet PORTLET-->
+            <div class="portlet box red">
+                <div class="portlet-title">
+                    <div class="caption">
+                        Warning
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto;">
+                        <div class="scroller" style="overflow: hidden; width: auto;" data-always-visible="1" data-rail-visible="1" data-rail-color="blue" data-handle-color="red" data-initialized="1">
+                            <strong>Microsoft now only supports IE 11 or Edge. Please upgrade your version of IE or log in with a different browser</strong>
+                        </div>
+                    </div>
+                </div>
+            <!-- END Portlet PORTLET-->
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

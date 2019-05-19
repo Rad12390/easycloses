@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme edit_form 'bootstrap_3_layout.html.twig' %}
+
+{% block content -%}
+    <h1>Tooltip edit</h1>
+
+    {{ form(edit_form) }}
+
+    <a class="btn btn-default" href="{{ path('admin_tooltips') }}">
+        Back to the list
+    </a>
+
+    {{ form(delete_form) }}
+{% endblock %}

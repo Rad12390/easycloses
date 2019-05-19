@@ -1,0 +1,28 @@
+order_list:
+    path:     /
+    methods:  GET
+    defaults: { _controller: LocalsBestShopBundle:Order:index }
+
+order_vendor_list:
+    path:     /vendor-list
+    methods:  GET
+    defaults: { _controller: LocalsBestShopBundle:Order:vendorList }
+
+vendor_order_show:
+    path:     /vendor-list/{code}
+    methods:  GET
+    defaults: { _controller: LocalsBestShopBundle:Order:vendorShow }
+
+checkout:
+    path:     /checkout/{code}
+    methods:  POST|GET
+    defaults: { _controller: LocalsBestShopBundle:Order:create, code: null }
+
+order_show:
+    path:     /{code}
+    methods:  GET
+    defaults: { _controller: LocalsBestShopBundle:Order:show }
+
+shop_sku_refund:
+    path:     /refund/{itemid}/{orderid}
+    defaults: { _controller: LocalsBestShopBundle:Order:refund }

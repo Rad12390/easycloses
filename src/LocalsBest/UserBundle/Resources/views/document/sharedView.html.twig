@@ -1,0 +1,66 @@
+{% extends app.request.xmlHttpRequest 
+         ? '::empty.html.twig'
+         : '::blank.html.twig' %}
+
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets 
+        'plugins/bootstrap-fileinput/bootstrap-fileinput.css'
+
+            filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts 
+            'plugins/bootstrap-fileinput/bootstrap-fileinput.js'
+    %}
+    <script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block title %}
+    Accept shared document
+{% endblock %}
+
+{% block content %}
+    {% if app.request.xmlHttpRequest %}
+        <div class="modal-content">
+    {% endif %}
+        <form action="{{ path('document_share_response', {'token': token }) }}" method="POST">
+            {% if app.request.xmlHttpRequest %}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    
+                </div>
+                {% endif %}
+            <div class="modal-body">
+                <h4 class="modal-title">Please Choose one</h4>
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <p>
+                            <label class="uniform-inline">{{ form_widget(statusForm.response) }}</label>	
+                        </p>
+
+                        <h4>Some Input Note</h4>
+                        <p>
+                            {{ form_widget(statusForm.note) }}
+                        </p>
+
+                    </div>
+                </div>   
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn green"><i class="fa fa-check"></i> Save Changes</button>
+            </div>
+            {{ form_end(statusForm) }}
+    </div>
+{% endblock %}
+
+
+

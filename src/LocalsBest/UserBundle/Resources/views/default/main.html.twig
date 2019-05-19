@@ -1,0 +1,299 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/easycloses-styles/flip-block.css') }}" />
+    <link href='{{ asset('system/global/plugins/fullcalendar/fullcalendar.min.css') }}' rel='stylesheet' />
+    <link href='{{ asset('system/global/plugins/fullcalendar/fullcalendar.print.css') }}' rel='stylesheet' media='print' />
+    <link href='{{ asset('system/pages/css/dashboard.css') }}' rel='stylesheet' />
+{% endblock %}
+
+{% block javascripts %}
+    <script src='{{ asset('system/global/plugins/fullcalendar/lib/moment.min.js') }}'></script>
+    <script src='{{ asset('system/global/plugins/fullcalendar/fullcalendar.min.js') }}'></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.2/isotope.pkgd.min.js"></script>
+
+    <script>
+        $(function () {
+            markAsComplete();
+            var index = Math.floor(Math.random() * $("#main_businessType option").length) + 1;
+            $("select#main_businessType option:nth-child(" + index + ")").prop("selected", true);
+            vendorSelectedByAjaxRandomly();
+
+            $('#main_businessType').change(function () {
+                var businessType = $(this).val();
+                if (businessType === "") {
+                    businessType = 'all';
+                }
+
+                $("#vendorsLoadAjax").load('{{ path('vendor_selected_ajax') }}/' + businessType + '?main_page=true', function () {
+                    var vendorsBlockHtml = $("body .render_business.scroller");
+                    if (vendorsBlockHtml.length) {
+                        vendorsBlockHtml.slimscroll({
+                            allowPageScroll: true,
+                            height: '430px',
+                            alwaysVisible: true
+                        });
+                    } else {
+                        vendorsBlockHtml.slimscroll({
+                            allowPageScroll: true,
+                            destroy: true
+                        });
+                    }
+                });
+            });
+        });
+
+        function vendorSelectedByAjaxRandomly() {
+            var businessType = $('#main_businessType').val();
+            if (businessType === "") {
+                businessType = 'all';
+            }
+
+            $("#vendorsLoadAjax").load('{{ path('vendor_selected_ajax')}}/' + businessType + '?main_page=true'  );
+        }
+
+        function markAsComplete() {
+            $("a[data-action='ajax']").click(function () {
+                var confirmMessage = $(this).data('confirm');
+                if (confirm(confirmMessage)) {
+                    var url = $(this).attr('href');
+                    $.get(url).done(function (resp) {
+                        if ($.parseJSON(resp).message) {
+                            alert($.parseJSON(resp).message);
+                            $("#eventBox").load("http://preview.localsbest.com/#eventBox", function () {
+                                markAsComplete();
+                            });
+                        }
+                    });
+                }
+                return false;
+            });
+        }
+    </script>
+
+    <script>
+        function hideNote(id) {
+            $.ajax({
+                method: "GET",
+                url: "{{ path('api_hide_note') }}",
+                data: {
+                    id: id
+                },
+                dataType: "json"
+            })
+                .done(function (respons) {
+                    if (respons.result == 'success') {
+                        $("#note-" + id).fadeOut("slow");
+                    } else {
+                        alert('Sorry, there was error on server.')
+                    }
+                })
+        }
+        $(document).ready(function() {
+            function getNotes(page) {
+                type = $("#note-type").val();
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('api_notes_list') }}",
+                    data: {
+                        page: page,
+                        type: type
+                    },
+                    dataType: "json"
+                })
+                    .done(function( respons ) {
+                        $( "#notes-block" ).append( respons.html );
+                        if(respons.more10 == false) {
+                            $("#more10").hide();
+                        } else {
+                            $("#more10").show();
+                        }
+                    });
+            }
+            if(typeof counter == 'undefined') {
+                var counter = 1;
+            }
+            getNotes(counter);
+            $("#more10").on('click', function(){
+                counter++;
+                getNotes(counter);
+            });
+            $("#note-type").on('change', function(){
+                counter = 1;
+                $( "#notes-block").empty();
+                getNotes(counter);
+            });
+            /* initialize the external events
+             -----------------------------------------------------------------*/
+            $('#external-events .fc-event').each(function() {
+                // store data so the calendar knows to render an event upon drop
+                $(this).data('event', {
+                    title: $.trim($(this).text()), // use the element's text as the event title
+                    stick: true // maintain when user navigates (see docs on the renderEvent method)
+                });
+                // make the event draggable using jQuery UI
+                $(this).draggable({
+                    zIndex: 999,
+                    revert: true,      // will cause the event to go back to its
+                    revertDuration: 0  //  original position after the drag
+                });
+            });
+            /* initialize the calendar
+             -----------------------------------------------------------------*/
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                scrollTime: '00:00:00',
+                editable: true,
+                droppable: false, // this allows things to be dropped onto the calendar
+                eventLimit: true, // allow "more" link when too many events
+                eventSources: [
+                    {
+                        url: '{{ path('calendar_events') }}',
+                        type: 'GET'
+                    }
+                ],
+                eventDrop: function(event, delta, revertFunc) {
+                    var id = event.id;
+                    var start = event.start.format();
+                    var end = (event.end == null) ? start : event.end.format();
+                    $.ajax({
+                        url: '{{ path('calendar_event_update') }}',
+                        data: 'type=resetdate&start=' + start + '&end=' + end + '&eventId='+id,
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function(response){
+                            if(response.status != 'success')
+                                revertFunc();
+                        },
+                        error: function(e){
+                            revertFunc();
+                            alert('Error processing your request: '+e.responseText);
+                        }
+                    });
+                },
+                eventResize: function(event, delta, revertFunc) {
+                    var id = event.id;
+                    var start = event.start.format();
+                    var end = (event.end == null) ? start : event.end.format();
+                    $.ajax({
+                        url: '{{ path('calendar_event_update') }}',
+                        data: 'start=' + start + '&end=' + end + '&eventId='+id,
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function(response){
+                            if(response.status != 'success')
+                                revertFunc();
+                        },
+                        error: function(e){
+                            revertFunc();
+                            alert('Error processing your request: '+e.responseText);
+                        }
+                    });
+                },
+                eventMouseover: function (event, jsEvent, view) {
+                    bodyText = '<p> <b>Start Time:</b> ' + moment(event.start).format('LT') + '</p>';
+                    if(event.end !== null) bodyText += '<p> <b>End Time:</b> ' + moment(event.end).format('LT') + '</p>';
+                    if(event.objectType !== null) bodyText += '<p> <b>' + event.objectType + ':</b> ' + event.object + '</p>';
+                    if(event.description !== null) bodyText += '<p>' + event.description + '</p>';
+                    $(this).children().popover({
+                        title: '<p>' + event.full_title + (event.alert == true ? ' <i class="fa fa-bell-o"></i>' : '') + '</p>',
+                        placement: 'right',
+                        content: bodyText,
+                        html: true,
+                        container: 'body'
+                    });
+                    if (typeof $calPopOver != 'undefined') $calPopOver.popover('destroy');
+                    $(this).children(".fc-content").popover('show');
+                },
+                eventMouseout: function (event, jsEvent, view) {
+                    $(this).children(".fc-content").popover('destroy');
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-8">
+                    {#{% if business.id not in [50] %}#}
+                        <!-- BEGIN BORDERED TABLE PORTLET-->
+                        <div class="portlet box blue">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    <i class="icon-briefcase"></i> Vendors
+                                </div>
+                                <div class="tools">
+                                    <a href="javascript:;" class="collapse" data-original-title="" title="">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="portlet-body">
+                                <div class="row" style="margin-bottom: 10px;">
+                                    <div class="col-md-6">
+                                        {{ form_widget(form.businessType) }}
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <i>Click Business for Info</i>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12" id="vendorsLoadAjax">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END BORDERED TABLE PORTLET-->
+                </div>
+
+                {% include('@LocalsBestUser/link/portletView.html.twig') %}
+
+                <div class="col-md-8 col-sm-12">
+                    <div class="portlet box blue">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                <i class="icon-calendar"></i> Calendar
+                            </div>
+                        </div>
+                        <div class="portlet-body">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <!-- BEGIN PORTLET-->
+                    <div class="portlet box blue">
+                        <div class="portlet-title line">
+                            <div class="caption">
+                                <i class="fa fa-comments"></i> Notes
+                            </div>
+                            <div class="actions">
+                                <select class="pull-left form-control" style="width: inherit; height: 29px; padding: 3px 12px;" id="note-type">
+                                    <option selected="selected" value="all">All</option>
+                                    <option value="user">Users</option>
+                                </select>
+                                <a class="btn btn-success pull-left" id="more10">Show 10 More</a>
+                            </div>
+                        </div>
+                        <div class="portlet-body" id="chats">
+                            <div class="scroller" style="height: 352px;" data-always-visible="1" data-rail-visible1="1">
+                                <ul class="chats" id="notes-block">
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END PORTLET-->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

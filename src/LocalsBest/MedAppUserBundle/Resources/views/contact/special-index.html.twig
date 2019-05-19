@@ -1,0 +1,409 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Contacts{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Contacts
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/ladda/ladda-themeless.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        div.table-scrollable {
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+        }
+
+        .dt-buttons {
+            margin-top: -35px !important;
+        }
+
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+        .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+            line-height: 1.82857;
+        }
+
+        .table-responsive {
+            overflow-x: inherit;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/ladda/spin.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/ladda/ladda.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/r/bs/jszip-2.5.0,pdfmake-0.1.18,dt-1.10.9,b-1.0.3,b-colvis-1.0.3,b-html5-1.0.3,b-print-1.0.3,r-1.0.7/datatables.min.js"></script>
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            footerColumns = $('#example tfoot th');
+            var footerSize = footerColumns.length;
+
+            footerColumns.each( function (index) {
+                if (index + 1 == footerSize ) {
+                    $(this).html('');
+                    return;
+                }
+                $(this).html( '<input style="width: 100%" class="form-control input-sm" type="text" />' );
+            } );
+
+            table = $('#example').DataTable({
+                // setup responsive extension: http://datatables.net/extensions/responsive/
+                responsive: true,
+
+                columnDefs: [
+                    {  // set default column settings
+                        'orderable': false,
+                        'targets': [0, {% if app.user.role.level < 7 %}5, 6, 7{% else %} 4, 5, 6{% endif %}]
+                    },
+                    {
+                        "className": "dt-right"
+                        //"targets": [2]
+                    }
+                ],
+
+                order: [],
+
+                serverSide: true,
+
+                processing: true,
+
+                ajax: {
+                    url: "/datatable/contacts?filter={{ filter }}&filter_status={{ filterStatus }}",
+                    type: 'GET',
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.redirect) {
+                            alert("error" + jqXHR + " : " + textStatus + " : " + errorThrown);
+                        }
+                    },
+                    complete: function(data) {
+                        windowForLogout(data)
+                    }
+                },
+
+                dom: 'lBfrtip',
+
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        orientation: "landscape",
+                        exportOptions: {
+                            "columns": ":not(.no-export)"
+                        },
+                        className: 'btn-sm'
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            "columns": ":not(.no-export)"
+                        },
+                        customize: function (window) {
+                            var $body = $(window.document.body);
+                            $body.addClass("datatables-print");
+                        },
+                        className: 'btn-sm'
+                    },
+                    {
+                        text: 'Advanced Print',
+                        className: 'advance-print btn-sm'
+                    }
+                ],
+
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100] // change per page values here
+                ]
+
+                // Uncomment below line("dom" parameter) to fix the dropdown overflow issue in the datatable cells. The default datatable layout
+                // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js).
+                // So when dropdowns used the scrollable div should be removed.
+                //"dom": "<'row' <'col-md-12'T>><'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r>t<'row'<'col-md-5 col-sm-12'i><'col-md-7 col-sm-12'p>>",
+            });
+
+
+            $('#example').find('.group-checkable').change(function () {
+                var set = $(this).attr("data-set");
+                var checked = $(this).is(":checked");
+                $(set).each(function () {
+                    if (checked) {
+                        $(this).prop("checked", true);
+                        $(this).closest('span').addClass('checked');
+                    } else {
+                        $(this).prop("checked", false);
+                        $(this).closest('span').removeClass('checked');
+                    }
+                });
+            });
+
+            // Apply the search
+            table.columns().every( function () {
+                var that = this;
+
+                $( 'input', this.footer() ).on( 'keyup change', function () {
+                    if ( that.search() !== this.value ) {
+                        that
+                            .search( this.value.replace(/,/g, '|'), true, false )
+                            .draw();
+                    }
+                } );
+            } );
+
+            function rowAlert() {
+                App.alert({
+                    type: 'danger',
+                    icon: 'warning',
+                    message: 'No record selected',
+                    place: 'prepend'
+                });
+            }
+
+            {% if app.user.role.level < 7 %}
+                $(".table-actions-wrapper").on('click', '.table-group-action-submit', function (e) {
+                    e.preventDefault();
+                    selectedRows = $('tbody > tr > td:nth-last-child(1) input[type="checkbox"]:checked');
+
+                    contactIDs = selectedRows.map(function(){
+                        return $(this).val();
+                    }).get();
+
+                    if (selectedRows.size() > 0) {
+
+                        $('#ajax').modal( {'remote': '{{ path('contacts_assign_window') }}'} );
+
+                    } else {
+                        rowAlert();
+                    }
+                });
+            {% endif %}
+
+            $(".assign-contacts-back").on('click', function (e) {
+                e.preventDefault();
+                var selectedRows = $('tbody > tr > td:nth-last-child(1) input[type="checkbox"]:checked');
+
+                var contactIDs = selectedRows.map(function(){
+                    return $(this).val();
+                }).get();
+
+                if ( selectedRows.size() > 0 ) {
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('contacts_assign_to_leader') }}",
+                        dataType: "json",
+                        data: {
+                            contact_ids: contactIDs
+                        },
+                        success:function(data){
+                            if(data.status == 'success') {
+                                selectedRows.closest('tr').each(function() {
+                                    $(this).remove();
+                                });
+
+                                table.draw();
+                            }
+                        }
+                    })
+                } else {
+                    rowAlert();
+                }
+            });
+
+
+            $('.mass-invite').click(function(e){
+                e.preventDefault();
+
+                selectedRows = $('tbody > tr > td:nth-last-child(1) div[role="group"] input[type="checkbox"]:checked');
+                
+                contactIDs = selectedRows.map(function(){
+                    return $(this).val();
+                }).get();
+
+                if (selectedRows.size() > 0) {
+
+                    var l = Ladda.create(this);
+                    l.start();
+                    $.post("{{ path('contact_mass_invite_ajax') }}",
+                        { contacts : contactIDs },
+                        function(response){
+                            App.alert({
+                                type: response.status,
+                                message: response.message,
+                                place: 'prepend'
+                            });
+                        }, "json")
+                        .always(function() {
+                            l.stop();
+                        });
+                    return false;
+
+                } else {
+                    rowAlert();
+                }
+            });
+
+            $('.advance-print').click(function(e){
+                e.preventDefault();
+
+                selectedRows = $('tbody > tr > td:nth-last-child(1) input[type="checkbox"]:checked');
+
+                contactIDs = selectedRows.map(function(){
+                    return $(this).val();
+                }).get();
+
+                if (selectedRows.size() > 0) {
+
+                    $("#cont_acts").val(contactIDs);
+                    $("#print").submit();
+
+                } else {
+                    rowAlert();
+                }
+            });
+
+            $("#filter").on('change', function(){
+                var filterValue = $(this).val();
+                var filterStatusValue = $("#filter-status").val();
+
+                window.location.replace("{{ path('contact_index') }}" + "?filter=" + filterValue + "&filter_status=" + filterStatusValue);
+            });
+
+            $("#filter-status").on('change', function(){
+                var filterStatusValue = $(this).val();
+                var filterValue = $("#filter").val();
+
+                window.location.replace("{{ path('contact_index') }}" + "?filter=" + filterValue + "&filter_status=" + filterStatusValue);
+            });
+
+            {#$('#example tr').live('click', function () {
+                var id = $(this).attr('data-id');
+            });#}
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <form id="print" action="{{ path('contact_print') }}" method="post">
+        <input id="cont_acts" type="hidden" name="contact_ids" value="">
+    </form>
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-book"></i> Contacts
+            </div>
+            <div class="actions">
+                <a class="btn  red" href="{{ path('contact_import') }}">
+                    <i class="fa fa-file-o"></i> Import Contacts
+                </a>
+                <a class="btn  red" href="{{ path('contact_add') }}">
+                    Add Contact
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <div class="table-actions-wrapper" style="display: block; margin-bottom: 5px;">
+                    <span> </span>
+
+                    {% if checker.forAddon('lead tracker', app.user) or app.user.businesses.first.id in [23, 155] %}
+                        {% if app.user.role.level < 7 %}
+                            <button class="btn btn-sm btn-success table-group-action-submit">
+                                <i class="fa fa-check"></i> Transfer Contacts
+                            </button>
+                        {% endif %}
+
+                        {% if app.user.role.level <= 7 %}
+                            <button class="btn btn-sm btn-danger assign-contacts-back">
+                                <i class="fa fa-reply"></i> Transfer Contacts Back
+                            </button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if checker.forAddon('client portals', app.user) %}
+                        <button class="btn btn-sm btn-warning mass-invite ladda-button" data-style="expand-left" data-spinner-color="#333">
+                            <span class="ladda-label">
+                                <i class="fa fa-paper-plane-o"></i> Mass Invitation
+                            </span>
+                        </button>
+                    {% endif %}
+
+
+                    <select id="filter" class="form-control input-small input-sm input-inline">
+                        <option {% if filter == 'all' %}selected{% endif %} value="all">All</option>
+                        <option {% if filter == 'contacts' %}selected{% endif %} value="contacts">Contacts</option>
+                        <option {% if filter == 'members' %}selected{% endif %} value="members">Members</option>
+                    </select>
+
+                    <select id="filter-status" class="form-control input-small input-sm input-inline">
+                        <option {% if filterStatus == 'all' %}selected{% endif %} value="all">All</option>
+                        <option {% if filterStatus == 'open' %}selected{% endif %} value="open">Open</option>
+                        <option {% if filterStatus == 'closed' %}selected{% endif %} value="closed">Closed</option>
+                    </select>
+                </div>
+
+                <table style="width: 100%;" id="example" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            {% if app.user.role.level < 7 %}
+                            <th >
+                                Assign To
+                            </th>
+                            {% endif %}
+                            <th > Full Name </th>
+                            <th > Phone </th>
+                            <th > Email </th>
+                            <th > Category </th>
+                            <th > Tags </th>
+                            <th > Notes </th>
+                            <th class="no-export">
+                                Actions
+                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                    <input type="checkbox" class="group-checkable" data-set="#example .checkboxes" />
+                                    <span></span>
+                                </label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            {% if app.user.role.level < 7 %}
+                            <th >
+                                Assign To
+                            </th>
+                            {% endif %}
+                            <th > Full Name </th>
+                            <th > Phone </th>
+                            <th > Email </th>
+                            <th > Category </th>
+                            <th > Tags </th>
+                            <th > Notes </th>
+                            <th class="no-export"> Actions </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}	

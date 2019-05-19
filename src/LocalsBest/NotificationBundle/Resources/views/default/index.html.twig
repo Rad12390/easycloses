@@ -1,0 +1,34 @@
+<!-- BEGIN NOTIFICATION DROPDOWN -->
+<!-- DOC: Apply "dropdown-dark" class after "dropdown-extended" to change the dropdown styte -->
+<!-- DOC: Apply "dropdown-hoverable" class after below "dropdown" and remove data-toggle="dropdown" data-hover="dropdown" data-close-others="true" attributes to enable hover dropdown mode -->
+<!-- DOC: Remove "dropdown-hoverable" and add data-toggle="dropdown" data-hover="dropdown" data-close-others="true" attributes to the below A element with dropdown-toggle class -->
+<li class="dropdown dropdown-extended dropdown-notification" id="header_notification_bar">
+    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+        <i class="icon-bell"></i>
+        {% if notificationCount > 0 %}
+            <span class="badge badge-default"> {{ notificationCount }} </span>
+        {% endif %}
+    </a>
+    <ul class="dropdown-menu">
+        {% if notificationCount > 0 %}
+            <li class="external">
+                <h3>
+                    <span class="bold">{{ notificationCount }} pending</span> notifications
+                </h3>
+                <a href="{{ path('notification_list') }}">view all</a>
+            </li>
+            <li>
+                <ul class="dropdown-menu-list scroller" style="height: 250px;">
+                    {% for notification in notifications %}
+                        {{ include ('@LocalsBestNotification/notification-row.html.twig', { notification: notification }) }}
+                    {% endfor %}
+                </ul>
+            </li>
+        {% else %}
+            <li class="external">
+                <p>No new notifications.</p>
+                <a href="{{ path('notification_list') }}">(view old)</a>
+            </li>
+        {% endif %}
+    </ul>
+</li>

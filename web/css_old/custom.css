@@ -1,0 +1,149 @@
+/* here you can put your own css to customize and override the theme */
+
+/***
+Rounded Portlets
+***/
+/*
+.portlet {
+        border-radius: 4px !important;
+}
+
+.portlet .portlet-title {
+        border-radius: 4px 4px 0px 0px !important;
+}
+
+.portlet .portlet-body,
+.portlet .portlet-body .form-actions  {
+        border-radius: 0px 0px 4px 4px !important;
+}
+*/
+
+::-webkit-scrollbar-track {
+    background-color: #cccccc !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #aaaaaa !important;
+}
+
+div.tagsinput input {
+    width: 100% !important;
+}
+
+tr.strong {
+    font-weight: bold;
+}
+
+.table-scrollable {
+    /*overflow-x: visible !important;*/
+    /*overflow-y: visible !important;*/
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+
+#transaction_parties_wrapper.table-scrollable {
+    overflow-x: auto !important;
+}
+
+ul.right-aligned {
+    left: -188%;
+}
+
+.mark-important-star:hover i.inbox-started:before {
+    content: "\f005";
+}
+
+.todo-tasklist-item .mark-important-star {
+    display: none;
+}
+
+.todo-tasklist-item:hover .mark-important-star {
+    display: block;
+}
+
+i.inbox-started {
+    color: #ed4e2a;
+    font-size: large;
+}
+i.star-large {
+    font-size: large;
+}
+i.approved {
+    color: #3cc051;
+    font-size: larger;
+}
+i.rejected {
+    color: #CC2A41;
+    font-size: larger;
+}
+.circle-small {
+    width: 18px;
+    height: 18px;
+    border-radius: 50px!important;
+}
+.btn.black {
+    color: white;
+    text-shadow: none;
+    background-color: #555;
+}
+.btn.icn-only {
+    min-width: 14px;
+}
+.page-header.navbar .page-logo .logo-default {
+margin: -1px 0 0 0!important;
+}
+
+/*
+.page-sidebar-wrapper {
+    margin-top: 100px;
+}
+.page-content-wrapper {
+    margin-top: -100px;
+}
+.page-header.navbar .page-logo {
+    height: 200px;
+}
+*/
+
+/*.portlet.box > .portlet-body {
+    overflow: hidden;
+}*/
+
+.portlet-title .action-button {
+    float: right;
+    margin: 5px;
+}
+.bx-wrapper {
+    margin: 0 auto !important;
+}
+
+.bx-wrapper .bx-pager {
+    display: none;
+}
+
+.control-label label.required {
+  color: inherit;
+  font-size: inherit;
+  padding-left: inherit;
+}
+
+.page-sidebar-menu-closed li#logo-li{
+    width: 45px !important;
+    box-shadow: 0px 0px;
+}
+
+.page-sidebar-closed .page-sidebar .page-sidebar-menu > li#concierge {
+    display: block !important;
+}
+
+.page-sidebar-closed .page-sidebar .page-sidebar-menu.page-sidebar-menu-closed > li#concierge {
+    display: none !important;
+}
+
+div.dt-buttons {
+    float: right;
+}
+
+div.dataTables_filter label {
+    float: left;
+}

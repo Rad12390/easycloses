@@ -1,0 +1,20 @@
+<div class="col-md-4 col-sm-12">
+    <!-- BEGIN PORTLET-->
+    <div class="portlet box blue" id="links-block">
+
+    </div>
+    <!-- END PORTLET-->
+</div>
+
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            method: "GET",
+            url: "{{ path('api_links_list') }}",
+            dataType: "html"
+        })
+        .done(function( respons ) {
+            $( "#links-block" ).append( respons );
+        });
+    });
+</script>

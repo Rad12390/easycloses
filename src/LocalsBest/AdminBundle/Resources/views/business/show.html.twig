@@ -1,0 +1,68 @@
+{% extends '::base.html.twig' %}
+
+    {% block stylesheets %}
+        {{ parent() }}
+        {% stylesheets
+        'plugins/bootstrap-fileinput/bootstrap-fileinput.css'
+        filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+        <link rel="stylesheet" href="/plugins/jquery-notific8/jquery.notific8.min.css" />
+        {% endstylesheets %}
+    {% endblock %}
+
+    {% block javascripts %}
+        {{ parent() }}
+        {% javascripts
+        'plugins/bootstrap-fileinput/bootstrap-fileinput.js'
+        %}
+        <script type="text/javascript" src="{{ asset_url }}"></script>
+        <script type="text/javascript" src="/plugins/jquery-notific8/jquery.notific8.min.js"></script>
+        {% endjavascripts %}
+
+        <script>
+            $(document).ready(function(){
+                $("#localsbest_userbundle_business_category").on("change", function(){
+                    category = $(this).val();
+
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('admin_ajax_change_category') }}",
+                        data: {
+                            business: {{ entity.id }},
+                            category: category
+                        },
+                        dataType: "json"
+                    })
+                    .done(function( response ) {
+                        $.notific8(response.message, {
+                            life: 10000,
+                            theme: response.color,
+                            horizontalEdge: 'bottom',
+                            zindex: 9999
+                        });
+                    });
+                });
+            });
+        </script>
+    {% endblock %}
+
+{% block content -%}
+    <h1>Business creation</h1>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="form-group">
+                <label class="control-label" for="localsbest_userbundle_business_category">Type</label>
+                <select id="localsbest_userbundle_business_category" name="localsbest_userbundle_business[category]" class="form-control">
+                    {% for key, category in businessCategories %}
+                        <option {% if key == entity.owner.vendorCategory %}selected{% endif %} value="{{ key }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <a class="btn btn-default" href="{{ path('admin_businesses') }}">
+                Back to the list
+            </a>
+        </div>
+    </div>
+{% endblock %}

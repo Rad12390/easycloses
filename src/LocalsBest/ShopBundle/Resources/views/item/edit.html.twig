@@ -1,0 +1,623 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme edit_form 'bootstrap_3_layout.html.twig' %}
+
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}"/>
+    <style>
+      label.required.buyer_type {padding-left: 12px;}
+      .select2-container  { width:100% !important}
+      #localsbest_shopbundle_item_type{margin-left: 20px;}
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/components-select2.js') }}"></script>
+
+    <script>
+        jQuery(document).ready(function () {
+            var handleWysihtml5 = function() {
+                if (!jQuery().wysihtml5) {
+                    return;
+                }
+            };
+            handleWysihtml5();
+
+            $('#localsbest_shopbundle_item_type').on('click', function () {
+                hideFields();
+                var itemType = $(this).find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                showField(itemType);
+
+            });
+
+            function showField(itemType) {
+                if (itemType == 2) {
+                    $('#localsbest_shopbundle_item_plugin').parent().show();
+                } else if (itemType == 3) {
+                    $('#localsbest_shopbundle_item_externalLink').parent().show();
+                } else if (itemType == 4) {
+                    $('#localsbest_shopbundle_item_bucket').parent().show();
+                }
+            }
+
+            function hideFields() {
+                $('#localsbest_shopbundle_item_plugin').parent().hide();
+                $('#localsbest_shopbundle_item_externalLink').parent().hide();
+                $('#localsbest_shopbundle_item_bucket').parent().hide();
+            }
+
+            $('#localsbest_shopbundle_item_type').trigger('click');
+            
+           
+            // code to set Industries restriction as disable if all selected on selection of radio button
+            $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").change(function(){
+                setTimeout(function(){ 
+                    var switch_status= $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").find('input[type=radio]:checked').val();
+                    if(switch_status=='')
+                        $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", true);
+                    else
+                        $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", false);
+                }, 50);
+            });
+            
+            // code to set business restriction as disable if all selected on load
+            var businessSwitch= $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").find('input[type=radio]:checked').val();
+            if(businessSwitch=='')
+                $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", true);
+            else
+                $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", false);
+            
+            // code to set Industries restriction as disable if all selected on selection of radio button
+            $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").change(function(){
+                setTimeout(function(){ 
+                    var switch_status= $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").find('input[type=radio]:checked').val();
+                    if(switch_status=='')
+                        $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", true);
+                    else
+                        $("#localsbest_shopbundle_item_restrictions_0_businesses").prop("disabled", false);
+                }, 50);
+            });
+            
+            //code to set allignment of radio button as inline
+            $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+            
+            $("#localsbest_shopbundle_item_restrictions_0_businessesSwitch").find('.radio').each(function(){
+                $(this).removeClass("radio");
+                $(this).addClass("radio-inline");
+            });
+            
+            var value= $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+            var role= '{{role}}';
+            if(value==2 && role=='Admin'){
+                $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","none"); 
+                $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","none"); 
+                $(".use-restriction").css("display","block");
+               // $("#localsbest_shopbundle_item_restrictions_0_rolesSwitch").closest(".form-group").css("display","none"); 
+            }    
+            else{
+               $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","none"); 
+               $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","none"); 
+               $(".use-restriction").css("display","none");
+             //  $("#localsbest_shopbundle_item_restrictions_0_rolesSwitch").closest(".form-group").css("display","none");  
+            }
+         
+            $("#localsbest_shopbundle_item_type").click(function(){
+                var value= $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                var role= '{{role}}';
+                if(value==2 && role=='Admin'){
+                   $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","block"); 
+                   $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","block"); 
+                   $(".use-restriction").css("display","block");
+                }    
+                else{
+                   $("#localsbest_shopbundle_item_restrictions_0_type").closest(".form-group").css("display","none"); 
+                   $("#localsbest_shopbundle_item_restrictions_0_roles").closest(".form-group").css("display","none"); 
+                   $(".use-restriction").css("display","none");
+                }
+            });
+            
+            //restrict state & city dropdown for default ie, without upgrade
+            var status= '{{state_status}}';
+            if(status==1){
+               
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='enable')
+                        $(this).prop("checked", true);
+                });
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","none");
+                $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () { 
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 1
+                    });
+                });
+
+                $("#localsbest_shopbundle_item_restrictions_0_cities").on("change", function () { 
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        maximumSelectionLength: 3
+                    });
+                });
+            }
+            else if(status==2){
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='enable')
+                        $(this).prop("checked", true);
+                });
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","none");
+                
+                //code for first upgrade of state (ie, can select up to 1 state only)
+                $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () { 
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 1
+                    });
+                });
+                //code for first upgrade of state (ie, can select up to 10 cities)
+                $("#localsbest_shopbundle_item_restrictions_0_cities").on("change", function () { 
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        maximumSelectionLength: 10
+                    });
+                });
+            }
+            else if(status==3){
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","block");
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()=='')
+                        $(this).prop("checked", true);
+                });
+                $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () { 
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 1
+                    });
+                });
+            }
+            else if(status==4){
+                 // code to set Industries restriction as disable if all selected on load
+                var citiesSwitch = $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").val();
+                if(citiesSwitch==''){
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", true);
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        placeholder: "All Cities",
+                    });
+                }
+                else{
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", false);
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        placeholder: "Select Cities",
+                    });
+                }
+                
+                // code to set Industries restriction as disable if all selected on selection of radio button
+                $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").change(function(){
+                    setTimeout(function(){ 
+                        var switch_status= $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type=radio]:checked').val();
+                        if(switch_status==''){
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", true);
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                                placeholder: "All Cities",
+                            });
+                        }
+                        else{
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", false);
+                            $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                                placeholder: "Select Cities",
+                            });
+                        }
+                    }, 50);
+                });         
+                 $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").css("display","block");
+                    var section = $('input:radio[name="localsbest_shopbundle_item[restrictions][0][citiesSwitch]"]:checked').val();
+                    if(section==''){
+                        $("#localsbest_shopbundle_item_restrictions_0_citiesSwitch").find('input[type="radio"]').each(function(){
+                           if($(this).val()==''){
+                               $(this).prop("checked", true);
+                           }
+                       });
+                        $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", true);
+                        $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                            placeholder: "All Cities",
+                        });
+                    }
+                    else{
+                        $("#localsbest_shopbundle_item_restrictions_0_cities").prop("disabled", false);
+                        $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                            placeholder: "Select Cities",
+                        });
+                    }
+                    
+                 $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () { 
+                    $("#localsbest_shopbundle_item_restrictions_0_states").select2({
+                        maximumSelectionLength: 50
+                    });
+                });
+            }
+            
+            //get city on load based on selected state
+             var selected_state= $("#localsbest_shopbundle_item_restrictions_0_states").val();
+             var city= '{{city_id}}';
+             var city_array= city.split(',');
+             
+             $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_city_based_state') }}",
+                    data: {
+                        states: selected_state
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    data=[];
+                    for(var i=0;i<response['result'].length;i++){
+                        data.push({id:response['result'][i]['id'], text:response['result'][i]['name']});
+                    }
+                    $("#localsbest_shopbundle_item_restrictions_0_cities option").remove();
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        data: data
+                    })
+                  
+                   $("#localsbest_shopbundle_item_restrictions_0_cities").val(city_array).trigger("change");
+                })
+                
+            //get city on load based on selected state
+            // var selected_state= $("#localsbest_shopbundle_item_restrictions_1_states").val();
+            var use_status= {{use_status}};
+            if(use_status){
+            var state= '{{use_states}}';
+            var state_array= state.split(',');
+             $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_city_based_state') }}",
+                    data: {
+                        states: state_array
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    data=[];
+                    for(var i=0;i<response['result'].length;i++){
+                        data.push({id:response['result'][i]['id'], text:response['result'][i]['name']});
+                    }
+                    $("#localsbest_shopbundle_item_restrictions_1_cities option").remove();
+                    $("#localsbest_shopbundle_item_restrictions_1_cities").select2({
+                        data: data
+                    })
+                    var use_cities= '{{use_cities}}';
+                    if(use_cities!=''){
+                        var use_cities_array= use_cities.split(',');
+                        $("#localsbest_shopbundle_item_restrictions_1_cities").val(use_cities_array).trigger("change");
+                    }
+                })
+            }   
+            $(".notifications").css("display","none");
+        });
+
+        var $collectionRestrictionsHolder;
+        var $collectionImagesHolder;
+        var $collectionDispositionsHolder;
+
+        // setup an "add a tag" link
+        var $addRestrictionLink = $('<a href="#" class="btn btn-primary add_restriction_link">Add a Restriction</a>');
+        var $addImageLink = $('<div style="margin-top:10px;"><a href="#" class="btn btn-primary add_image_link">Add a Image</a></div>');
+        var $addDispositionLink = $('<a href="#" class="btn btn-primary add_disposition_link">Add a Disposition</a>');
+        var $newRestrictionLinkLi = $('<li></li>').append($addRestrictionLink);
+        var $newImageLinkLi = $('<li></li>').append($addImageLink);
+        var $newDispositionLinkLi = $('<li></li>').append($addDispositionLink);
+
+        jQuery(document).ready(function() {
+
+            // Get the ul that holds the collection of tags
+            $collectionRestrictionsHolder = $('ul.item-restrictions');
+            $collectionImagesHolder = $('ul.item-images');
+            $collectionDispositionsHolder = $('ul.item-dispositions');
+
+            // add the "add a tag" anchor and li to the tags ul
+            $collectionRestrictionsHolder.append($newRestrictionLinkLi);
+            $collectionImagesHolder.append($newImageLinkLi);
+            $collectionDispositionsHolder.append($newDispositionLinkLi);
+
+
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $collectionRestrictionsHolder.data('index', $collectionRestrictionsHolder.find(':input').length);
+            $collectionImagesHolder.data('index', $collectionImagesHolder.find(':input').length);
+            $collectionDispositionsHolder.data('index', $collectionDispositionsHolder.find(':input').length);
+
+            $addRestrictionLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionRestrictionsHolder, $newRestrictionLinkLi);
+            });
+
+            $addImageLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+                // add a new tag form (see next code block)
+                addForm($collectionImagesHolder, $newImageLinkLi);
+                
+                //code so as to add the order no.
+                var li_count = $(".add_image_link").closest("ul").find('li').length;
+                li_count = (li_count-1);
+                var id= $(".add_image_link").closest("ul").find('li').eq(-2).find('input[type="text"]').attr("id");
+                $("#"+id).val(li_count);
+            });
+
+            $addDispositionLink.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // add a new tag form (see next code block)
+                addForm($collectionDispositionsHolder, $newDispositionLinkLi);
+            });
+
+            // add a delete link to all of the existing tag form li elements
+            $collectionDispositionsHolder.find('li:not(:last)').each(function() {
+                addFormDeleteLink($(this));
+            });
+
+            // add a delete link to all of the existing tag form li elements
+            $collectionImagesHolder.find('li:not(:last)').each(function() {
+                addFormDeleteLink($(this));
+            });
+            
+            $(".add_restriction_link").trigger("click");
+            $(".add_restriction_link").css("display","none");
+            $(".use-restriction").find('#localsbest_shopbundle_item_restrictions_1_buyerType').closest('.form-group').remove();
+            
+            //code to display the data on the edit form
+            var type= '{{use_type}}';
+            if(type!=''){
+                $("#localsbest_shopbundle_item_restrictions_1_type").val(type);            
+            }
+            
+            var role= '{{use_role}}';
+            var role_array= role.split(',');
+            $("#localsbest_shopbundle_item_restrictions_1_roles").val(role_array).trigger("change");
+            
+            var industry= '{{use_industries}}';
+            var industry_array= industry.split(',');
+            $("#localsbest_shopbundle_item_restrictions_1_industries").val(industry_array).trigger("change");
+            
+            var state= '{{use_states}}';
+            var state_array= state.split(',');
+            $("#localsbest_shopbundle_item_restrictions_1_states").val(state_array).trigger("change");
+            
+            var cities= '{{use_cities}}';
+            var cities_array= cities.split(',');
+            $("#localsbest_shopbundle_item_restrictions_1_cities").val(cities_array).trigger("change");
+            
+            var business= '{{use_businesses}}';
+            var business_array= business.split(',');
+            $("#localsbest_shopbundle_item_restrictions_1_businesses").val(business_array).trigger("change");
+            
+            var citiesSwitch= '{{use_citiesSwitch}}';
+            $("#localsbest_shopbundle_item_restrictions_1_citiesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()== citiesSwitch)
+                        $(this).prop("checked", true);
+            });
+            
+            var industriesSwitch= '{{use_industriesSwitch}}';
+            $("#localsbest_shopbundle_item_restrictions_1_industriesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()== industriesSwitch)
+                        $(this).prop("checked", true);
+            });
+            
+            var businessesSwitch= '{{use_businessesSwitch}}';
+            $("#localsbest_shopbundle_item_restrictions_1_businessesSwitch").find('input[type="radio"]').each(function(){
+                    if($(this).val()== businessesSwitch)
+                        $(this).prop("checked", true);
+            });
+            
+             $("#localsbest_shopbundle_item_restrictions_1_states").on("change", function () { 
+                var states= $(this).val();
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_city_based_state') }}",
+                    data: {
+                        states: states
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    data=[];
+                    for(var i=0;i<response['result'].length;i++){
+                        data.push({id:response['result'][i]['id'], text:response['result'][i]['name']});
+                    }
+                    $("#localsbest_shopbundle_item_restrictions_1_cities option").remove();
+                    $("#localsbest_shopbundle_item_restrictions_1_cities").select2({
+                        data: data
+                    })
+                    
+                })
+            });
+            $("#localsbest_shopbundle_item_restrictions_0_states").on("change", function () { 
+                var states= $(this).val();
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('get_city_based_state') }}",
+                    data: {
+                        states: states
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    data=[];
+                    for(var i=0;i<response['result'].length;i++){
+                        data.push({id:response['result'][i]['id'], text:response['result'][i]['name']});
+                    }
+                    $("#localsbest_shopbundle_item_restrictions_0_cities option").remove();
+                    $("#localsbest_shopbundle_item_restrictions_0_cities").select2({
+                        data: data
+                    })
+                    
+                })
+            });
+            
+                 // code to set Industries restriction as disable if all selected on load
+            var industriesSwitch= $("#localsbest_shopbundle_item_restrictions_0_industriesSwitch").find('input[type=radio]:checked').val();
+            if(industriesSwitch=='')
+                $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", true);
+            else
+                $("#localsbest_shopbundle_item_restrictions_0_industries").prop("disabled", false);
+            
+             $("#localsbest_shopbundle_item_submit_active").click(function(){
+                var image_length= $("ul.item-images").find('li').length;
+                var status=0;
+                if(image_length>1){
+                    for(var i=0;i<image_length-1;i++){
+                        var image= $("ul.item-images li:eq("+i+")").find('img').attr("src");
+                        if(typeof image== 'undefined'){
+                            alert("Please upload the "+(i+1)+" image");
+                            status=1;
+                        }
+                    }
+                    if(status==1){
+                        return false;
+                    }
+                }
+                if(image_length==1){
+                    alert("Upload atleast one image");
+                    return false;
+                }
+                
+                var itemType = $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                if(itemType==3){
+                    var ext_url= $("#localsbest_shopbundle_item_externalLink").val()
+                    var pattern = /^(http|https)?:\/\/[a-zA-Z0-9-\.]+\.[a-z]{2,4}/;
+                    if(!pattern.test(ext_url)){
+                         alert("Enter the correct External link");
+                         return false;
+                    }
+                }
+               
+            });
+            
+            $("#localsbest_shopbundle_item_submit_draft").click(function(){
+                var image_length= $("ul.item-images").find('li').length;
+                var status=0;
+                if(image_length>1){
+                    for(var i=0;i<image_length-1;i++){
+                        var image= $("ul.item-images li:eq("+i+")").find('img').attr("src");
+                        if(typeof image== 'undefined'){
+                            alert("Please upload the "+(i+1)+" image");
+                            status=1;
+                        }
+                    }
+                    if(status==1){
+                        return false;
+                    }
+                }
+                if(image_length==1){
+                    alert("Upload atleast one image");
+                    return false;
+                }
+                
+                var itemType = $("#localsbest_shopbundle_item_type").find('.radio input[name="localsbest_shopbundle_item[type]"]:checked').val();
+                if(itemType==3){
+                    var ext_url= $("#localsbest_shopbundle_item_externalLink").val()
+                    var pattern = /^(http|https)?:\/\/[a-zA-Z0-9-\.]+\.[a-z]{2,4}/;
+                    if(!pattern.test(ext_url)){
+                         alert("Enter the correct External link");
+                         return false;
+                    }
+                }
+            });
+            
+        });
+
+        function addForm($collectionHolder, $newLinkLi) {
+            // Get the data-prototype explained earlier
+            var prototype = $collectionHolder.data('prototype');
+
+            // get the new index
+            if($collectionHolder.selector!='ul.item-restrictions')
+                var index = $collectionHolder.data('index');
+            else
+                var index=1;
+
+            var newForm = prototype;
+            // You need this only if you didn't set 'label' => false in your tags field in TaskType
+            // Replace '__name__label__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            // newForm = newForm.replace(/__name__label__/g, index);
+
+            // Replace '__name__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            newForm = newForm.replace(/__name__/g, index);
+
+            // increase the index with one for the next item
+            $collectionHolder.data('index', index + 1);
+
+            // Display the form in the page in an li, before the "Add a tag" link li
+            var $newFormLi = $('<li></li>').append(newForm);
+            $newLinkLi.before($newFormLi);
+
+            // add a delete link to the new form
+            if($collectionHolder.selector!='ul.item-restrictions')
+                addFormDeleteLink($newFormLi);
+
+            $('.select2').select2();
+        }
+
+        function addFormDeleteLink($objectFormLi) {
+            var $removeFormA = $('<a class="btn btn-sm btn-danger" href="#">Delete</a>');
+            $objectFormLi.append($removeFormA);
+
+            $removeFormA.on('click', function(e) {
+                // prevent the link from creating a "#" on the URL
+                e.preventDefault();
+
+                // remove the li for the tag form
+                $objectFormLi.remove();
+            });
+        }
+        $("#localsbest_shopbundle_item_markup").closest(".form-group").css("display","none");
+        $("#localsbest_shopbundle_item_restrictions").closest(".form-group").css("display","none");
+        
+        var button_states= '<span style="float:right;margin-top:-12px;">{{ button_text.getText('4')|raw }}</span>';
+        $(button_states).insertAfter("label[for='localsbest_shopbundle_item_restrictions_0_states']");
+        if(external_link_status==0){
+            var button_external_link= '<span style="float:right;margin-top:-10px;">{{ button_text.getText('5')|raw }}</span>';
+            $(button_external_link).insertAfter("label[for='localsbest_shopbundle_item_externalLink']");
+        }
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-puzzle-piece"></i> Item Edit
+                    </div>
+                    <div class="actions">
+
+                        <a class="btn btn-default" href="{{ path('items') }}">
+                            <i class="fa fa-arrow-left"></i> Back to the List
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="table-responsive">
+                        {{ include('@LocalsBestShop/item/_form.html.twig', {'form': edit_form}) }}
+
+                        {{ form(delete_form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

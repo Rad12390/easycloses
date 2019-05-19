@@ -1,0 +1,755 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+
+    <script src="https://unpkg.com/vue/dist/vue.js" xmlns:v-bind="http://www.w3.org/1999/xhtml"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
+
+    <script>
+        var vm = new Vue({
+
+            http: {
+                emulateJSON: true,
+                emulateHTTP: true
+            },
+
+            el: '#app',
+            data: {
+                image: '',
+                {% if transactionId is not null %}
+                transactionId: {{ transactionId }},
+                {% endif %}
+                user: {
+                    firstName: "{{ user.firstName|raw }}",
+                    lastName: "{{ user.lastName }}",
+                    email: "{{ user.email }}",
+                    business: "{{ user.company|raw }}",
+                    phone: {
+                        areaCode: '{{ user.phone[0:3] }}',
+                        number: '{{ user.phone[3:3] }}-{{ user.phone[6: ] }}'
+                    }
+                },
+                client: {
+                    firstName: "{{ client.firstName|raw }}",
+                    lastName: "{{ client.lastName }}",
+                    email: "{{ client.email }}",
+                    business: "{{ client.company }}",
+                    phone: "{{ client.phone }}"
+                },
+                contact_me: false,
+                printedPhone: {
+                    areaCode: '{{ user.phone[0:3] }}',
+                    number: '{{ user.phone[3:3] }}-{{ user.phone[6: ] }}'
+                },
+                sign_installation: {
+                    status: false,
+                    quantity: 0,
+                    price: 25
+                },
+                sign_removal: {
+                    status: false
+                },
+                sign_fabrication: {
+                    status: false,
+                    with_photo_quantity: 0,
+                    with_photo_price: 55.00,
+                    without_photo_quantity: 0,
+                    without_photo_price: 45
+                },
+                bulk_sign_fabrication: {
+                    status: false,
+                    with_photo_quantity: 5,
+                    with_photo_price: 50.00,
+                    without_photo_quantity: 5,
+                    without_photo_price: 40
+                },
+                rider_fabrication: {
+                    status: false,
+                    price: 10,
+                    sold_quantity: 0,
+                    under_contract_quantity: 0,
+                    sale_pending_quantity: 0,
+                    for_sale_quantity: 0,
+                    for_rent_quantity: 0,
+                    family_2_quantity: 0,
+                    family_3_quantity: 0,
+                    pool_quantity: 0,
+                    other_quantity: 0
+                },
+                rider_installation: {
+                    status: false,
+                    quantity: 0,
+                    price: 10
+                },
+                open_house_signs: {
+                    status: false,
+                    quantity: 0,
+                    price: 28
+                },
+                a_frame: {
+                    status: false,
+                    quantity: 0,
+                    price: 75
+                },
+                total: 0,
+                instructions: '',
+                address: {
+                    street: '{% if data is not empty %}{{  data.job.jobProperty.property.address.street }}{% endif %}',
+                    unit: '{% if data is not empty %}{{ data.job.jobProperty.mlsBoard }}{% endif %}',
+                    city: '{% if data is not empty %}{{ data.job.jobProperty.property.address.city }}{% endif %}',
+                    state: '{% if data is not empty %}{{ data.job.jobProperty.property.address.state }}{% endif %}',
+                    zip: '{% if data is not empty %}{{ data.job.jobProperty.property.address.zip }}{% endif %}'
+                },
+                loading: false,
+                paymentUrl: ''
+            },
+            watch: {
+                // whenever question changes, this function will run
+                "sign_fabrication.status": function () {
+                    this.getTotal();
+                },
+                "sign_fabrication.without_photo_quantity": function () {
+                    this.getTotal();
+                },
+                "sign_fabrication.with_photo_quantity": function () {
+                    this.getTotal();
+                },
+                "bulk_sign_fabrication.status": function () {
+                    this.getTotal();
+                },
+                "bulk_sign_fabrication.without_photo_quantity": function () {
+                    this.getTotal();
+                },
+                "bulk_sign_fabrication.with_photo_quantity": function () {
+                    this.getTotal();
+                },
+                "sign_installation.status": function () {
+                    this.getTotal();
+                },
+                "sign_installation.quantity": function () {
+                    if(this.sign_installation.status == false) {
+                        this.sign_installation.status = true;
+                    } else {
+                        this.getTotal();
+                    }
+                },
+                "rider_installation.status": function () {
+                    this.getTotal();
+                },
+                "rider_installation.quantity": function () {
+                    if(this.rider_installation.status == false) {
+                        this.rider_installation.status = true;
+                    } else {
+                        this.getTotal();
+                    }
+                },
+                "a_frame.status": function () {
+                    this.getTotal();
+                },
+                "a_frame.quantity": function () {
+                    if(this.a_frame.status == false) {
+                        this.a_frame.status = true;
+                    } else {
+                        this.getTotal();
+                    }
+                },
+                "open_house_signs.status": function () {
+                    this.getTotal();
+                },
+                "open_house_signs.quantity": function () {
+                    if (this.open_house_signs.status == false) {
+                        this.open_house_signs.status = true;
+                    } else {
+                        this.getTotal();
+                    }
+                },
+                "rider_fabrication.sold_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.under_contract_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.sale_pending_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.for_sale_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.for_rent_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.family_2_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.family_3_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.pool_quantity": function () {
+                    this.getTotal();
+                },
+                "rider_fabrication.other_quantity": function () {
+                    this.getTotal();
+                }
+            },
+            methods: {
+                onFileChange: function(e) {
+                    var files = e.target.files || e.dataTransfer.files;
+                    if (!files.length)
+                        return;
+                    this.createImage(files[0]);
+                },
+                createImage: function(file) {
+                    var image = new Image();
+                    var reader = new FileReader();
+                    var vm = this;
+
+                    reader.onload = function(e) {
+                        vm.image = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                },
+                isEmptyAddress: function() {
+                    return (this.address.street == '' || this.address.city == '' || this.address.state == '' || this.address.zip == '');
+                },
+                submit: function() {
+                    if (
+                        (this.total == 0 && this.sign_removal.status == false)
+                        || (this.isEmptyAddress() && (this.sign_removal.status == true || this.sign_installation.status == true))
+                    ) {
+                        var title = '';
+                        var description = '';
+
+                        if (this.isEmptyAddress()) {
+                            title = 'Address is required';
+                            description = 'Please enter address for this form';
+                        }
+                        if (this.total == 0 && this.sign_removal.status == false) {
+                            title = 'Incomplete Order';
+                            description = 'Please Enter a Quantity';
+                        }
+                        swal({
+                            title: title,
+                            text: description,
+                            type: "warning",
+                            showCancelButton: false,
+                            showLoaderOnConfirm: true,
+                            closeOnConfirm: true
+                        });
+                    } else {
+                        // Set the loading property to true, this will display the "Searching..." button.
+                        this.loading = true;
+
+                        var params = {
+                            user: this.user,
+                            client: this.client,
+                            contact_me: this.contact_me,
+                            printedPhone: this.printedPhone,
+                            sign_installation: this.sign_installation,
+                            sign_removal: this.sign_removal,
+                            sign_fabrication: this.sign_fabrication,
+                            bulk_sign_fabrication: this.bulk_sign_fabrication,
+                            rider_fabrication: this.rider_fabrication,
+                            rider_installation: this.rider_installation,
+                            a_frame: this.a_frame,
+                            open_house_signs: this.open_house_signs,
+                            total: this.total,
+                            instructions: this.instructions,
+                            address: this.address,
+                            {% if transactionId is not null %}
+                            transactionId: this.transactionId,
+                            {% endif %}
+                            image: this.image
+                        };
+
+                        // Making a get request to our API and passing the query to it.
+                        this.$http.post('/custom/{{ type }}/save', params).then(function (response) {
+                            // If there was an error set the error message, if not fill the products array.
+                            vm.paymentUrl = response.body.url;
+
+                            swal({
+                                title: response.body.title,
+                                text: response.body.message,
+                                type: "success",
+                                showCancelButton: false,
+                                showLoaderOnConfirm: true,
+                                closeOnConfirm: false
+                            }, function () {
+                                window.location.href = response.body.url;
+                            });
+                            // The request is finished, change the loading to false again.
+                            vm.loading = false;
+                        });
+                    }
+                },
+                getTotal: function(){
+                    this.sign_fabrication.with_photo_quantity = this.isNumber(this.sign_fabrication.with_photo_quantity);
+                    this.sign_fabrication.without_photo_quantity = this.isNumber(this.sign_fabrication.without_photo_quantity);
+
+                    this.bulk_sign_fabrication.with_photo_quantity = this.isNumber(this.bulk_sign_fabrication.with_photo_quantity);
+                    this.bulk_sign_fabrication.without_photo_quantity = this.isNumber(this.bulk_sign_fabrication.without_photo_quantity);
+
+                    this.sign_installation.quantity = this.isNumber(this.sign_installation.quantity);
+
+                    this.rider_installation.quantity = this.isNumber(this.rider_installation.quantity);
+
+                    this.a_frame.quantity = this.isNumber(this.a_frame.quantity);
+                    this.open_house_signs.quantity = this.isNumber(this.open_house_signs.quantity);
+
+                    this.rider_fabrication.sold_quantity = this.isNumber(this.rider_fabrication.sold_quantity);
+                    this.rider_fabrication.under_contract_quantity = this.isNumber(this.rider_fabrication.under_contract_quantity);
+                    this.rider_fabrication.sale_pending_quantity = this.isNumber(this.rider_fabrication.sale_pending_quantity);
+                    this.rider_fabrication.for_sale_quantity = this.isNumber(this.rider_fabrication.for_sale_quantity);
+                    this.rider_fabrication.for_rent_quantity = this.isNumber(this.rider_fabrication.for_rent_quantity);
+                    this.rider_fabrication.family_2_quantity = this.isNumber(this.rider_fabrication.family_2_quantity);
+                    this.rider_fabrication.family_3_quantity = this.isNumber(this.rider_fabrication.family_3_quantity);
+                    this.rider_fabrication.pool_quantity = this.isNumber(this.rider_fabrication.pool_quantity);
+                    this.rider_fabrication.other_quantity = this.isNumber(this.rider_fabrication.other_quantity);
+
+                    this.total = 0;
+
+                    if(this.sign_fabrication.status) {
+                        this.total += this.sign_fabrication.with_photo_price * this.sign_fabrication.with_photo_quantity;
+                        this.total += this.sign_fabrication.without_photo_price * this.sign_fabrication.without_photo_quantity;
+                    }
+                    if(this.bulk_sign_fabrication.status) {
+                        this.total += this.bulk_sign_fabrication.with_photo_price * this.bulk_sign_fabrication.with_photo_quantity;
+                        this.total += this.bulk_sign_fabrication.without_photo_price * this.bulk_sign_fabrication.without_photo_quantity;
+                    }
+                    if(this.rider_fabrication.status) {
+                        this.total += this.rider_fabrication.price * (
+                            this.rider_fabrication.sold_quantity + this.rider_fabrication.under_contract_quantity
+                            + this.rider_fabrication.sale_pending_quantity + this.rider_fabrication.for_sale_quantity
+                            + this.rider_fabrication.for_rent_quantity + this.rider_fabrication.family_2_quantity
+                            + this.rider_fabrication.family_3_quantity + this.rider_fabrication.pool_quantity
+                            + this.rider_fabrication.other_quantity
+                        );
+                    }
+                    if(this.sign_installation.status) {
+                        this.total += this.sign_installation.price * this.sign_installation.quantity;
+                    }
+                    if(this.rider_installation.status) {
+                        this.total += this.rider_installation.price * this.rider_installation.quantity;
+                    }
+                    if(this.a_frame.status) {
+                        this.total += this.a_frame.price * this.a_frame.quantity;
+                    }
+                    if (this.open_house_signs.status) {
+                        this.total += this.open_house_signs.price * this.open_house_signs.quantity;
+                    }
+                },
+                isNumber: function(value) {
+                    if (Number(value) !== parseInt(value, 10)) {
+                        value = 0;
+                    } else {
+                        value = parseInt(value, 10);
+                        if(value < 0) {
+                            value = 0;
+                        }
+                    }
+                    return value;
+                }
+            }
+        });
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="portlet light bordered col-sm-10 col-sm-offset-1" id="app">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-cogs"></i> Order Form
+            </div>
+        </div>
+        <div class="portlet-body">
+            <form class="form">
+
+                <div class="col-md-3">
+                    <label for="associationId" class="control-label"><b>Agent Information</b></label>
+                </div>
+                <div class="col-md-9">
+                    <div class="portlet light bordered col-sm-12">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input class="form-control" v-model="user.business" placeholder="Insert brokerage name" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6">
+                                                <input class="form-control" placeholder="First Name" v-model="user.firstName" required>
+                                            </div>
+                                            <div class="col-xs-6">
+                                                <input class="form-control" placeholder="Last Name" v-model="user.lastName" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input class="form-control" placeholder="ex: myname@example.com" v-model="user.email" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-4">
+                                                <input class="form-control" placeholder="Area Code" v-model="user.phone.areaCode" required>
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <input class="form-control" placeholder="Phone Number" v-model="user.phone.number" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="associationId" class="control-label"><b>Select Items Needed</b></label>
+                    <label for="associationId" class="control-label"><i>*All items need to be prepaid on next screen</i></label>
+                </div>
+                <div class="col-md-9">
+                    <div class="portlet light bordered col-sm-12">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 control-label">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    <b>Post and Sign Installation Only - ${% verbatim %}{{ sign_installation.price }}{% endverbatim %} </b>
+                                                    <input type="checkbox" v-model="sign_installation.status">
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                            <label for="associationId" class="col-xs-3 control-label">Quantity</label>
+                                            <div class="col-xs-3">
+                                                <input v-model="sign_installation.quantity" class="form-control" type="number">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <label style="margin-left: 5px;">
+                                                    If you are ordering an installation, but do not currently have signs in stock with us, you must order signs to be made also. Please also select "sign fabrication" below.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    <b>Sign Removal Free</b>
+                                                    <input type="checkbox" v-model="sign_removal.status">
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    Sign Fabrication (select for options)
+                                                    <input type="checkbox" v-model="sign_fabrication.status">
+                                                    <span></span>
+                                                </label>
+                                                <div v-if="sign_fabrication.status">
+                                                    <table class="table">
+                                                        <tr>
+                                                            <th>Photo Options</th>
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>With Realtor Photo</td>
+                                                            <td><i>${% verbatim %}{{ sign_fabrication.with_photo_price }}{% endverbatim %}</i></td>
+                                                            <td><input v-model="sign_fabrication.with_photo_quantity" class="form-control" type="number"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Without Realtor Photo</td>
+                                                            <td><i>${% verbatim %}{{ sign_fabrication.without_photo_price }}{% endverbatim %}</i></td>
+                                                            <td><input v-model="sign_fabrication.without_photo_quantity" class="form-control" type="number"></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    Bulk Sign Fabrication Order of 5 or more (Select for Options)
+                                                    <input type="checkbox" v-model="bulk_sign_fabrication.status">
+                                                    <span></span>
+                                                </label>
+                                                <table class="table" v-if="bulk_sign_fabrication.status">
+                                                    <tr>
+                                                        <th>Photo Options</th>
+                                                        <th>Price</th>
+                                                        <th>Quantity</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>With Realtor Photo</td>
+                                                        <td><i>${% verbatim %}{{ bulk_sign_fabrication.with_photo_price }}{% endverbatim %}</i></td>
+                                                        <td><input v-model="bulk_sign_fabrication.with_photo_quantity" class="form-control" type="number" min="5"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Without Realtor Photo</td>
+                                                        <td><i>${% verbatim %}{{ bulk_sign_fabrication.without_photo_price }}{% endverbatim %}</i></td>
+                                                        <td><input v-model="bulk_sign_fabrication.without_photo_quantity" class="form-control" type="number" min="5"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="sign_fabrication.status || bulk_sign_fabrication.status">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label for="associationId" class="col-md-3 control-label"><b>Phone Number to use on Sign</b></label>
+                                                <div class="col-md-9">
+                                                    <div class="row">
+                                                        <div class="col-xs-4">
+                                                            <input class="form-control" placeholder="Area Code" v-model="printedPhone.areaCode" required>
+                                                        </div>
+                                                        <div class="col-xs-8">
+                                                            <input class="form-control" placeholder="Phone Number" v-model="printedPhone.number" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="(bulk_sign_fabrication.status && bulk_sign_fabrication.with_photo_quantity > 0) || (sign_fabrication.status && sign_fabrication.with_photo_quantity > 0)" class="form-group">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label for="associationId" class="col-md-3 control-label"><b>Please upload your sign photo here</b></label>
+                                                <div class="col-md-9">
+                                                    <input type="file" @change="onFileChange">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    Rider Fabrication (select for options) - <b>${% verbatim %}{{ rider_fabrication.price }}{% endverbatim %}</b>
+                                                    <input type="checkbox" v-model="rider_fabrication.status">
+                                                    <span></span>
+                                                </label>
+                                                <table class="table" v-if="rider_fabrication.status">
+                                                    <tr>
+                                                        <th>Rider Type</th>
+                                                        <th>Quantity</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>SOLD</td>
+                                                        <td><input type="number" v-model="rider_fabrication.sold_quantity" class="form-control"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>UNDER CONTRACT</td>
+                                                        <td><input type="number" v-model="rider_fabrication.under_contract_quantity" class="form-control" ></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>SALE PENDING</td>
+                                                        <td><input v-model="rider_fabrication.sale_pending_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>FOR SALE</td>
+                                                        <td><input v-model="rider_fabrication.for_sale_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>FOR RENT</td>
+                                                        <td><input v-model="rider_fabrication.for_rent_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2 FAMILY</td>
+                                                        <td><input v-model="rider_fabrication.family_2_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>3 FAMILY</td>
+                                                        <td><input v-model="rider_fabrication.family_3_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>POOL</td>
+                                                        <td><input v-model="rider_fabrication.pool_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>OTHER (Please specify in special instructions below)</td>
+                                                        <td><input v-model="rider_fabrication.other_quantity" class="form-control" type="number"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 control-label">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    Rider Installation - <b>${% verbatim %}{{ rider_installation.price }}{% endverbatim %}</b>
+                                                    <input type="checkbox" v-model="rider_installation.status">
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="associationId" class="col-xs-3 control-label">Quantity</label>
+                                                <div class="col-xs-3">
+                                                    <input v-model="rider_installation.quantity" class="form-control" type="number">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 control-label">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    Open House A-Frame - <b>${% verbatim %}{{ a_frame.price }}{% endverbatim %}</b>
+                                                    <input type="checkbox" v-model="a_frame.status">
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="associationId" class="col-xs-3 control-label">Quantity</label>
+                                                <div class="col-xs-3">
+                                                    <input type="number" v-model="a_frame.quantity" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 control-label">
+                                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                                    Open House Signs (Lightweight/Wire Stake) - <b>${% verbatim %}{{ open_house_signs.price }}{% endverbatim %}</b>
+                                                    <input type="checkbox" v-model="open_house_signs.status">
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="associationId" class="col-xs-3 control-label">Quantity</label>
+                                                <div class="col-xs-3">
+                                                    <input type="number" v-model="open_house_signs.quantity" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="associationId" class="col-md-3 control-label"></label>
+                                        <div class="col-md-9">
+                                            <div class="row" style="font-size: 18px;">
+                                                <div class="col-sm-6"><b>Total:</b></div>
+                                                <div class="col-sm-6"><b>${% verbatim %}{{ total }}{% endverbatim %}</b></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="associationId" class="control-label">
+                        <b>Address required for Sign Install and Removal</b>
+                    </label>
+                </div>
+                <div class="col-md-9">
+                    <div class="portlet light bordered col-sm-12">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-9">
+                                                <input class="form-control" placeholder="Street" v-model="address.street" :required="sign_removal.status == true || sign_installation.status == true">
+                                            </div>
+                                            <div class="col-xs-3">
+                                                <input class="form-control" placeholder="Unit" v-model="address.unit" :required="sign_removal.status == true || sign_installation.status == true">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-4">
+                                                <input class="form-control" placeholder="City" v-model="address.city" :required="sign_removal.status == true || sign_installation.status == true">
+                                            </div>
+                                            <div class="col-xs-4">
+                                                <input class="form-control" placeholder="State" v-model="address.state" :required="sign_removal.status == true || sign_installation.status == true">
+                                            </div>
+                                            <div class="col-xs-4">
+                                                <input class="form-control" placeholder="ZIP" v-model="address.zip" :required="sign_removal.status == true || sign_installation.status == true">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {#<div class="form-group">
+                    <label for="associationId" class="col-md-3 control-label"><b>I am in need of maintenance, handyman or lawn care services.</b></label>
+                    <div class="col-md-9">
+                        <label>
+                            <input type="checkbox" v-model="contact_me">
+                            Yes, please contact me.
+                        </label>
+                    </div>
+                </div>#}
+
+                <div class="col-md-3">
+                    <label for="associationId" class="control-label"><b>Other Instructions</b></label>
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <textarea v-model="instructions" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <button class="btn btn-primary" type="button" @click="submit()" v-if="!loading && paymentUrl == ''">
+                            Submit
+                        </button>
+                        <button class="btn btn-primary" type="button" disabled="disabled" v-if="loading && paymentUrl == ''">
+                            <i class="fa fa-spin fa-gear"></i>
+                            Please Wait
+                        </button>
+                        <a v-bind:href="paymentUrl" class="btn btn-success" type="button" v-if="!loading && paymentUrl != ''">
+                            <i class="fa fa-money"></i>
+                            Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

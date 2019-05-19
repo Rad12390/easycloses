@@ -1,0 +1,47 @@
+{% extends "::base.html.twig" %}
+
+{% block content %}
+    <h3>
+        Surveys
+        <a class="btn btn-sm green" href="{{ path('survey_create') }}" id="surveyAdd"> Create
+            <i class="fa fa-plus"></i>
+        </a></h3>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Type</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if surveys|length > 0 %}
+                    {% for item in surveys %}
+                        <tr>
+                            <td>{{ item.question }}</td>
+                            <td>{% if item.type == 'radio' %}Multiply{% else %}Single{% endif %}</td>
+                            <td>
+                                <a href="{{ path('survey_view', {'id': item.id}) }}" class="btn btn-sm btn-icon-only blue">
+                                    <i class="fa fa-search"></i>
+                                </a>
+                                {#<a href="{{ path('question_edit', {'id': item.id}) }}" class="btn btn-sm btn-icon-only yellow" id="questionEdit" data-target="#ajax" data-toggle="modal">#}
+                                    {#<i class="fa fa-edit"></i>#}
+                                {#</a>#}
+                                {#<a href="{{ path('question_remove', {'id': item.id}) }}" onclick="return confirm('Are you sure?');" class="btn btn-sm btn-icon-only red">#}
+                                    {#<i class="fa fa-trash-o"></i>#}
+                                {#</a>#}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8">You don't create your own surveys yet.</td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

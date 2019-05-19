@@ -1,0 +1,159 @@
+<style>
+    .header,
+    .footer {
+        width: 100%;
+        text-align: center;
+        position: fixed;
+    }
+    .header {
+        top: 0px;
+    }
+    .footer {
+        bottom: 0px;
+    }
+    table {
+        border-bottom: 2px solid #888888;
+        border-collapse: collapse;
+        border-top: 2px solid #888888;
+        margin-bottom: 0.5em;
+        margin-top: 0.5em;
+        width: auto;
+    }
+
+    thead th {
+        border-bottom: 2px solid #888888;
+        color: #111111;
+    }
+
+    tbody th {
+        border-bottom: 1px solid #FFFFFF;
+        text-align: left;
+    }
+
+    tbody th {
+        background: none repeat scroll 0 0 #E6E6E6;
+        color: #333333;
+    }
+</style>
+
+<h3 style="text-align: center"><u><b>SECURED DOCUMENT DESTRUCTION CERTIFICATE</b></u></h3>
+
+<table style="width: 100%;">
+    <thead>
+    <tr>
+        <th>Generators Name and Physical Address:</th>
+        <th style="text-align: center;">Generators Telephone #</th>
+        <th style="text-align: center;">Generators Account #</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            {{ data.generator.name }}<br>
+            {{ data.generator.address }}
+        </td>
+        <td style="text-align: center;">
+            {{ data.generator.phone }}
+        </td>
+        <td style="text-align: center;">
+            {{ data.generator.account }}
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+
+<div>
+    <b>Transporter:</b>
+</div>
+<div style="text-align: center;">
+    <b>
+        Champion Shredding LLC. 28040 Airpark Dr. # 106, Punta Gorda, FL 33982<br>
+        941-621-2479 / 941-621-3398 fax / www.ChampionShredding.com
+    </b>
+</div>
+
+<table style="width: 100%;">
+    <thead>
+        <tr>
+            <th >SERVICE TYPE:</th>
+            <th style="text-align: center;">Quantity</th>
+            <th style="text-align: center;">Weight</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in data.services %}
+            <tr>
+                <td>{{ service.title }}</td>
+                <td style="text-align: center;">{{ service.quantity }}</td>
+                <td style="text-align: center;">{{ service.weight }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br>
+
+<table style="width: 100%;">
+    <thead>
+    <tr>
+        <th>Generator Print Name:</th>
+        <th style="text-align: center;">Generator Signature:</th>
+        <th style="text-align: center;">Date:</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{{ data.generator.printName }}</td>
+        <td style="text-align: center;">
+            <img style="height: 75px; width: 300px;" src="{{ data.generator.sign }}">
+        </td>
+        <td style="text-align: center;">{{ data.generator.date }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+
+<p style="text-align: center;">
+    <u>Champion Shredding LLC. Receipt of Consignment:</u>
+</p>
+
+<table style="width: 100%;">
+    <thead>
+    <tr>
+        <th>Driver Print Name:</th>
+        <th style="text-align: center;">Driver Signature:</th>
+        <th style="text-align: center;">Date:</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{{ data.driver.printName }}</td>
+        <td style="text-align: center;">
+            <img style="height: 75px; width: 300px;" src="{{ data.driver.sign }}">
+        </td>
+        <td style="text-align: center;">{{ data.driver.date }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+
+<p style="text-align: center;">
+    <u>Champion Shredding LLC. Certificate of Destruction:</u>
+</p>
+
+<p>
+    Champion Shredding LLC. certifies all documents listed have been shredded in our MDS-25GT onsite Mobile document shredding truck and complies with all NAID certification guidelines. Shredded document are sent to a domestic paper mill to be 100% Recycled into post- consumer fiber products.
+</p>
+
+<br>
+
+<h2><b>"Your Document Shredding Specialists"</b></h2>
+
+
+<div class="footer">
+    Licensed & Insured/Family Owned & Operated
+</div>

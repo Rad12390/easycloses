@@ -1,0 +1,18 @@
+Requesting: {% if job.orderType == 'Order' %}Job{% else %}{{ job.orderType }}{% endif %}<br>
+Customer Name: {{ job.client.contactName }}<br>
+Customer Phone: {{ job.client.phone }}<br>
+Customer Email: {{ job.client.email }}<br>
+Agent Name: {{ job.createdBy.firstName }} {{ job.createdBy.lastName }}<br>
+Agent Phone: {{ job.createdBy.primaryPhone.number }}<br>
+Agent Email: {{ job.createdBy.primaryEmail.email }}<br>
+Property Address: {{ job.fullAddress }}<br>
+Property Type: {{ job.jobProperty.property.type|replace({'_': ' '}) }}<br>
+Note: {{ note }}<br>
+
+To access the details of this order, you may log into your EasyCloses account.<br>
+
+<br>
+-We appreciate you allowing us to serve you!<br>
+<br>
+Sincerely,-<br>
+EasyCloses.com 888-740-0550

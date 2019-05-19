@@ -1,0 +1,157 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Contacts{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        Contacts
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/ladda/ladda-themeless.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" />
+
+    <style type="text/css">
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+        div.table-scrollable {
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+        }
+
+        .dt-buttons {
+            margin-top: -35px !important;
+        }
+
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+
+        .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+            line-height: 1.82857;
+        }
+
+        .table-responsive {
+            overflow-x: inherit;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/ladda/spin.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/ladda/ladda.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-sweetalert/sweetalert.min.js') }}"></script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery('#example').DataTable({
+                responsive: true,
+                "order": [[ 4, "desc" ]],
+                columnDefs: [
+                    { targets: 'no-sort', orderable: false }
+                ]
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-book"></i> Contacts
+            </div>
+            <div class="actions">
+                <a class="btn  red" href="{{ path('contact_import') }}">
+                    <i class="fa fa-file-o"></i> Import Contacts
+                </a>
+                <a class="btn  red" href="{{ path('contact_add') }}">
+                    Add Contact
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table style="width: 100%;" id="example" class="table table-bordered table-striped">
+                    <thead class="flip-content">
+                        <tr>
+                            <th > First Name </th>
+                            <th > Last Name </th>
+                            <th > Phone </th>
+                            <th > Email </th>
+                            <th > Last Updated </th>
+                            <th > Actions </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contact in contacts %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('contact_view', {'id': contact.id}) }}" >
+                                        {{ contact.firstName }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ contact.lastName }}
+                                </td>
+                                <td>
+                                    {{ contact.number|phone }}
+                                </td>
+                                <td>
+                                    {{ contact.email }}
+                                </td>
+                                <td>
+                                    {{ contact.updated|date('m-d-Y') }}
+                                </td>
+                                <td style="height: 30px;">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-gear"></i> <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu pull-right" role="menu">
+                                            <li>
+                                                <a href="{{ path('contact_edit', {'id': contact.id}) }}" >
+                                                    <i class="fa fa-edit"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ path('contact_delete', {'id': contact.id}) }}" >
+                                                    <i class="fa fa-trash-o"></i> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}	

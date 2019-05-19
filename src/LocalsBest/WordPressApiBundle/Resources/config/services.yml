@@ -1,0 +1,7 @@
+parameters:
+
+services:
+    localsbest.wp_actions:
+        class: LocalsBest\WordPressApiBundle\Service\WpActions
+        calls:
+            - [setContainer, ["@service_container"]]

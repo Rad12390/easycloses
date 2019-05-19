@@ -1,0 +1,60 @@
+<div class="portlet box blue" id="{{ type }}Document">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class="icon-docs"></i> {{ type|capitalize }} File Documents
+        </div>
+        <div class="actions">
+            <a class="btn btn-sm  btn-danger add_document"
+               href="{{ path('document_type_add', {'objectId': file.id, 'objectType': type|capitalize, 'object': transaction.id }) }}"
+               style="color: white;" data-target="#ajax" data-toggle="modal">
+                Add
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body no-more-tables custom{{ type }}DocumentBody">
+        <table id="datatable_example" class="customTable table table-striped table-bordered table-condensed table-hover table-full-width cf doc_vault doc_vault_listing" id="document_vault">
+            <thead class="cf">
+            <tr>
+                <td>
+                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                        <input id="checkAll{{ type }}sDocs" type="checkbox" class="group-checkable">
+                        <span></span>
+                    </label>
+                </td>
+                <th></th>
+                <th>Document Type</th>
+                <th >File</th>
+                <th>Date</th>
+                {% if transaction.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+                    <th></th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for documentType in type=='listing'?listingDocumentTypes:closingDocumentTypes %}
+                {% include '@LocalsBestUser/transaction/blocks/_transaction-document-row.html.twig' with {'type': type, 'nrds': nrds} %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="btn-group" style="margin-bottom: 6px !important;margin-left: 3px !important;">
+            <a class="btn mini btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+                Document Tools <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#" class="attach_email" id="emailFor{{ type|capitalize }}s" data-id="{{ type }}">
+                        <i class="icon-envelope"></i> Attach to Email
+                    </a>
+                </li>
+                {% if checker.forAddon('blank documents', app.user) %}
+                    <li>
+                        <a href="#" class="{{ type }}_blank_docs" id="blankDocsFor{{ type|capitalize }}s" data-type="{{ type }}">
+                            <i class="fa fa-file"></i> Get Blank Documents
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>

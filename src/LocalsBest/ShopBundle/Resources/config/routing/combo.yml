@@ -1,0 +1,30 @@
+combo:
+    path:     /
+    defaults: { _controller: "LocalsBestShopBundle:Combo:index" }
+
+combo_show:
+    path:     /{id}/show
+    defaults: { _controller: "LocalsBestShopBundle:Combo:show" }
+
+combo_new:
+    path:     /new
+    defaults: { _controller: "LocalsBestShopBundle:Combo:new" }
+
+combo_create:
+    path:     /create
+    defaults: { _controller: "LocalsBestShopBundle:Combo:create" }
+    methods: [POST]
+
+combo_edit:
+    path:     /{id}/edit
+    defaults: { _controller: "LocalsBestShopBundle:Combo:edit" }
+
+combo_update:
+    path:     /{id}/update
+    defaults: { _controller: "LocalsBestShopBundle:Combo:update" }
+    methods: [POST|PUT]
+
+combo_delete:
+    path:     /{id}/delete
+    defaults: { _controller: "LocalsBestShopBundle:Combo:delete" }
+    methods: [POST|DELETE]

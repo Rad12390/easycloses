@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+
+<script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+{#<script>
+    jQuery(document).ready(function () {
+        $("#add-document-type-form").submit(function() {
+            var url = $(this).attr('action');
+            var data = $(this).serialize();
+            $.post(url, data, function(data) {
+                console.log(data);
+            });
+            $('#colTwo').load(url + ' #colTwo');
+                
+            return false;
+        });
+    });
+</script>#}
+
+<div class="modal-content">
+    <form  action="{{ path('document_type_add', {'objectId': objectId,'objectType': objectType, 'object': object })}}" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        </div>
+        <div class="modal-body">
+            <div class="control-group">
+            <label class="control-label3">Document Name</label>
+            <div class="controls2">
+                   {{ form_widget( documentForm.name) }}<br>
+                   <span class="doc_name_validate hide" style="color: #b94a48;">You Must Name Your New Document Type!</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn green"><i class="fa fa-check"></i> Add Document Type</button>
+        </div>
+    {{ form_end(documentForm) }}
+</div>

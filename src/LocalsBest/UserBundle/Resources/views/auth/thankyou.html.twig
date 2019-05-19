@@ -1,0 +1,7 @@
+{% extends "::base.html.twig" %}
+{% block content %}
+    <h3> {{ message }}
+
+<a href="{{ path('reset_password', {'token': user.token}) }}">click here</a> </h3>
+
+{% endblock %}

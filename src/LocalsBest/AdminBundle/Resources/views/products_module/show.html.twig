@@ -1,0 +1,58 @@
+{% extends '::base.html.twig' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
+            <h1>Bundle #{{ entity.id }}</h1>
+
+            <table class="table record_properties">
+                <tbody>
+                    <tr>
+                        <th>Id</th>
+                        <td>{{ entity.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Title</th>
+                        <td>{{ entity.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Description</th>
+                        <td>{{ entity.description }}</td>
+                    </tr>
+
+                    {% if entity.productTypes is not empty %}
+                        <tr>
+                            <th>Products Types</th>
+                            <td>
+                                {% for pType in entity.productTypes %}
+                                    <span class="label label-primary"> {{ pType.product.title }} - ${{ pType.price }}({{ pType.type }})</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if entity.businesses is not empty %}
+                        <tr>
+                            <th>Businesses</th>
+                            <td>
+                                {% for business in entity.businesses %}
+                                    <span class="label label-info"> {{ business.name }}</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <a class="btn btn-default" href="{{ path('admin_products_modules') }}">
+                Back to the list
+            </a>
+
+            <a class="btn btn-warning" href="{{ path('admin_products_modules_edit', { 'id': entity.id }) }}">
+                Edit
+            </a>
+
+            {{ form(delete_form) }}
+        </div>
+    </div>
+{% endblock %}

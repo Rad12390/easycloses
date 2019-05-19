@@ -1,0 +1,32 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Industry Type list</h1>
+
+    <a class="btn btn-success" href="{{ path('admin_industry_type_new') }}">
+        <i class="fa fa-plus"></i> Create a new Industry Type
+    </a>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('admin_industry_type_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{{ entity.name }}</td>
+                <td>
+                    <a href="{{ path('admin_industry_type_show', { 'id': entity.id }) }}">show</a>
+                    <a href="{{ path('admin_industry_type_edit', { 'id': entity.id }) }}">edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% endblock %}

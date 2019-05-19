@@ -1,0 +1,12 @@
+Hello!<br>
+You have been invited to register with EasyCloses.com by {{ app.user.firstname }} {{ app.user.lastname }} from
+{{ app.user.businesses[0].name }}. <br/>
+<b>Click the 'Register Now' link below to activate your free account.</b>
+
+<a href="{{ url('register', {token: token}) }}">Register Now</a>
+<br>
+<br>
+-We appreciate you allowing us to serve you!<br>
+<br>
+Sincerely,-<br>
+EasyCloses.com 888-740-0550

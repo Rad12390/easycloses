@@ -1,0 +1,51 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+    <h4 class="modal-title">Business Information</h4>
+</div>
+<form method="POST" role="form" class="form-horizontal" action="{{ path('contact_business_info', {'id': contact.id}) }}">
+    <div class="modal-body">
+        <div class="form-body">
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <input type="text" class="form-control" name="business_name" placeholder="Business Name" value="{{ contact.businessName }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="business_phone" placeholder="Business Phone" value="{{ contact.businessPhone }}">
+                </div>
+                <div class="col-md-6">
+                    <input type="email" class="form-control" name="business_email" placeholder="Business Email" value="{{ contact.businessEmail }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-9">
+                    <input value="{{ contact.businessAddressStreet }}" class="form-control" name="business_street" required placeholder="Street Address">
+                </div>
+                <div class="col-md-3">
+                    <input value="{{ contact.businessAddressUnit }}" class="form-control" name="business_unit" placeholder="Unit">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-4">
+                    <input value="{{ contact.businessAddressCity }}" class="form-control" name="business_city" required placeholder="City">
+                </div>
+                <div class="col-md-4">
+                    <input value="{{ contact.businessAddressState }}" class="form-control" name="business_state" required pattern=".{2,}" title="2 characters length" maxlength="2" onkeyup="javascript:this.value=this.value.toUpperCase();" placeholder="State">
+                </div>
+                <div class="col-md-4">
+                    <input value="{{ contact.businessAddressZip }}" class="form-control" name="business_zip" pattern=".{5,}" title="5 characters length" maxlength="5" required  onkeypress='return event.charCode >= 48 && event.charCode <= 57' placeholder="Zip Code">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-success">Update</button>
+    </div>
+</form>

@@ -1,0 +1,325 @@
+{% extends "::base.html.twig" %}
+
+{% if user is defined %}
+    {% if user.username != '' %}
+        {% set title = user.username %}
+    {% endif %}
+    {% set class = 'form-group' %}
+{% else %}
+    {% set class = 'hidden' %}
+{% endif %}
+
+{% block title %}
+    {% if title is defined %}
+        {{ title }}
+    {% else %}
+        Add User
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('users_index') }}">Users</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        {% if title is defined %}
+            {{ title }}
+        {% else %}
+            Add User
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" />
+
+    <style type="text/css">
+        .create_job .control-group.error input, .input-group.error input, .control-group.error select, .control-group.error textarea, .control-group.error radio {
+            border-color: red;
+            background: rgb(250, 255, 189);
+        }
+        .create_job .control-group.success input, .input-group.success input, .control-group.success select, .control-group.success textarea, .control-group.success radio {
+            border-color: #468847;
+        }
+        .radio input[type=radio], .radio-inline input[type=radio], .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox] {
+            margin-left: -10px !important;
+        }
+        tr.contact_error .contact_status{
+            color:rgb(255, 0, 0);
+        }
+        tr.contact_success .contact_status{
+            color:rgb(0, 128, 0);
+        }
+
+        .img_contain {
+            max-width: 160px;
+            margin: 0 auto;
+        }
+
+        ul.thumbnails {
+            padding: 0px;
+            width: 1000%;
+        }
+
+        .thumbnails .vendor-box {
+            width: 225px;
+            display: inline-block;
+            float: left;
+            margin: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bxSlider/jquery.bxslider.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/pages/scripts/ui-toastr.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+
+    <script>
+        jQuery(document).ready(function() {
+            $(".add_email").change(function() {
+                $(".add").val($(this).val());
+            });
+
+            {% if app.user.businesses[0].id == 15 %}
+                $(".phone").inputmask("999.999.9999");
+            {% else %}
+                $(".phone").inputmask("(999) 999-9999");
+            {% endif %}
+
+            var helpFunction = function(response, status, xhr, dataType) {
+//                $('.bxslider').bxSlider({
+//                    infiniteLoop: false,
+//                    slideWidth: 330,
+//                    minSlides: 4,
+//                    maxSlides: 4,
+//                    slideMargin: 10,
+//                    adaptiveHeight: false
+//                });
+//
+//                $('.thumbnails :input').uniform();
+//                $("#show-more-vendors").removeAttr('disabled');
+//                $("div .bx-loading").hide();
+
+                if ( status === "error" ) {
+//                    response = JSON.parse(response);
+//                    $("#userLoadAjax").html(response.message);
+//                    $("#show-more-vendors").attr('disabled', 'disabled');
+                } else {
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-full-width",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.error(dataType.replace(/\b\w/g, function(l){ return l.toUpperCase() }) + ' entered  is already registered. Please try a new ' + dataType);
+                }
+            };
+            
+            {#$("#user_contact_phones_0_number").on('blur', function () {#}
+                {#var element = $(this).val() === '' ? 'empty' : $(this).val();#}
+                {#var checkType = 'primaryPhone';#}
+                {#var type = 'User';#}
+                {#$.ajax({#}
+                    {#url: '{{ path('user_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ element,#}
+                    {#dataType: 'html'#}
+                {#})#}
+                    {#.complete(function(response, status){#}
+                        {#console.log(response, status);#}
+                        {#helpFunction(response, status, 'xhr', 'phone')#}
+                    {#})#}
+            {#});#}
+
+            $("#user_contact_emails_0_email").on('blur', function () {
+                var element = $(this).val() === '' ? 'empty' : $(this).val();
+                var checkType = 'primaryEmail';
+                var type = 'User';
+                $.ajax({
+                    url: '{{ path('user_checked_ajax')}}/'+ type +'/'+ checkType +'/'+ element,
+                    dataType: 'html'
+                })
+                .complete(function(response, status){
+                    console.log(response, status);
+                    helpFunction(response, status, 'xhr', 'email')
+                })
+            });
+            
+        {% if app.user.role.role == 'ROLE_NETWORK_MANAGER'%}
+           $("#user_role option[value=5]").remove();
+           $("#user_role option[value=7]").remove();
+           $("#user_role option[value=8]").remove();
+           $("#user_role option[value=9]").remove();
+        {% endif %}
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% if error is defined and error is not empty %}
+        <div class="Metronic-alerts alert alert-danger fade in">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+            <i class="fa-lg fa fa-warning"></i>  {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="row" id="userLoadAjax"></div>
+
+    <div id="vendor_slider_wrapper" class="dataTables_wrapper form-inline no-footer"></div>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            {{ form_start(form, {attr: {class: 'form-horizontal form-row-seperated register_form'} }) }}
+                <div class="portlet box blue">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-user-plus"></i> {% if title is defined %}{{ title }}{% else %}Add User {% endif %}
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div class="tabbable">
+                            <div class="tab-content no-space">
+                                <div class="tab-pane active" id="tab_general">
+                                    <div class="form-body">
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                First Name: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.firstName) }}
+                                                <span class="help-block">
+                                                    {{ form_errors(form.firstName) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Last Name: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.lastName) }}
+                                                <span class="help-block">
+                                                    {{ form_errors(form.lastName) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Email: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {% for email in form.contact.emails %}
+                                                    {{ form_widget(email.email) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(email.email) }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Phones: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {% for phone in form.contact.phones %}
+                                                    {{ form_widget(phone.number) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(phone.number) }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Phone Type: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {% for phone in form.contact.phones %}
+                                                    {{ form_widget(phone.type) }}
+                                                    <span class="help-block">
+                                                        {{ form_errors(phone.type) }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Username: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.username)}}
+                                                <span class="help-block">
+                                                    {{ form_errors(form.username) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Password: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.password.first) }}
+                                                <span class="help-block">
+                                                    {{ form_errors(form.password.first) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">
+                                                Confirm Password: <span class="required">* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.password.second) }}
+                                                <span class="help-block">
+                                                    {{ form_errors(form.password.second) }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="{{ class }}">
+                                            <label class="col-md-2 control-label">
+                                                Role: <span class="required" >* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.role) }}
+                                            </div>
+                                        </div>
+                                        <div class="{{ class }}">
+                                            <label class="col-md-2 control-label">
+                                                Status: <span class="required" >* </span>
+                                            </label>
+                                            <div class="col-md-10">
+                                                {{ form_widget(form.status) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: right; ">
+                            <a href="{{ path('users_index') }}" class="btn btn-default" ><i class="fa fa-angle-left"></i> Back </a>
+                            <input type="reset" class="btn btn-warning" name="Reset" >
+                            <button class="btn btn-success"><i class="fa fa-check"></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

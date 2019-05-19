@@ -1,0 +1,25 @@
+{% extends "::base.html.twig" %}
+
+{% block content %}
+    <h3>
+        Create new Survey
+    </h3>
+    <div class="row">
+        <div class="col-md-12">
+            <form class="form-horizontal" role="form" method="POST" action="">
+                <div class="modal-body">
+                    <div class="form-body">
+                        {% include('@LocalsBestUser/survey/_form.html.twig') %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ path('survey_index') }}" class="btn red">Back</a>
+                    <input type="submit" class="btn green" value="Create">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% include('@LocalsBestUser/survey/_script.html.twig') %}
+{% endblock %}
+

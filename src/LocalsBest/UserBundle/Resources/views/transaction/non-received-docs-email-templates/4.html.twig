@@ -1,0 +1,2 @@
+Good day {% if user is defined %}{{ user.fullName }}{% else %}*agent_full_name*{% endif %}. Please contact your brokerage office immediately regarding to the documents missed
+for {% if transaction is defined %}{{ transaction.fullAddress }}{% else %}*transaction_address*{% endif %} transaction!

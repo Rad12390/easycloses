@@ -1,0 +1,218 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}
+    Import Contacts from File
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('contact_index') }}">Contacts</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Import Contacts
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.css') }}">
+    <style>
+        .hidden{
+            display:none;
+        }
+        .ajax_loader{
+            position:absolute;
+            width:100%;
+            height:100%;
+            left:0;
+            top:0;
+            background:rgba(0,0,0,.5);
+        }
+        .ajax_loader i{
+            position:absolute;
+            left:50%;
+            top:50%;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('system/global/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-4">
+            <!-- BEGIN Portlet PORTLET-->
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-info-circle"></i>Instruction
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <ol>
+                        <li>File Type - Choose CSV or Excel</li>
+                        <li>Insert the column number into the matching field of the form i.e. if last name is in column 9 on your spreadsheet, insert 9 into the Last Name field on the form.</li>
+                        <li>Click "Choose File" and select the file to add</li>
+                        <li>Click on the "Import" button</li>
+                    </ol>
+
+                </div>
+            </div>
+            <!-- END Portlet PORTLET-->
+        </div>
+
+        <div class="col-md-8">
+            <!-- BEGIN Portlet PORTLET-->
+            <div class="portlet box blue">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-gift"></i>Import File Settings
+                    </div>
+                </div>
+                <div class="portlet-body">
+
+                    <form class="form-horizontal" role="form" enctype="multipart/form-data" id="data">
+                        <div class="form-body">
+                            <div class="form-group">
+                                <label for="fileType" class="col-md-3 control-label">File Type</label>
+                                <div class="col-md-9">
+                                    <select id="fileType" class="form-control" name="fileType">
+                                        <option value="csv">CSV</option>
+                                        <option value="excel">Excel</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">First Name</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" placeholder="First Name" name="firstName" value="1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Last Name</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" placeholder="Last Name" name="lastName" value="2">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Phone</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" placeholder="Phone" name="phone" value="3">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Email</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" placeholder="Email" name="email" value="4">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Note</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" placeholder="Note" name="note" value="5">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputFile" class="col-md-3 control-label">File</label>
+                                <div class="col-md-9">
+                                    <input type="file" id="inputFile" name="importFile">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <div class="row">
+                                <div class="col-md-offset-3 col-md-9">
+                                    <button type="submit" id="upload" class="btn green">
+                                        <i id="spinner" class="fa fa-spinner fa-spin" style="display: none;" aria-hidden="true"></i> Import
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+            <!-- END Portlet PORTLET-->
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $("form#data").submit(function(){
+
+                var formData = new FormData($(this)[0]);
+                spinner = $('#spinner');
+                spinner.show();
+                spinner.parent().prop('disabled', true);
+
+
+                $.ajax({
+                    url: "{{ path('contact_ajax_import') }}",
+                    type: 'POST',
+                    data: formData,
+                    async: false,
+                    success: function (data) {
+                        toastr.options = {
+                            "closeButton": true,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-center",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "1000",
+                            "hideDuration": "1000",
+                            "timeOut": "10000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        };
+                        toastr.success('You added ' + data.count + ' new contacts.', 'Import Completed Successfully');
+
+                        spinner.parent().hide();
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    error: function (response) {
+                        spinner.hide();
+                        spinner.parent().prop('disabled', false);
+
+                        toastr.options = {
+                            "closeButton": true,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-center",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "1000",
+                            "hideDuration": "1000",
+                            "timeOut": "10000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        };
+
+                        if (response.responseText !== undefined) {
+                            message = response.responseText;
+                        } else {
+                            messgae = 'Please contact with support about this problem.';
+                        }
+
+                        toastr.error(message, 'There was error on server side.');
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+{% endblock %}

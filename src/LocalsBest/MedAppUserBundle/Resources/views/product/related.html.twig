@@ -1,0 +1,40 @@
+<h3>Related Products</h3>
+<div class="gap gap-mini"></div>
+<div class="row row-wrap">
+    {% for product in products %}
+        <div class="col-md-4">
+            <div class="product-thumb">
+                <header class="product-header">
+                    {% if product.0.images is not empty %}
+                        <img src="{{ vich_uploader_asset(product.0.images.first, 'imageFile', 'LocalsBest\\UserBundle\\Entity\\ProductImage') }}" alt="{{ product.0.title }}">
+                    {% else %}
+                        <img src="/shop/img/800x600.png" alt="{{ product.0.title }}" title="{{ product.0.title }}"/>
+                    {% endif %}
+                </header>
+                <div class="product-inner">
+                    <ul class="icon-group icon-list-rating" title="3.5/5 rating">
+                        {{ product.averageRating|rating|raw }}
+                    </ul>
+                    <h5 class="product-title">{{ product.0.title }}</h5>
+                    <p class="product-desciption">
+                        {{ product.0.shortDescription|raw }}
+                    </p>
+                    <div class="product-meta">
+                        <ul class="product-price-list">
+                            <li><span class="product-price">{{ product.0.getPrice }}</span>
+                            </li>
+                        </ul>
+                        <ul class="product-actions-list">
+                            <li>
+                                <a class="btn btn-sm" href="{{ path('products_show', { 'slug': product.0.slug }) }}">
+                                    <i class="fa fa-bars"></i> Details
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+<div class="gap gap-small"></div>

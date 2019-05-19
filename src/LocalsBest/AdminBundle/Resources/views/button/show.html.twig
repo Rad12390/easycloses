@@ -1,0 +1,40 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <style>
+        #form{margin-top: -35px;margin-left: 185px;}
+    </style>
+    <h1>Button</h1>
+
+    <table class="table record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ entity.location }}</td>
+            </tr>
+            <tr>
+                <th>Label</th>
+                <td>{{ entity.name }}</td>
+            </tr>
+            <tr>
+                <th>Link</th>
+                <td>{{ entity.link }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <a class="btn btn-default" href="{{ path('admin_buttons') }}">
+        Back to the list
+    </a>
+
+    <a class="btn btn-warning" href="{{ path('admin_buttons_edit', { 'id': entity.id }) }}" style="margin-left: 3px;">
+        Edit
+    </a>
+
+    {{ form(delete_form) }}
+{% endblock %}

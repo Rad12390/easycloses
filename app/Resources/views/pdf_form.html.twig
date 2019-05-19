@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=no">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
+    <script src="{{ asset('shop/js/pdf.js') }}"></script>
+    <script src="{{ asset('shop/js/pdf.worker.js') }}"></script>
+    <style type="text/css">
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .row1 {
+                position: fixed;
+            }
+            #section-to-print * {
+                visibility: visible;
+            }
+            #section-to-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+            }
+            #dropName2 {
+                border: none;
+            }
+        }
+        
+        .row1 {
+            position: relative;
+        }
+        
+        .auto-form {
+            padding-top: 20px;
+        }
+        
+        .hide-div {
+            border: 1px solid #c3c3c3;
+            padding: 15px;
+        }
+        
+        .hide-div h1 {
+            margin-top: 0;
+            font-size: 25px;
+        }
+        
+        .hide-div h1 {
+            margin-top: 0;
+            font-size: 25px;
+            background-color: #3598dc;
+            color: #fff;
+            margin-top: -15px;
+            margin-left: -15px;
+            margin-right: -15px;
+            padding: 10px 15px;
+            text-align: center;
+        }
+        
+        .hide-div h4 {
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        
+        .hide-div p.click {
+            font-weight: 600;
+        }
+        
+        .action {
+            margin-top: 30px;
+            text-align: right;
+        }
+        
+        .action .panel-f {
+            display: inline-block;
+        }
+        
+        .action .panel-f button.btn.btn-sm.btn-warning {
+            margin-right: 10px;
+            width: 80px;
+        }
+        
+        .action .panel-f input.btn.btn-sm.btn-danger {
+            width: 80px;
+        }
+        
+        div#section-to-print {
+            border: 1px solid #c3c3c3;
+        }
+        
+        div#section-to-print h1 {
+            margin-top: 0;
+            font-size: 25px;
+            margin-left: -15px;
+            margin-right: -15px;
+            padding: 10px 15px;
+            text-align: center;
+        }
+        
+        .rightElement {
+            width: 48%;
+            float: left;
+            padding-left: 5px;
+        }
+        
+        .leftElement {
+            width: 48%;
+            float: left;
+            padding-right: 10px;
+        }
+        
+        #upload-button {
+            width: 150px;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        #file-to-upload {
+            display: none;
+        }
+        
+        #pdf-main-container {
+            width: 100%;
+            margin: 20px auto;
+        }
+        
+        #pdf-loader {
+            display: none;
+            text-align: center;
+            color: #999999;
+            font-size: 13px;
+            line-height: 100px;
+            height: 100px;
+        }
+        
+        #pdf-contents {
+            width: auto;
+            display: none;
+        }
+        
+        #pdf-meta {
+            overflow: hidden;
+            margin: 0 0 20px 0;
+        }
+        
+        #pdf-buttons {
+            float: left;
+        }
+        
+        #page-count-container {
+            float: right;
+        }
+        
+        #pdf-current-page {
+            display: inline;
+        }
+        
+        #pdf-total-pages {
+            display: inline;
+        }
+        
+        #pdf-canvas {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+        }
+        
+        #page-loader {
+            height: 100px;
+            line-height: 100px;
+            text-align: center;
+            display: none;
+            color: #999999;
+            font-size: 13px;
+        }
+        
+        .pdf-space {
+            width: 78%;
+            float: left;
+        }
+        
+        .form-space {
+            width: 18%;
+            float: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pdf-space">
+        <button id="upload-button">Select PDF</button>
+        <input type="file" id="file-to-upload" accept="application/pdf" />
+        <div id="section-to-print" class="row1">
+            <div id="section-to-print" id="pdf-main-container">
+                <div id="pdf-loader">Loading document ...</div>
+                <div id="pdf-contents">
+                    <div id="pdf-meta">
+                        <div id="pdf-buttons">
+                            <button id="pdf-prev">Previous</button>
+                            <button id="pdf-next">Next</button>
+                        </div>
+                        <div id="page-count-container">Page
+                            <div id="pdf-current-page"></div> of
+                            <div id="pdf-total-pages"></div>
+                        </div>
+                    </div>
+                    <div id="droppable" class='droptarget'>
+                        <canvas id="pdf-canvas" width="800px"></canvas>
+                    </div>
+                    <div id="page-loader">Loading page ...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divToHideOnPrint" class="form-space">
+        <form id="configreset">
+            <div class="hide-div">
+                <div>
+                    <h1>Instructions</h1>
+                </div>
+                <div>
+                    <h4>Please add Name & Initials</h4>
+                </div>
+                <!-- <div class="row"> -->
+                <div class="leftElement">
+
+                    <!-- <div class="form-group has-feedback">
+                        <label for="name" class="col-3">Name</label>
+                        <p contenteditable="true" class="form-control draggable draggableFocus" id="dragName" style="
+								border: 1px solid #ccc;"></p>
+                      
+                    </div>
+                    <div class="form-group has-feedback ">
+                        <label for="name" class="col-3">Initials</label>
+                        <p contenteditable="true" class="form-control draggable draggableFocus" id="dragInitials" style="
+									border: 1px solid #ccc;"></p>
+                    </div> -->
+                    <div>
+                        <p class="draggable"><span class="makeopaque">Name</span>
+                            <textarea style="width:100%" class="draggable" col="15" rows="1" name="Remarks"></textarea>
+                        </p>
+                    </div> <div>
+                        <p class="draggable"><span class="makeopaque">Initials</span>
+                            <textarea style="width:100%" class="draggable" col="15" rows="1" name="Remarks"></textarea>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="draggable">
+                            <input type="checkbox" name="agreed" value="Car"><br>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="draggable">
+                            <input type="radio" name="gender" value="female"><br>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="draggable"><span class="makeopaque">Text Area</span>
+                            <textarea style="width:100%" class="draggable" col="15" rows="1" name="Remarks"></textarea>
+                        </p>
+                    </div>
+
+                </div>
+                <div class="rightElement">
+
+                </div>
+                <div class="" style="clear: both;">
+                    <div class="form-group has-feedback ">
+                        <label for="name" class="col-3"> Please Select Date-</label>
+                        <input style="width: 100%" type="date" id="dateId" value=''>
+                        <p contenteditable="true" class="form-control draggable draggableFocus" id="dragDate" style="
+											border: 1px solid #ccc;  ">Drag this field after selecting the date on above field.</p>
+                    </div>
+
+                </div>
+                <!-- </div> -->
+                <!-- <div>
+							<p class="click">Please click below button or drag to the agreement to fill the details. </p>
+						</div>
+						<div class="panel-f droptarget" ondrop="drop(event)" ondragover="allowDrop(event)">
+							<button onclick="fillData()" ondragstart="dragStart(event)" ondrag="dragging(event)" draggable="true" type="button" class="btn btn-sm btn-primary"><i class="fa fa-dot-circle-o"></i>Drag Me !</button>
+							</a>
+						</div> -->
+                <div class="action">
+                    <div class="panel-f ">
+                        <button type="button" onclick="myPrint()" class="btn btn-sm btn-warning"><i class="fa fa-dot-circle-o"></i>Print</button>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+
+
+            $("#dateId").change(function() {
+                $("#dragDate").text($("#dateId").val());
+            });
+            $(".draggableFocus").click(function() {
+                $(this).focus()
+            });
+
+            $(".draggable").draggable({
+                cursor: "move",
+                revert: "invalid",
+                helper: "clone"
+            });
+
+            $("#droppable").droppable({
+                accept: '.draggable',
+                hoverClass: "ui-state-active",
+                drop: function(ev, ui) {
+                    if ($(ui.helper).hasClass('new')) {
+                        $('.new').draggable({
+                            revert: true
+                        });
+                    } else {
+                        $(this).append($(ui.helper).clone().draggable({
+                            helper: "original"
+                        }).addClass('new'));
+                        $('.new .makeopaque').css('opacity','0');
+                    }
+                },
+                out: function(event, ui) {
+                    $(ui.draggable).fadeOut(1000, function() {
+                        $(this).remove();
+                    });
+                }
+            });
+
+            function myPrint() {
+                $('#dropName2').css('border', 'none')
+                $('#dropName1').css('border', 'none')
+                $('#dropInitials').css('border', 'none')
+                window.print();
+                $('#dropName2').css('border', '1px solid #ccc')
+                $('#dropName1').css('border', '1px solid #ccc')
+                $('#dropInitials').css('border', '1px solid #ccc')
+            }
+        })
+    </script>
+    <script>
+        function myPrint() {
+
+            window.print();
+
+        }
+    </script>
+    <script>
+        var __PDF_DOC,
+            __CURRENT_PAGE,
+            __TOTAL_PAGES,
+            __PAGE_RENDERING_IN_PROGRESS = 0,
+            __CANVAS = $('#pdf-canvas').get(0),
+            __CANVAS_CTX = __CANVAS.getContext('2d');
+
+        function showPDF(pdf_url) {
+            $("#pdf-loader").show();
+
+            PDFJS.getDocument({
+                url: pdf_url
+            }).then(function(pdf_doc) {
+                __PDF_DOC = pdf_doc;
+                __TOTAL_PAGES = __PDF_DOC.numPages;
+
+                // Hide the pdf loader and show pdf container in HTML
+                $("#pdf-loader").hide();
+                $("#pdf-contents").show();
+                $("#pdf-total-pages").text(__TOTAL_PAGES);
+
+                // Show the first page
+                showPage(1);
+            }).catch(function(error) {
+                // If error re-show the upload button
+                $("#pdf-loader").hide();
+                $("#upload-button").show();
+
+                alert(error.message);
+            });;
+        }
+
+        function showPage(page_no) {
+            __PAGE_RENDERING_IN_PROGRESS = 1;
+            __CURRENT_PAGE = page_no;
+
+            // Disable Prev & Next buttons while page is being loaded
+            $("#pdf-next, #pdf-prev").attr('disabled', 'disabled');
+
+            // While page is being rendered hide the canvas and show a loading message
+            $("#pdf-canvas").hide();
+            $("#page-loader").show();
+
+            // Update current page in HTML
+            $("#pdf-current-page").text(page_no);
+
+            // Fetch the page
+            __PDF_DOC.getPage(page_no).then(function(page) {
+                // As the canvas is of a fixed width we need to set the scale of the viewport accordingly
+                var scale_required = __CANVAS.width / page.getViewport(1).width;
+
+                // Get viewport of the page at required scale
+                var viewport = page.getViewport(scale_required);
+
+                // Set canvas height
+                __CANVAS.height = viewport.height;
+
+                var renderContext = {
+                    canvasContext: __CANVAS_CTX,
+                    viewport: viewport
+                };
+
+                // Render the page contents in the canvas
+                page.render(renderContext).then(function() {
+                    __PAGE_RENDERING_IN_PROGRESS = 0;
+
+                    // Re-enable Prev & Next buttons
+                    $("#pdf-next, #pdf-prev").removeAttr('disabled');
+
+                    // Show the canvas and hide the page loader
+                    $("#pdf-canvas").show();
+                    $("#page-loader").hide();
+                });
+            });
+        }
+
+        // Upon click this should should trigger click on the #file-to-upload file input element
+        // This is better than showing the not-good-looking file input element
+        $("#upload-button").on('click', function() {
+            $("#file-to-upload").trigger('click');
+        });
+
+        // When user chooses a PDF file
+        $("#file-to-upload").on('change', function() {
+            // Validate whether PDF
+            if (['application/pdf'].indexOf($("#file-to-upload").get(0).files[0].type) == -1) {
+                alert('Error : Not a PDF');
+                return;
+            }
+
+            $("#upload-button").hide();
+
+            // Send the object url of the pdf
+            showPDF(URL.createObjectURL($("#file-to-upload").get(0).files[0]));
+        });
+
+        // Previous page of the PDF
+        $("#pdf-prev").on('click', function() {
+            if (__CURRENT_PAGE != 1)
+                showPage(--__CURRENT_PAGE);
+        });
+
+        // Next page of the PDF
+        $("#pdf-next").on('click', function() {
+            if (__CURRENT_PAGE != __TOTAL_PAGES)
+                showPage(++__CURRENT_PAGE);
+        });
+    </script>
+
+</body>
+
+</html>

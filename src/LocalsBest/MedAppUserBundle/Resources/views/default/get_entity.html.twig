@@ -1,0 +1,13 @@
+{% if object == 'LocalsBestUserBundle:Transaction' %}
+    <div class="media-status">
+        <a href="{{ path('transaction_view', {'id': id}) }}"><strong>Transaction:</strong> {{ item.fullAddress }}</a>
+        <span class="label label-sm label-success">{{ item.transactionStatus|replace({'_': ' '}) }}</span>
+    </div>
+{% elseif object == 'LocalsBestUserBundle:Job' %}
+    <div class="media-status">
+        <a href="{{ path('job_view', {'id': id}) }}"><strong>Job:</strong> {{ item.fullAddress }}</a>
+        <span class="label label-sm label-warning">{{ item.jobStatus|replace({'_': ' '})|capitalize }}</span>
+    </div>
+{% elseif object == 'LocalsBestUserBundle:User' %}
+    <a href="{{ path('user_view', {'username': item.username}) }}"><strong>User:</strong> {{ item.firstName }} {{ item.lastName }}</a>
+{% endif %}

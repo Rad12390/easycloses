@@ -1,0 +1,45 @@
+<form method="post" action="{{ path('payment_checkout', {'token' : token}) }}">
+    <input type="hidden" name="businessId" value="{{ business.id }}">
+    <input type="hidden" name="industryTypeId" value="{{ indTypeId }}">
+    <input type="hidden" name="industryGroupId" value="{{ price.id }}">
+    <table class="table">
+        <tr>
+            <th>
+                Network
+            </th>
+            {% if price.bronzePrice > 0 %}
+                <th>Bronze Price</th>
+            {% endif %}
+            {% if price.silverPrice > 0 %}
+                <th>Silver Price</th>
+            {% endif %}
+            {% if price.goldPrice > 0 %}
+                <th>Gold Price</th>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>
+                {{ business.name }}
+            </th>
+            {% if price.bronzePrice > 0 %}
+                <td>
+                    <input class="bronze" id="bronze" name="priceLevel" value="bronze" type="radio">
+                    <label for="bronze">${{ price.bronzePrice }}</label>
+                </td>
+            {% endif %}
+            {% if price.silverPrice > 0 %}
+                <td>
+                    <input class="silver" id="silver" name="priceLevel" value="silver" type="radio">
+                    <label for="silver">${{ price.silverPrice }}</label>
+                </td>
+            {% endif %}
+            {% if price.goldPrice > 0 %}
+                <td>
+                    <input class="gold" id="gold" name="priceLevel" value="gold" checked type="radio">
+                    <label for="gold">${{ price.goldPrice }}</label>
+                </td>
+            {% endif %}
+        </tr>
+    </table>
+    <button type="submit" class="btn btn-success">Sign Up</button>
+</form>

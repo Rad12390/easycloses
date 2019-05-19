@@ -1,0 +1,66 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}
+    Ordered Products
+{% endblock %}
+
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content -%}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-puzzle-piece"></i> Ordered Products
+                <span>{{ tooltip_text.getText('Vendor Orders','header')|raw }}</span>
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table class="table table-order">
+                    <thead>
+                        <tr>
+                            <th>Qty</th>
+                            <th>Product</th>
+                            <th>Status</th>
+                            <th>Whose Order</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for orderItem in orderItems %}
+                            <tr>
+                                <td>
+                                    {{ orderItem.quantity }}
+                                </td>
+                                <td>
+                                    {% if orderItem.sku.package is not null %}
+                                        <a href="{{ path('packages_show', {'id': orderItem.sku.package.id}) }}">
+                                    {% else %}
+                                        <a href="{{ path('combo_show', {'id': orderItem.sku.combo.id}) }}">
+                                    {% endif %}
+                                        {{ orderItem.title }}
+                                    </a>
+                                </td>
+                                <td>{{ orderItem.order.status }}</td>
+                                <td>{{ orderItem.order.user.fullName }}</td>
+                                <td>{{ orderItem.order.createdAt|date("m.d.Y H:i") }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">
+                                    There are no orders yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

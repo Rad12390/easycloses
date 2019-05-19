@@ -1,0 +1,33 @@
+{% block vich_file_widget %}
+    {% spaceless %}
+        <div class="fileinput fileinput-new" data-provides="fileinput">
+            <div class="fileinput-preview thumbnail" data-trigger="fileinput" style="width: 200px; height: 150px; line-height: 150px;">
+                <img {% if download_uri is defined and download_uri %}src="{{ download_uri }}"{% endif %} alt="">
+            </div>
+            <div>
+                <span class="btn default btn-file">
+                    {% if form.file.vars.data and form.file.vars.data.size %}
+                        <span class="fileinput-new">Change File </span>
+                    {% else %}
+                        <span class="fileinput-new">Select File </span>
+                    {% endif %}
+                    &nbsp;
+                    <span class="fileinput-exists">
+                        Change
+                    </span>
+                    {{ form_widget(form.file) }}
+                </span>
+                &nbsp;&nbsp;
+                {% if form.file.vars.data and form.file.vars.data.size and download_uri is defined and download_uri %}
+                    <a href="#" class="btn red fileinput-exists" data-dismiss="fileinput">
+                        Remove
+                    </a>
+
+                    <a class="btn blue" href="{{ download_uri }}">
+                        <i class="fa fa-download"></i> {{ 'download'|trans({}, 'VichUploaderBundle') }}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endspaceless %}
+{% endblock %}

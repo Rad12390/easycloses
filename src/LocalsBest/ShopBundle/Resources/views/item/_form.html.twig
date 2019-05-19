@@ -1,0 +1,282 @@
+{{ form_start(form) }}
+{{ form_errors(form) }}
+{{ form_row(form.type) }}
+{{ form_row(form.externalLink) }}
+{{ form_row(form.plugin) }}
+
+
+<div class="portlet box blue">
+    <div class="portlet-title">
+        <div class="caption">
+            Description
+            <span>{{ tooltip_text.getText('Description','header')|raw }}</span>
+        </div>
+        <div class="tools">
+            <a href="javascript:;" class="collapse" data-original-title="" title="">
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+        {{ form_row(form.title) }}
+        {{ form_row(form.shortDescription) }}
+        {{ form_row(form.description) }}
+         {{ form_row(form.quantity) }}
+    </div>
+</div>
+    
+<div class="portlet box blue">
+    <div class="portlet-title">
+        <div class="caption">
+            Package Display
+            <span>{{ tooltip_text.getText('Package Display','header')|raw }}</span>
+        </div>
+        <div class="tools">
+            <a href="javascript:;" class="collapse" data-original-title="" title="">
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    by Member Role
+                    <span>{{ tooltip_text.getText('by Member Role','header')|raw }}</span>
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="collapse" data-original-title="" title="">
+                    </a>
+                </div>
+
+            </div>
+            <div class="portlet-body">
+                {% for key , restriction  in form.restrictions %}
+                    {% if key == 0 %}
+                    {{ form_row(restriction.buyerType) }}
+                    
+                       {# {{ form_row(restriction.type , { 'attr': {'style': 'hidden-row'} }) }}
+                        {{ form_row(restriction.roles) }}#}
+{#                        {{ form_row(restriction.rolesSwitch) }}#}
+                   
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    by Area
+                    <span>{{ tooltip_text.getText('by Area','header')|raw }}</span>
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="expand" data-original-title="" title="">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body portlet-collapsed">
+                {% for restriction in form.restrictions %}
+
+                    {{ form_row(restriction.states) }} 
+{#                    {{ form_row(restriction.statesSwitch) }}#}
+                    {{ form_row(restriction.citiesSwitch) }}
+                   {# {{ form_row(restriction.cities) }}#}
+                   <div class="form-group">                
+                       <label class="control-label" for="localsbest_shopbundle_item_restrictions_0_cities">Cities</label>
+                       <span style="float:right;margin-top:-15px;">
+                            {{ button_text.getText('2')|raw }}
+                            {{ button_text.getText('3')|raw }}
+                       </span>
+                       <select id="localsbest_shopbundle_item_restrictions_0_cities" name="localsbest_shopbundle_item[restrictions][0][cities][]" class="select2 form-control select2-hidden-accessible" multiple="" tabindex="-1" aria-hidden="true"> 
+                       </select>
+                   </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    by Industry
+                    <span>{{ tooltip_text.getText('by Industry','header')|raw }}</span>
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="expand" data-original-title="" title="">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body portlet-collapsed">
+                {% for restriction in form.restrictions %}
+
+                    {{ form_row(restriction.industriesSwitch) }}
+                    {{ form_row(restriction.industries) }}
+                  
+
+
+                {% endfor %}
+            </div>
+        </div>
+        <div class="portlet box blue">
+            <div class="portlet-title">
+                <div class="caption">
+                    by Business Name
+                    <span>{{ tooltip_text.getText('by Business Name','header')|raw }}</span>
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="expand" data-original-title="" title="">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body portlet-collapsed">
+                {% for restriction in form.restrictions %}
+                    {{ form_row(restriction.businessesSwitch) }}
+                    {{ form_row(restriction.businesses) }}
+                    
+
+                {% endfor %}
+            </div>
+        </div>
+            
+        <div class="portlet box blue use-restriction">
+        <div class="portlet-title">
+            <div class="caption">
+                Add Use Restrictions
+            </div>
+            <div class="tools">
+                <a href="javascript:;" class="expand" data-original-title="" title="">
+                </a>
+            </div>
+        </div>
+        <div class="portlet-body portlet-collapsed">
+            
+            <ul class="list-unstyled item-restrictions" data-prototype="{{ form_widget(form.restrictions.vars.prototype)|e('html_attr') }}">
+                {% for restriction in form.restrictions %}
+                    <li>
+                        {{ form_row(restriction.states) }}
+                        {{ form_row(restriction.citiesSwitch) }}
+                         
+                        {{ form_row(restriction.industriesSwitch) }}
+                        {{ form_row(restriction.industries) }}
+                        {{ form_row(restriction.businessesSwitch) }}
+                        {{ form_row(restriction.businesses) }}
+                       
+                    </li>
+                    
+                {% endfor %}
+            </ul>
+            <div class="form-group">                
+                        <label class="control-label" for="localsbest_shopbundle_item_restrictions_1_cities">Cities</label>
+                        <select id="localsbest_shopbundle_item_restrictions_1_cities" name="localsbest_shopbundle_item[restrictions][1][cities][]" class="select2 form-control select2-hidden-accessible" multiple="" tabindex="-1" aria-hidden="true"> 
+                        </select>
+                    </div>
+        </div>
+            
+    </div>
+
+
+    </div>
+</div>
+
+
+<!--div class="portlet box blue">
+    <div class="portlet-title">
+        <div class="caption">
+            Add Dispositions
+        </div>
+        <div class="tools">
+            <a href="javascript:;" class="collapse" data-original-title="" title="">
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <ul class="list-unstyled item-dispositions" data-prototype="{#{{ form_widget(form.dispositions.vars.prototype)|e('html_attr') }}#}">
+          {#  {% for disposition in form.dispositions %}
+                <li>
+                    {{ form_row(disposition.type) }}
+                    {{ form_row(disposition.options) }}
+                </li>
+            {% endfor %}#}
+        </ul>
+    </div>
+</div-->
+
+
+<div class="portlet box blue notifications">
+    <div class="portlet-title">
+        <div class="caption">
+            Notifications
+        </div>
+        <div class="tools">
+            <a href="javascript:;" class="collapse" data-original-title="" title="">
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="text-center">Me</th>
+                        <th></th>
+                        <th class="text-center">Client</th>
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr>
+                        <th class="text-center">
+                            {{ form_widget(form.emailToVendor) }}
+                        </th>
+                        <th class="text-center">Email</th>
+                        <th class="text-center">
+                            {{ form_widget(form.emailToClient) }}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="text-center">
+                            {{ form_widget(form.textToVendor) }}
+                        </th>
+                        <th class="text-center">Text</th>
+                        <th class="text-center">
+                            {{ form_widget(form.textToClient) }}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="text-center">
+                            {{ form_widget(form.notificationToVendor) }}
+                        </th>
+                        <th class="text-center">LB Platform</th>
+                        <th class="text-center">
+                            {{ form_widget(form.notificationToClient) }}
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div class="portlet box blue images-section">
+    <div class="portlet-title">
+        <div class="caption">
+            Add Images
+            <span>{{ tooltip_text.getText('Add Images','header')|raw }}</span>
+        </div>
+        <div class="tools">
+            <a href="javascript:;" class="collapse" data-original-title="" title="">
+            </a>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <ul class="list-unstyled item-images" data-prototype="{{ form_widget(form.images.vars.prototype)|e('html_attr') }}">
+            {% for image in form.images %}
+                <li>
+                    {{ form_row(image.orderNumber) }}
+                     {{ form_row(image.file) }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{{ form_widget(form.submit_draft) }}
+{{ form_widget(form.submit_active) }}
+{{ form_end(form) }}

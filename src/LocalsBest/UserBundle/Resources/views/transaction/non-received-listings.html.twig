@@ -1,0 +1,188 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Non Received Listings{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-circle"></i>
+        <a href="{{ path('transaction_index') }}">Transactions</a>
+    </li>
+    <li>
+        <i class="fa fa-circle"></i>
+        Non Received Listings
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/r/bs/jszip-2.5.0,pdfmake-0.1.18,dt-1.10.9,b-1.0.3,b-colvis-1.0.3,b-html5-1.0.3,b-print-1.0.3,r-1.0.7/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css') }}"/>
+
+    <style type="text/css">
+        div.table-responsive {
+            overflow-x: inherit !important;
+        }
+
+        table.dataTable>tbody>tr.child ul.dropdown-menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+        }
+
+        table.dataTable>tbody>tr.child .open ul.dropdown-menu {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="https://cdn.datatables.net/r/bs/jszip-2.5.0,pdfmake-0.1.18,dt-1.10.9,b-1.0.3,b-colvis-1.0.3,b-html5-1.0.3,b-print-1.0.3,r-1.0.7/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js') }}"></script>
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            (function ($) {
+                $.each(['show', 'hide'], function (i, ev) {
+                    var el = $.fn[ev];
+                    $.fn[ev] = function () {
+                        this.trigger(ev);
+                        return el.apply(this, arguments);
+                    };
+                });
+            })(jQuery);
+
+            $("#addresses").on('hide', function () {
+                if (typeof(matchClicked) !== 'undefined') {
+                    window.location.reload();
+                }
+            });
+
+            var table = $('#example');
+            var oTable = table.dataTable({
+                dom: 'lfrtip',
+                order: [
+                    [ 7, "asc" ],
+                    [ 4, "desc" ]
+                ]
+            });
+
+            $("table").on("click", 'a.change-user-type', function(){
+                var object = this;
+                var userId = $(this).data('userid');
+                $.ajax({
+                    url: '/ajax-user-change-type/' + userId,
+                    method: "GET"
+                }).done(function( data ) {
+                    $(object).parent().html(data.html);
+                });
+            });
+
+            $('table#example').on('click', 'td', function(e) {
+                $('table#example tr.success').removeClass('success');
+                $(this).parent().addClass('success');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-cogs"></i>Non Received Listings
+            </div>
+        </div>
+        <div class="portlet-body">
+            <div class="table-responsive">
+                <table style="width: 100%;" id="example" class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th> MLS# </th>
+                        <th> Address </th>
+                        <th> Agent Name </th>
+                        <th> Listing Price </th>
+                        <th> Listing Date </th>
+                        <th> Agent Board Id </th>
+                        <th> Property Type </th>
+                        <th> Email </th>
+                        <th> Count </th>
+                        <th> Type </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in thatNonReceivedListings %}
+                            <tr>
+                                <td>{{ item.mlsId }}</td>
+                                <td>{{ item.propertyAddress }}</td>
+                                <td>
+                                    {% if item.agentName.id is defined %}
+                                        <a type="button" href="{{ path('transaction_non_received_addresses', { mls: item.mlsId, agent: item.agentName.id, address: item.propertyAddress, price: item.listingPrice, listingDate: item.listingDate|date('m/d/Y'), propertyType: ('Rental' in item.propertyType ? 'Lease' : 'Sale') }) }}" data-target="#addresses" data-toggle="modal">{{ item.agentName.fullName }}</a>
+                                    {% else %}
+                                        {{ item.agentName }}
+                                    {% endif %}
+                                </td>
+                                <td>${{ item.listingPrice|number_format(2, '.', ',') }}</td>
+                                <td>{{ item.listingDate|date('m/d/Y') }}</td>
+                                <td>{{ item.agentBoardId }}</td>
+                                <td>{% if 'Rental' in item.propertyType %}Lease{% else %}Sale{% endif %}</td>
+                                <td>
+                                    {% set schedulerO = null %}
+                                    {% for scheduler in emailsSchedulers %}
+                                        {% if scheduler.mlsNumber == item.mlsId and scheduler.address == item.propertyAddress %}
+                                            {% set schedulerO = scheduler %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if schedulerO is not null %}
+                                        {% if schedulerO.status == true %}
+                                            <a href="{{ path('transactions_non_received_toggle_scheduler_status', { id: schedulerO.id }) }}" class="btn btn-sm btn-default"><i class="fa fa-stop"></i> Stop</a>
+                                        {% else %}
+                                            <a href="{{ path('transactions_non_received_toggle_scheduler_status', { id: schedulerO.id }) }}" class="btn btn-sm btn-default"><i class="fa fa-play"></i> Re-Start</a>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if item.agentName.id is defined %}
+                                            <a href="{{ path('transaction_non_received_emails', {userId: item.agentName.id, address: item.propertyAddress, mls: item.mlsId}) }}"  data-target="#non-emails" data-toggle="modal" class="btn btn-sm btn-default email-btn"><i class="fa fa-envelope"></i> Email</a>
+                                        {#{% else %}#}
+                                            {#<a href="{{ path('transaction_non_received_emails', {userId: 0, address: item.propertyAddress, agentName: item.agentName, mls: item.mlsId}) }}"  data-target="#non-emails" data-toggle="modal" class="btn btn-sm btn-default"><i class="fa fa-envelope"></i> Email</a>#}
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if schedulerO is not null %}
+                                        <span class="badge badge-info badge-roundless"> {{ schedulerO.counter }} </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.agentName.id is defined %}
+                                        <a data-userid="{{ item.agentName.id }}"  class="change-user-type btn btn-sm btn-{{ item.agentName.userType.color }}">{{ item.agentName.userType.short_name }}</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="addresses" role="basic" aria-hidden="true" style="display: none; padding-right: 15px;">
+        <div class="modal-dialog modal-lg" style="transform: none !important;">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="non-emails" role="basic" aria-hidden="true" style="display: none; padding-right: 15px;">
+        <div class="modal-dialog modal-lg" style="transform: none !important;">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

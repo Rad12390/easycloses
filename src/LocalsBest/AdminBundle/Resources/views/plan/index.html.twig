@@ -1,0 +1,31 @@
+{% extends '::base.html.twig' %}
+
+{% block content -%}
+    <h1>Plan list</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('admin_plans_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{{ entity.name }}</td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{{ path('admin_plans_show', { 'id': entity.id }) }}">show</a>
+                    <a class="btn btn-xs btn-warning" href="{{ path('admin_plans_edit', { 'id': entity.id }) }}">edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a class="btn btn-success" href="{{ path('admin_plans_new') }}">
+        Create a new entry
+    </a>
+{% endblock %}

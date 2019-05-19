@@ -1,0 +1,78 @@
+<div class="content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Blank Documents Preview</h4>
+    </div>
+
+    <form role="form" method="post" id="zip-form" action="{{ path('blank_docs_download_zip') }}">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>Blank Documents</h4>
+                    {% for key, blankDoc in blankDocs %}
+                        <p class="muted">
+                            <i class="fa fa-paperclip"></i> {{ blankDoc }}
+                            <input class="blank-document" type="hidden" name="documents[]" value="{{ key }}">
+                        </p>
+                    {% else %}
+                        <h4 class="text-danger">
+                            Sorry, but there are no blank documents that you need.
+                        </h4>
+                    {% endfor %}
+                </div>
+            </div>
+            {% if docTypes|length > blankDocs|length %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>No Blank Documents For This</h4>
+                        {% for doc in docTypes if doc not in blankDocs %}
+                            <p class="text-danger">
+                                <i class="fa fa-times"></i> {{ doc }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-success" id="download_zip" {% if blankDocs|length == 0 %}disabled{% endif %}>
+                    <i class="fa fa-download"></i> Download
+                </button>
+
+                <button style="display: none;" type="button" disabled class="btn btn-success" id="download_wait">
+                    <i class="fa fa-spinner fa-spin"></i> Please Wait...
+                </button>
+
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $("#zip-form").submit(function(event) {
+//            event.preventDefault();
+//            var docsIds = $(".blank-document").map(
+//                function () {
+//                    return $(this).val();
+//                }).get();
+
+            $('#download_zip').hide();
+            $('#download_wait').show();
+
+            {#// I like to use defers :)#}
+            {#var deferred = $.post("{{ path('blank_docs_download_zip') }}", { documents: docsIds });#}
+
+            {#deferred.success(function () {#}
+                {#$('#download_zip').show();#}
+                {#$('#download_wait').hide();#}
+            {#});#}
+
+            {#deferred.error(function () {#}
+                {#// Handle any errors here.#}
+            {#});#}
+        });
+    });
+</script>

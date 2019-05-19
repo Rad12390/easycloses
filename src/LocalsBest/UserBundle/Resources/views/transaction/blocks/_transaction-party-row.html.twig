@@ -1,0 +1,28 @@
+<tr>
+    <td data-title="Role">{{ role }}</td>
+    <td data-title="Contact Name">{{ contact.contactName }}</td>
+    <td data-title="Company">{% if contact.company is not null %} {{ contact.company|raw }} {% endif %}</td>
+    <td data-title="Phone Number">{% if contact.phone is not null %}{{ contact.phone }}{% endif %}</td>
+    <td data-title="Email">{% if contact.email is not null %}{{ contact.email }}{% endif %}</td>
+    <td data-title="Company Phone">{% if contact.companyPhone is not null %}{{ contact.companyPhone }}{% endif %}</td>
+    <td data-title="Company Email">{% if contact.companyEmail is not null %}{{ contact.companyEmail }}{% endif %}</td>
+    {% if file.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+        <td>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-expanded="false">
+                    <i class="fa fa-gear"></i>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <a href="{{ path('transaction_contact_detail', { 'transactionId': file.id, 'id': contact.id }) }}"
+                           data-role="{{ role }}" data-target="#ajax" data-toggle="modal">
+                            Edit
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    {% endif %}
+</tr>

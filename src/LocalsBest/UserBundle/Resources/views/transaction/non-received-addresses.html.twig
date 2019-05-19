@@ -1,0 +1,104 @@
+<div class="content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">
+            {{ data.address }} | {{ data.propertyType }} | ${{ data.price|number_format(0, '.', ',') }}  | {{ data.mls }} | {{ data.listingDate }}
+            <a href="{{ path('transaction_non_received_emails', {userId: data.agent, address: data.address, mls: data.mls}) }}"  data-target="#non-emails" data-toggle="modal" class="btn btn-sm btn-default"><i class="fa fa-envelope"></i> Email</a>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table" id="addresess">
+                    {% for transaction in transactions %}
+                        <tr>
+                            <td>
+                                <input data-add-path="/transactions/non-received-mls-match/{{ data.mls }}/{{ transaction.id }}" data-replace-path="/transactions/non-received-mls-replace/{{ data.mls }}/{{ transaction.id }}" type="radio" name="selected" class="selected-address">
+                            </td>
+                            <td>
+                                {% if transaction.closing is not null %}
+                                    <a target="_blank" href="{{ path('transaction_edit_closing', { transaction: transaction.id, closing: transaction.closing.id }) }}">
+                                {% else %}
+                                    <a target="_blank" href="{{ path('transaction_edit_listing', { id: transaction.id }) }}">
+                                {% endif %}
+                                    {{ transaction.fullAddress }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if ( transaction.closing is not null and ( 'Seller' in transaction.closing.represent or 'Buyer' in transaction.closing.represent ) ) or ( transaction.listing is not null and ( 'Seller' in transaction.listing.represent or 'Buyer' in transaction.listing.represent ) ) %}Sale{% else %}Lease{% endif %}
+                            </td>
+                            <td>
+                                {% if ( transaction.closing is not null ) %}
+                                    {{ transaction.closing.moneyBox.contractPrice }}
+                                {% else %}
+                                    {{ transaction.listing.moneyBox.contractPrice }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ transaction.transactionProperty.mlsNumber }}
+                                {% if transaction.transactionProperty.primaryMlsNumber is not null and transaction.transactionProperty.pMlsNumber is not null %}
+                                    | {{ transaction.transactionProperty.pMlsNumber }}
+                                {% endif %}
+                            </td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var addressesTable = $("table#addresess");
+
+        addressesTable.on("click", 'input.selected-address', function(){
+
+            addPath = $(this).data('add-path');
+            replacePath = $(this).data('replace-path');
+
+            $.each($(this).parent().parent().parent().find('tr'), function( index, value ) {
+                $(value).find('td:last').html('');
+            });
+
+            row = $(this).parent().parent();
+            last = $(row).find('td:last');
+            $(last).html('<button id="mls-match" data-add-path="' + addPath + '" class="btn btn-xs btn-primary">Add</button><button id="mls-replace" data-replace-path="' + replacePath + '" class="btn btn-xs btn-warning">Replace</button>');
+        });
+
+        addressesTable.on("click", '#mls-match', function(){
+            path = $(this).data('add-path');
+            matchClicked = true;
+            $.ajax({
+                method: "GET",
+                url: path,
+                dataType: "json",
+                success:function(data){
+                    if(data.result == true) {
+                        $('#addresses').modal('hide');
+                    } else {
+                        alert('There was error on server!');
+                    }
+                }
+            })
+        });
+
+        addressesTable.on("click", '#mls-replace', function(){
+            path = $(this).data('replace-p[ath');
+            matchClicked = true;
+            $.ajax({
+                method: "GET",
+                url: path,
+                dataType: "json",
+                success:function(data){
+                    if(data.result == true) {
+                        $('#addresses').modal('hide');
+                    } else {
+                        alert('There was error on server!');
+                    }
+                }
+            })
+        });
+    });
+</script>

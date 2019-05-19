@@ -1,0 +1,112 @@
+{% set backgroundColor = "#d84a38" %}
+{% if documentType.document is not null %}
+    {% if documentType.approved %}
+        {% set backgroundColor = "#3cc051" %}
+    {% else%}
+        {% set backgroundColor = "#ffb848" %}
+    {% endif %}
+{% else %}
+    {% if documentType.status == 'R' %}
+        {% set backgroundColor = "#d84a38" %}
+    {% elseif documentType.status == 'O' %}
+        {% set backgroundColor = "#999999" %}
+    {% endif%}
+{% endif%}
+
+{% if backgroundColor == "#3cc051" and transaction.transactionStatus == 'Contract_fell_thru' %}
+    {% set backgroundColor = "#000000" %}
+{% endif %}
+
+<tr class="odd gradeX doc {{ type }} required " id="1253955_1392118" style="height:20px;">
+    <td>
+        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+            <input name="{{ type }}Doc" value="{{ documentType.id }}" type="checkbox" class="group-checkable for{{ type|capitalize }}Doc">
+            <span></span>
+        </label>
+    </td>
+    <td class="text-center">
+        <span class="badge" style="background-color: {{ backgroundColor }}; color: {{ backgroundColor }}"> 3 </span>
+    </td>
+    <td  id="Affiliated Business Disclosure" class="attach_name">
+        <label class="control-label ">
+            {{ documentType.name }}
+            {% if documentType.isRequired == true %}
+                <span class="required" aria-required="true">*</span>
+            {% endif %}
+        </label>
+    </td>
+    <td style="word-break: break-all; min-width: 100px;">
+        {% if documentType.document is not null and documentType.document.deleted is null %}
+            <a href="{{ path('document_typeview', {'id': documentType.id, 'from_transaction': true}) }}" >{{ documentType.document.clearFileName}}</a>
+        {% else %}
+            <div class="dropzone dropzone_small" id="upload_{{ documentType.id }}"></div>
+            <div class="dropzone_controller hide" id="control_{{ documentType.id }}"></div>
+        {% endif %}
+    </td>
+    <td >
+        {% if documentType.document is not null %}
+            {{ documentType.document.created|date('m-d-Y H:i:s') }}
+        {% endif %}
+    </td>
+    {% if transaction.transactionStatus not in ['Sold_Paid', 'Leased_Paid'] %}
+        <td >
+            {% if backgroundColor == "#000000" and transaction.transactionStatus == 'Contract_fell_thru' %}
+            {% else %}
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-gear"></i>
+                        <span class="caret"></span>
+                    </button>
+
+                    {% if app.user.role.level <= 5 %}
+                        <ul class="dropdown-menu pull-right loadAjax" role="menu">
+                            {% if documentType.isRequired == true  %}
+                                <li>
+                                    <a href="{{ path('document_type_unrequired', {'typeId': documentType.id, 'object': transaction.id, 'link-token': linkToken}) }}" >
+                                        Unrequire
+                                    </a>
+                                </li>
+                            {% elseif documentType.isRequired == false %}
+                                <li>
+                                    <a {% if nrds is not null %}onclick="return confirm('Agent created this transaction is currently getting reminders about missed documents, continuing will add this document to the list');"{% endif %} href="{{ path('document_type_required', {'typeId': documentType.id, 'object': transaction.id, 'link-token': linkToken}) }}" >
+                                        Require
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if documentType.document is null%}
+                                <li>
+                                    <a data-toggle="modal" data-target="#ajax" href="{{ path('document_request_exemption', {'documentTypeId': documentType.id, 'transactionId': transaction.id, 'link-token': linkToken}) }}">
+                                        Request Exemption
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li>
+                                <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id, 'object': transaction.id, 'link-token': linkToken}) }}">
+                                    <i class="fa fa-times"></i> Remove {% if (documentType.document is defined and documentType.document is not null) %}doc{% else %}row{% endif %}
+                                </a>
+                            </li>
+                        </ul>
+                    {% elseif ( (app.user.role.level == 7 and (documentType.createdBy == app.user or transaction.createdBy == app.user)) or app.user.role.level == 6) %}
+                        <ul class="dropdown-menu pull-right loadAjax" role="menu">
+                            {% if ( documentType.document is null ) %}
+                                <li>
+                                    <a data-toggle="modal" data-target="#ajax" href="{{ path('document_request_exemption', {'documentTypeId': documentType.id, 'transactionId': transaction.id, 'link-token': linkToken}) }}">
+                                        Request Exemption
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if ( ( documentType.isSystem == 0 and documentType.createdBy.role.level >= app.user.role.level) or ( documentType.document is not null and documentType.approved == 0 ) ) %}
+                                <li>
+                                    <a data-target="#ajax" href="{{ path('document_type_remove_document', {'typeId': documentType.id, 'object': transaction.id, 'link-token': linkToken}) }}">
+                                        <i class="fa fa-times"></i> Remove {% if (documentType.document is defined and documentType.document is not null) %}doc{% else %}row{% endif %}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </td>
+    {% endif %}
+</tr>

@@ -1,0 +1,19 @@
+locals_best_word_press_api_new_contact:
+    path:     /new-contact
+    methods:  "POST"
+    defaults: { _controller: LocalsBestWordPressApiBundle:Contact:create}
+
+locals_best_word_press_api_leaving_comment:
+    path:     /leaving-comment
+    methods:  "POST"
+    defaults: { _controller: LocalsBestWordPressApiBundle:Contact:leavingComment}
+
+locals_best_word_press_api_save_search:
+    path:     /save-search
+    methods:  "POST"
+    defaults: { _controller: LocalsBestWordPressApiBundle:Contact:saveSearch}
+
+locals_best_word_press_api_favourite_property:
+    path:     /favourite-property
+    methods:  "POST"
+    defaults: { _controller: LocalsBestWordPressApiBundle:Contact:favoriteProperty}

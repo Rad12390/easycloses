@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} | EasyCloses</title>
+        <!-- meta info -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="keywords" content=""/>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% block styles %}
+            <!-- Google fonts -->
+            <link href='//fonts.googleapis.com/css?family=Open+Sans:400,600,700,300' rel='stylesheet' type='text/css'>
+            <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300' rel='stylesheet' type='text/css'>
+            <!-- Bootstrap styles -->
+            <link rel="stylesheet" href="{{ asset('shop/css/boostrap.css') }}">
+            <!-- Font Awesome styles (icons) -->
+            <link rel="stylesheet" href="{{ asset('shop/css/font_awesome.css') }}">
+            <!-- Main Template styles -->
+            <link rel="stylesheet" href="{{ asset('shop/css/styles.css') }}">
+            <!-- IE 8 Fallback -->
+            <!--[if lt IE 9]>
+            <link rel="stylesheet" type="text/css" href="{{ asset('shop/css/ie.css') }}"/>
+            <![endif]-->
+
+            <!-- Your custom styles (blank file) -->
+            {#<link rel="stylesheet" href="/shop/css/mystyles.css">#}
+
+            <link rel="stylesheet" type="text/css" href="{{ asset('shop/css/schemes/victoria.css') }}">
+            
+        {% endblock %}
+    </head>
+
+    <body>
+        <div class="global-wrap">
+
+
+            <!-- MAIN HEADER -->
+            {% include '::blocks/shop-layout/_header.html.twig' %}
+            <!-- END MAIN HEADER -->
+
+            <!-- PAGE CONTENT -->
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 {% if page_class is defined %} {{ page_class }} {% endif %}">
+                        {% for label, flashes in app.session.flashbag.all %}
+                            {% for flash in flashes %}
+                                <div class="alert alert-{{ label }} alert-dismissable">
+                                    {% if label == 'success' and app.request.attributes.get('_route') == 'sku_show' %}
+                                        <a href="{{ path('ec_shop_main_page') }}" class="btn btn-xs btn-info pull-right">Go back to Shop</a>
+                                    {% else %}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    {% endif %}
+                                    <p>
+                                        {{ flash }}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% block content %}
+            {% endblock %}
+            <!-- END PAGE CONTENT -->
+
+            <!-- MAIN FOOTER -->
+            {% include '::blocks/shop-layout/_footer.html.twig' %}
+            <!-- END MAIN  FOOTER -->
+
+            <div class="modal fade" id="ajax" role="basic" aria-hidden="true">
+                <div class="modal-dialog modal-lg" style="transform: none !important;">
+                    <div class="modal-content">
+                    </div>
+                </div>
+            </div>
+
+            {% block javascripts %}
+                <!-- Scripts queries -->
+                <script src="{{ asset('shop/js/jquery.js') }}"></script>
+                <script src="{{ asset('shop/js/boostrap.min.js') }}"></script>
+                <script src="{{ asset('shop/js/countdown.min.js') }}"></script>
+                <script src="{{ asset('shop/js/flexnav.min.js') }}"></script>
+                <script src="{{ asset('shop/js/magnific.js') }}"></script>
+                <script src="{{ asset('shop/js/tweet.min.js') }}"></script>
+                <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+                <script src="{{ asset('shop/js/fitvids.min.js') }}"></script>
+                <script src="{{ asset('shop/js/mail.min.js') }}"></script>
+                <script src="{{ asset('shop/js/ionrangeslider.js') }}"></script>
+                <script src="{{ asset('shop/js/icheck.js') }}"></script>
+                <script src="{{ asset('shop/js/fotorama.js') }}"></script>
+                <script src="{{ asset('shop/js/card-payment.js') }}"></script>
+                <script src="{{ asset('shop/js/owl-carousel.js') }}"></script>
+                <script src="{{ asset('shop/js/masonry.js') }}"></script>
+                <script src="{{ asset('shop/js/nicescroll.js') }}"></script>
+
+                <!-- Custom scripts -->
+                <script src="{{ asset('shop/js/custom.js') }}"></script>
+            {% endblock %}
+        </div>
+    </body>
+</html>

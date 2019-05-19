@@ -1,0 +1,35 @@
+{% extends '::base.html.twig' %}
+
+{% form_theme edit_form 'bootstrap_3_layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/select2/css/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('system/global/plugins/select2/css/select2-bootstrap.min.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('system/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('system/global/plugins/select2/js/select2.full.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            $('.select2_sample1').select2();
+        });
+    </script>
+{% endblock %}
+
+{% block content -%}
+    <h1>Business edition</h1>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            {{ form_start(edit_form) }}
+                {{ form(edit_form) }}
+            {{ form_end(edit_form) }}
+
+            <a class="btn btn-default" href="{{ path('admin_businesses') }}">
+                Back to the list
+            </a>
+        </div>
+    </div>
+{% endblock %}

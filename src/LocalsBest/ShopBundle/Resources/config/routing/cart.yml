@@ -1,0 +1,17 @@
+cart_show:
+    path:     /
+    defaults: { _controller: "LocalsBestShopBundle:Cart:show" }
+
+cart_qunatity_update:
+    path:     /quantity-update
+    defaults: { _controller: "LocalsBestShopBundle:Cart:updateQuantity" }
+    methods: 'POST'
+
+
+cart_add:
+    path:     /add
+    defaults: { _controller: "LocalsBestShopBundle:Cart:store" }
+
+cart_remove:
+    path:     /remove/{id}
+    defaults: { _controller: "LocalsBestShopBundle:Cart:remove" }

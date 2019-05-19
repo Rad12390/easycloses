@@ -1,0 +1,158 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Transfer Contacts</h4>
+    </div>
+    <form class="form-horizontal" role="form" method="post" action="{{ path('contacts_single_assign') }}">
+        {% if single is not null %}
+            <input type="hidden" value="{{ contactId }}" name="contact_ids[]">
+        {% endif %}
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <select name="agent_id" id="assign-agent" class="form-control" required="required">
+                        <option value="">Select User</option>
+                        {% for agent in team %}
+                            <option value="{{ agent.id }}">{{ agent.fullName }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            {% if member_notes|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <p class="text-muted">You have some private information stored on member page of this contact. Do you want to include any of that to the contact you are going to transfer?</p>
+                        <h4>Notes:</h4>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th> Author </th>
+                                <th> Note </th>
+                                <th> Time </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in member_notes %}
+                                    <tr>
+                                        <td> <input name="notes[]" value="{{ note.id }}" type="checkbox"> </td>
+                                        <td> {{ note.createdBy.fullName }} </td>
+                                        <td> {{ note.note }} </td>
+                                        <td> {{ note.created|date("m.d.Y H:i") }} </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if member_documents|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Documents:</h4>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th> Created By </th>
+                                <th> FileName </th>
+                                <th> Time </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for document in member_documents %}
+                                <tr>
+                                    <td> <input name="documents[]" value="{{ document.id }}" type="checkbox"> </td>
+                                    <td> {{ document.createdBy.fullName }} </td>
+                                    <td> {{ document.clearFileName }} </td>
+                                    <td> {{ document.created|date("m.d.Y H:i") }} </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if member_events|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Events:</h4>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th> Created By </th>
+                                <th> Name </th>
+                                <th> Time </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for event in member_events %}
+                                <tr>
+                                    <td> <input name="events[]" value="{{ event.id }}" type="checkbox"> </td>
+                                    <td> {{ event.createdBy.fullName }} </td>
+                                    <td> {{ event.title}} </td>
+                                    <td> {{ event.created|date("m.d.Y H:i") }} </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            <button id="save" class="btn btn-success"><i class="fa fa-check"></i> Submit</button>
+        </div>
+    </form>
+
+    <script>
+        {% if single is null %}
+            $("#save").on('click', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('contacts_assign') }}",
+                    dataType: "json",
+                    data: {
+                        agent_id: $("#assign-agent").val(),
+                        contact_ids: contactIDs
+                    },
+                    success: function (data) {
+                        if (data.result == 'success') {
+                            selectedRows = $.grep(selectedRows, function( a ) {
+                                return -1 !== $.inArray( parseInt($(a).val()), data.success_results );
+                            });
+
+                            App.alert({
+                                type: data.status,
+                                icon: data.icon,
+                                message: data.message,
+                                place: 'prepend'
+                            });
+
+                            if(data.status == 'warning') {
+                                sweetAlert("Oops...", data.message, data.status);
+                            }
+
+                            $.each(selectedRows, function (key, a) {
+                                var tr = $(a).closest('tr');
+
+                                tr.find("td:nth-child(1)").append(' <span class="label label-sm label-warning">Sent</span>');
+                                tr.find("td:nth-child(2)").html($("#assign-agent").find("option:selected").text());
+
+                                table.draw();
+                            });
+
+                            $('#ajax').modal('hide');
+                        }
+                    }
+                });
+            });
+        {% endif %}
+    </script>
+</div>

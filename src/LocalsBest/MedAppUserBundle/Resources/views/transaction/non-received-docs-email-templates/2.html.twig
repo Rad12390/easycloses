@@ -1,0 +1,8 @@
+Hello {% if user is defined %}{{ user.fullName }}{% else %}*agent_full_name*{% endif %}! Almost one week passed since we ask you to upload the document(s) for
+{% if transaction is defined %}{{ transaction.fullAddress }}{% else %}*transaction_address*{% endif %} transaction. Kindly remind you that we can not proceed your transaction until
+{% if docs is defined %}{{ docs }}{% else %}*documents_count*{% endif %} required document(s) will be uploaded to the system.<br>
+<br>
+If you experience any difficulties in uploading documents to the transaction, please call 1 (888) 740-0550 and
+LocalsBest will assist you.<br>
+<br>
+Thank you for your care and have a good day!

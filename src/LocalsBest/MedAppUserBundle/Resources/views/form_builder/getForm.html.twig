@@ -1,0 +1,63 @@
+<input type="hidden" name="signForm[showed]"  id="formShowed" value="1">
+
+{% for item in form %}
+    <div class="form-group">
+        <label class="col-md-3 control-label">{{ item.label }} {% if item.required %}<span class="font-red">*</span>{% endif %} </label>
+        <div class="col-md-9">
+            {% if item.field_type == 'text' %}
+                <input {% if item.required %}required{% endif %} name="signForm[{{ item.label | replace({" ": ""}) }}]" type="text" class="form-control">
+            {% elseif item.field_type == 'email' %}
+                <input {% if item.required %}required{% endif %} name="signForm[{{ item.label | replace({" ": ""}) }}]" type="email" class="form-control">
+            {% elseif item.field_type == 'date' %}
+                <input {% if item.required %}required{% endif %} name="signForm[{{ item.label | replace({" ": ""}) }}]" type="text" class="form-control date-picker">
+            {% elseif item.field_type == 'paragraph' %}
+                <textarea {% if item.required %}required{% endif %} name="signForm[{{ item.label | replace({" ": ""}) }}]" rows="3" class="form-control"></textarea>
+            {% elseif item.field_type == 'number' %}
+                <input {% if item.required %}required{% endif %} name="signForm[{{ item.label | replace({" ": ""}) }}]" type="number"
+                       {% if item.field_options.min is defined %}min="{{ item.field_options.min }}"{% endif %}
+                       {% if item.field_options.max is defined %}max="{{ item.field_options.max }}"{% endif %}
+                       class="form-control"> {% if item.field_options.units is defined %}({{ item.field_options.units }}){% endif %}
+            {% elseif item.field_type == 'dropdown' %}
+                <select {% if item.required %}required{% endif %} name="signForm[{{ item.label | replace({" ": ""}) }}]" class="form-control">
+                    {% if item.field_options.include_blank_option %}
+                        <option value=""></option>
+                    {% endif %}
+                    {% for option in item.field_options.options %}
+                        <option value="{{ option.label }}" {% if option.checked %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            {% elseif item.field_type == 'checkboxes' %}
+                <div class="radio-list">
+                    {% for option in item.field_options.options %}
+                        <label class="radio-inline">
+                            <input name="signForm[{{ item.label | replace({" ": ""}) }}][]" value="{{ option.label }}" {% if option.checked %}selected{% endif %} type="checkbox"> {{ option.label }}
+                        </label>
+                    {% endfor %}
+                    {% if item.field_options.include_other_option %}
+                        <label class="radio-inline">
+                            <input value="signForm[{{ item.label | replace({" ": ""}) }}][other]" type="checkbox"> Other <input name="signForm[{{ item.label | replace({" ": ""}) }}][otherValue]" type="text" class="form-control">
+                        </label>
+                    {% endif %}
+                </div>
+            {% elseif item.field_type == 'radio' %}
+                <div class="checkbox-list">
+                    {% for option in item.field_options.options %}
+                        <label class="checkbox-inline">
+                            <input name="signForm[{{ item.label | replace({" ": ""}) }}]" value="{{ option.label }}" {% if option.checked %}selected{% endif %} type="radio"> {{ option.label }}
+                        </label>
+                    {% endfor %}
+                    {% if item.field_options.include_other_option %}
+                        <label class="checkbox-inline">
+                            <input name="signForm[{{ item.label | replace({" ": ""}) }}]" value="other" type="radio"> Other <input name="signForm[{{ item.label | replace({" ": ""}) }}][otherValue]" type="text" class="form-control">
+                        </label>
+                    {% endif %}
+                </div>
+            {% elseif item.field_type == 'section_break' %}
+                <hr>
+            {% endif %}
+            {% if item.field_options.description is defined %}
+                <span class="help-block"> {{ item.field_options.description }} </span>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}

@@ -1,0 +1,16 @@
+/*PORTAL BODY PACKAGE*/
+.portlet-body.portlet-form .mt-repeater-input{ display: block;}
+.portlet-body.portlet-form .mt-repeater-item{border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(1){ width: 42%; float: left;}
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(1) .item-select{ width: 100% !important;}
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(2), 
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(3){ width: 20%; float: left;}
+.portlet-body.portlet-form .add-btn{ padding: 0 0 15px; border-bottom: 1px solid #ddd;margin-bottom: 5px;}
+.sticky{position: fixed;margin: 15px;right: 15px;max-width: 47%;top: 102px;}
+/*RESPONSIVE*/
+@media(max-width:767px){
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(1){ width: 100%;}
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(2), 
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(3){ width: 46%;}
+.portlet-body.portlet-form .mt-repeater-item .mt-repeater-input:nth-child(3){ margin: 24px 0 0 10px;}
+}

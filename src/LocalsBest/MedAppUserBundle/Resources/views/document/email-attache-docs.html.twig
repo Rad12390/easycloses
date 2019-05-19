@@ -1,0 +1,70 @@
+<div class="content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">Send Email w/ Attachment</h4>
+    </div>
+    <form role="form" method="post" action="{{ path('send_docs_with_email') }}">
+        <input type="hidden" name="transactionId" value="{{ transactionId }}">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-6">
+                        <div class="form-body">
+                            <div class="input-icon margin-top-10">
+                                <i class="fa fa-envelope-o"></i>
+                                <input required type="email" class="form-control" id="to" name="to" placeholder="Enter Email Address">
+                            </div>
+
+                            <div class="input-icon margin-top-10">
+                                <i class="fa fa-envelope-o"></i>
+                                <textarea class="form-control" rows="2" name="toCc" id="toCc" placeholder="Enter CC Email Addresses"></textarea>
+                                <span class="help-block"> Please use comma (",") to separate email addresses </span>
+                            </div>
+
+                            <div class="input-icon margin-top-10">
+                                <i class="fa fa-envelope-o"></i>
+                                <textarea class="form-control" rows="2" name="toBcc" id="toBcc" placeholder="Enter BCC Email Addresses"></textarea>
+                                <span class="help-block"> Please use comma (",") to separate email addresses </span>
+                            </div>
+                            <br>
+                            <br>
+                            <div class="input-icon margin-top-10">
+                                <i class="fa fa-edit"></i>
+                                <input required type="text" class="form-control" id="subject" name="subject" placeholder="Enter Subject">
+                            </div>
+
+                            <div class="input-icon margin-top-10">
+                                <i class="fa fa-align-justify"></i>
+                                <textarea class="form-control" rows="5" name="message" id="message" placeholder="Enter Message"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-6" style="color: #777;">
+                        <h3>Documents</h3>
+                        {% if docs|length > 0 %}
+                            {% for document in docs %}
+                                <p class="muted">
+                                    <i class="fa fa-paperclip"></i> {{ document.name }}
+                                    <input type="hidden" name="documentTypes[]" value="{{ document.id }}">
+                                </p>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-danger">
+                                There are no Documents for send.
+                            </p>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-md-12">
+                <button type="submit" {% if docs|length == 0 %}disabled="disabled"{% endif %} class="btn btn-success">Send</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,65 @@
+<style>
+    .mt-element-list .mt-list-container ul>.mt-list-item {
+        list-style: none;
+        border-bottom: 1px solid;
+        border-color: #e7ecf1;
+        padding: 15px;
+        position: relative;
+    }
+    .mt-element-list .list-thumb {
+        width: 80px;
+        height: 80px;
+        overflow: hidden;
+        float: left;
+    }
+
+    .mt-element-list .mt-list-container ul>.mt-list-item>.list-icon-container {
+        font-size: 20px;
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        margin-top: -10px;
+    }
+
+    .mt-element-list .mt-list-container ul>.mt-list-item>.list-datetime, .mt-element-list .mt-list-container ul>.mt-list-item>.list-item-content {
+        padding-left: 90px;
+    }
+</style>
+
+<div class="content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">
+            Masking Window
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div>
+                    <div class="form-group">
+                        <input class="form-control" type="text" id="query" placeholder="Enter Name, email, phone or username" autofocus>
+                    </div>
+
+                    {% if businessesAvailable == true %}
+                        <div class="form-group">
+                            <select id="query-business" class="form-control">
+                                <option value="">Select Business</option>
+                                {% for business in businesses %}
+                                    <option value="{{ business.id }}">{{ business.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    <button id="query-search" class="btn btn-primary" type="button">
+                        <i style="display: none;" id="masking-spinner" class="fa fa-spinner fa-spin"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="masking-results" class="mt-element-list">
+
+        </div>
+    </div>
+</div>

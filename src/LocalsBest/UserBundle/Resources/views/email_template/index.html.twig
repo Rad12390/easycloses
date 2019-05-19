@@ -1,0 +1,92 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Email Templates{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <i class="fa fa-angle-right"></i>
+        Email Templates
+    </li>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets
+     'plugins/datatables/plugins/bootstrap/dataTables.bootstrap.css'
+        filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/responsive/1.0.0/css/dataTables.responsive.css">
+    {% endstylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts
+        'plugins/datatables/media/js/jquery.dataTables.min.js'
+        'plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js'
+    %}
+    {% endjavascripts %}
+    <!-- END JAVASCRIPTS -->
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            var table = $('#example');
+            var oTable = table.dataTable({
+                "columnDefs": [{
+                    "orderable": false,
+                    "targets": [0]
+                }]
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+{% block content %}
+    <!-- Begin: life time stats -->
+    <div class="portlet box blue">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-cogs"></i> Email Templates
+            </div>
+            <div class="actions">
+                <a class="btn  red" href="{{ path('email_templates_create') }}">
+                    <i class="icon-plus"></i> Add Template
+                </a>
+            </div>
+        </div>
+
+        <div class="portlet-body">
+            <table id="example" class="table table-bordered table-striped table-condensed">
+                <thead class="flip-content">
+                    <tr>
+                        <th> Category </th>
+                        <th> Number </th>
+                        <th> Title </th>
+                        <th> </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for template in templates %}
+                        <tr>
+                            <td> {{ template.category }} </td>
+                            <td> {{ template.templateNumber }} </td>
+                            <td> {{ template.emailTitle }} </td>
+                            <td>
+                                <a href="{{ path('email_templates_edit', {'id': template.id}) }}" class="btn btn-xs btn-warning">
+                                    <i class="fa fa-edit"></i> Edit
+                                </a>
+
+                                <a onclick="return confirm('Are you sure?')" href="{{ path('email_templates_delete', {'id': template.id}) }}" class="btn btn-xs btn-danger">
+                                    <i class="fa fa-trash-o"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% endblock %}
